@@ -42,20 +42,23 @@ class OtorisasiService
     /**
      * Handler bertingkat: permintaan level N hanya untuk user yang level TERTINGGI-nya N (punya IsOtorisasiN dan tidak
      * punya level di atasnya) - mis. PO sampai 200 jt hanya untuk approver level 1, bukan direktur yang juga punya
-     * level 2. Untuk handler satu level (Kas, Bank, PR) dan permintaan batal: tidak ada pembatasan tambahan.
+     * level 2. Permintaan batal ikut aturan yang sama: haknya IsBatal, ditambah level tertinggi yang sesuai nilai
+     * dokumen. Untuk handler satu level (Kas, Bank, PR): tidak ada pembatasan tambahan.
      */
     private function hanyaLevel(string $menuPath, string $tipe, int $level): string
     {
-        if ($tipe === self::BATAL || $level >= 5 || ! $this->isSupported($menuPath) || ! $this->handler($menuPath) instanceof LeveledOtorisasiHandler) {
+        if (! $this->isSupported($menuPath) || ! $this->handler($menuPath) instanceof LeveledOtorisasiHandler) {
             return '';
         }
 
-        $diAtas = [];
+        $level = max(1, min(5, $level));
+        // Untuk 'O' IsOtorisasiN sudah diwajibkan oleh kolomHak(); untuk 'B' haknya IsBatal, jadi levelnya diwajibkan di sini.
+        $sql = $tipe === self::BATAL ? ' and isnull(f.IsOtorisasi'.$level.', 0) = 1' : '';
         for ($n = $level + 1; $n <= 5; $n++) {
-            $diAtas[] = 'isnull(f.IsOtorisasi'.$n.', 0) = 0';
+            $sql .= ' and isnull(f.IsOtorisasi'.$n.', 0) = 0';
         }
 
-        return ' and '.implode(' and ', $diAtas);
+        return $sql;
     }
 
     /** Level yang menerima permintaan otorisasi dokumen ini: ditentukan handler bertingkat per dokumen, selain itu 1. */
@@ -94,21 +97,24 @@ class OtorisasiService
         return $this->canAct($username, $menuPath, self::OTORISASI);
     }
 
-    /** Berhak batal otorisasi (IsBatal) menu ini? */
+    /** Berhak batal otorisasi (IsBatal) menu ini? Hak umum - tanpa pembatasan level (itu hanya untuk memproses satu permintaan). */
     public function canCancel(string $username, string $menuPath): bool
     {
-        return $this->canAct($username, $menuPath, self::BATAL);
+        return $this->canAct($username, $menuPath, self::BATAL, 1, false);
     }
 
-    /** Berhak memproses permintaan jenis $tipe ('O' / 'B') di menu ini? $level = LEVELOTO permintaan (hanya untuk 'O'). */
-    public function canAct(string $username, string $menuPath, string $tipe, int $level = 1): bool
+    /**
+     * Berhak memproses permintaan jenis $tipe ('O' / 'B') di menu ini? $level = LEVELOTO permintaan.
+     * $sesuaiLevel false = hanya cek hak dasarnya (IsBatal / IsOtorisasiN), tanpa aturan "level tertinggi" handler bertingkat.
+     */
+    public function canAct(string $username, string $menuPath, string $tipe, int $level = 1, bool $sesuaiLevel = true): bool
     {
         $res = DB::connection('SML')->select('
             select top 1 1 ok
             from DBMENUWEB m
             join DBFLMENUWEB f on f.L1 = m.KODEMENU
             where m.href = :path and f.USERID = :username and f.HASACCESS = 1 and f.'.$this->kolomHak($tipe, $level).' = 1'
-            .$this->hanyaLevel($menuPath, $tipe, $level), ['path' => $menuPath, 'username' => $username]);
+            .($sesuaiLevel ? $this->hanyaLevel($menuPath, $tipe, $level) : ''), ['path' => $menuPath, 'username' => $username]);
 
         return (bool) $res;
     }
@@ -119,7 +125,16 @@ class OtorisasiService
         return $this->isSupported($menuPath) && $this->handler($menuPath) instanceof BatalOtorisasiHandler;
     }
 
-    /** USERID semua yang berhak memproses permintaan jenis $tipe (level $level untuk 'O') di menu ini. */
+    /**
+     * Ada otorisasi yang bisa dibatalkan? Handler satu level: otorisasinya lengkap. Handler bertingkat: level mana pun sudah
+     * terisi (PO di atas plafon dept head bisa baru level 1 dan tetap boleh dibatalkan).
+     */
+    private function adaOtorisasi(OtorisasiHandler $handler, string $nobukti): bool
+    {
+        return $handler instanceof LeveledOtorisasiHandler ? $handler->hasApproval($nobukti) : $handler->isApproved($nobukti);
+    }
+
+    /** USERID semua yang berhak memproses permintaan jenis $tipe (level $level) di menu ini. */
     public function approvers(string $menuPath, string $tipe = self::OTORISASI, int $level = 1): array
     {
         $res = DB::connection('SML')->select('
@@ -166,7 +181,7 @@ class OtorisasiService
         }
 
         if ($batal) {
-            if (! $handler->isApproved($nobukti)) {
+            if (! $this->adaOtorisasi($handler, $nobukti)) {
                 return ['status' => 'notapproved', 'request' => null];
             }
             if ($blocker = $handler->cancelBlocker($nobukti)) {
@@ -176,8 +191,8 @@ class OtorisasiService
 
         // Tanpa approver, permintaan tidak akan pernah diproses dan tidak ada yang diberi tahu -
         // jangan disimpan (kalau disimpan, ia menggantung 'P' sampai ada yang diberi hak).
-        // Handler bertingkat (PO): level penerima ditentukan handler per dokumen (mis. berdasarkan nilai PO).
-        $level = $batal ? 1 : $this->requiredLevel($menuPath, $nobukti);
+        // Handler bertingkat (PO): level penerima ditentukan handler per dokumen (mis. berdasarkan nilai PO), juga untuk batal.
+        $level = $this->requiredLevel($menuPath, $nobukti);
         $approvers = array_values(array_diff($this->approvers($menuPath, $tipe, $level), [$username]));
         if (! $approvers) {
             return ['status' => 'noapprover', 'request' => null];
@@ -195,15 +210,15 @@ class OtorisasiService
             // Permintaan pending yang levelnya tidak lagi sesuai (aturan routing berubah, atau nilai dokumennya
             // berubah) dipindahkan ke level yang benar dan approver yang benar diberi tahu - kalau tidak, ia
             // menggantung di antrean orang yang tidak bisa memprosesnya.
-            if (! $batal && (int) $pending->LEVELOTO !== $level) {
+            if ((int) $pending->LEVELOTO !== $level) {
                 DB::connection('SML')->update("
                     update DBREQOTORISASI set LEVELOTO = :level where ID = :id and STATUS = 'P'
                 ", ['level' => $level, 'id' => $pending->ID]);
                 $pending = $this->find((int) $pending->ID);
 
                 $this->notify($approvers, [
-                    'title' => 'Permintaan Otorisasi '.$this->label($menuPath),
-                    'body' => $pending->REQUSER.' meminta otorisasi '.$nobukti,
+                    'title' => ($batal ? 'Permintaan Batal Otorisasi ' : 'Permintaan Otorisasi ').$this->label($menuPath),
+                    'body' => $pending->REQUSER.($batal ? ' meminta batal otorisasi ' : ' meminta otorisasi ').$nobukti,
                     'url' => url('/otorisasi/'.$pending->ID),
                     'tag' => 'oto-'.$pending->ID,
                 ]);
@@ -259,6 +274,19 @@ class OtorisasiService
      * @return array{ok: bool, message: string}
      */
     public function approve(int $id, string $username): array
+    {
+        try {
+            return $this->prosesApprove($id, $username);
+        } catch (\DomainException $e) {
+            // Handler menolak (mis. periode terkunci): transaksinya sudah dibatalkan, permintaan tetap pending.
+            return ['ok' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * @return array{ok: bool, message: string}
+     */
+    private function prosesApprove(int $id, string $username): array
     {
         $req = $this->find($id);
         if (! $req) {
@@ -403,7 +431,7 @@ class OtorisasiService
                 return ['ok' => false, 'message' => 'Permintaan ini sudah diproses'];
             }
 
-            if (! $handler->isApproved($req->NOBUKTI)) {
+            if (! $this->adaOtorisasi($handler, $req->NOBUKTI)) {
                 DB::connection('SML')->update("
                     update DBREQOTORISASI set STATUS = 'C', CATATAN = 'Sudah dibatalkan otorisasinya' where ID = :id
                 ", ['id' => $req->ID]);

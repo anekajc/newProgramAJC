@@ -106,6 +106,14 @@
       </div>
     @endif
 
+    {{-- Akibat menyetujui batal otorisasi bagi approver ini (handler yang akibatnya bergantung pada approver, mis. PO). --}}
+    @if (! empty($cancelNote))
+      <div class="card" style="border-color:#fca5a5;background:#fef2f2;">
+        <h2 style="color:#991b1b;">Yang terjadi bila disetujui</h2>
+        <div style="color:#991b1b;word-break: break-word;">{{ $cancelNote }}</div>
+      </div>
+    @endif
+
     @if (! $summary)
       <div class="card">Data transaksi {{ $request->NOBUKTI }} tidak ditemukan.</div>
     @else

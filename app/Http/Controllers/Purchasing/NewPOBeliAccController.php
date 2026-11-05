@@ -15,10 +15,14 @@ use App\Models\VWtampilbeli;
 use App\Models\vwMasterBeli;
 use App\Models\NEWDBBELI;
 use App\Traits\PenjagaTransaksi;
+use App\Services\OtorisasiService;
 
 class NewPOBeliAccController extends Controller
 {
   use PenjagaTransaksi;
+
+  // Kunci menu di config/otorisasi.php dan DBMENUWEB.href.
+  private const HREF = 'newpobeliacc';
 
 
 
@@ -166,59 +170,39 @@ public function spUpdateSO (Request $req) {
   }
 
 
-  public function spOtorisasi1 (Request $req) {
+  // Hak: IsOtorisasi1 menu Pembelian. User tanpa hak mengirim permintaan lewat tombol yang sama (otorisasirequest).
+  // Posting hutang/jurnal ada di PembelianAccOtorisasi - satu sumber dengan otorisasi lewat HP.
+  public function spOtorisasi1 (Request $req, OtorisasiService $oto) {
       $username = \Auth::user()->username;
       $nobukti =  $req->nobukti;
-      $otorisasi = $req->otorisasi;
-      $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
 
-
-      if ($otorisasi == 0 ) {
-        $username = '';
-        $tanggal = null;
+      if (!$oto->canApprove($username, self::HREF)) {
+        return $this->tolak('Anda tidak berhak otorisasi pembelian');
       }
-
-
       $beli = $this->headerDokumen('DBBELI', $nobukti);
       if (!$beli) {
         return $this->tolak('Pembelian ' . $nobukti . ' tidak ditemukan, mungkin sudah dihapus.');
       }
-      // Syarat belum oto di WHERE: klik ganda / dua user bersamaan tidak memposting dua kali
-      $update = DB::connection('SML')->update("update dbbeli set IsOtorisasi1 = :otorisasi , OtoUser1 = :username , TglOto1 = getDate() , MaxOL = 1 where nobukti = :nobukti and isnull(IsOtorisasi1, 0) = 0", ['otorisasi' => $otorisasi, 'username' => $username,  'nobukti' => $nobukti ] );
+      // Syarat belum oto ada di UPDATE-nya: klik ganda / dua user bersamaan tidak memposting dua kali
+      $update = $oto->handler(self::HREF)->approve($nobukti, $username);
       if (!$update) {
         return $this->tolak('Pembelian ' . $nobukti . ' sudah diotorisasi oleh ' . $beli->otouser1 . '.');
       }
-
-     $values = [
-      '',
-      'dbbeli',
-      $periode->bulan,
-      $periode->tahun,
-      $req->nobukti,
-      1
-    ];
-    DB::connection('SML')->statement('exec sp_ProsesPostingHutPiut ?,?,?,?,?,?', $values);
-    DB::connection('SML')->statement('exec sp_ProsesPostingJurnalOto ?,?,?,?,?,?', $values);
-
-
-
+      // Tutup permintaan push yang masih pending + kabari peminta.
+      $oto->closePending(self::HREF, $nobukti, $username);
 
       return $update;
-
     }
 
 
-    public function spUnOtorisasi1 (Request $req) {
+    // Hak: IsBatal menu Pembelian. Keterangan (pket) dikirim halaman; di HP alasannya tersimpan di permintaan batal.
+    public function spUnOtorisasi1 (Request $req, OtorisasiService $oto) {
         $username = \Auth::user()->username;
         $nobukti =  $req->nobukti;
-        $otorisasi = $req->otorisasi;
-         $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
-        if ($otorisasi == 0 ) {
-          $username = '';
-          $tanggal = null;
+
+        if (!$oto->canCancel($username, self::HREF)) {
+          return $this->tolak('Anda tidak berhak batal otorisasi pembelian');
         }
-
-
         $beli = $this->headerDokumen('DBBELI', $nobukti);
         if (!$beli) {
           return $this->tolak('Pembelian ' . $nobukti . ' tidak ditemukan, mungkin sudah dihapus.');
@@ -228,22 +212,16 @@ public function spUpdateSO (Request $req) {
         }
         // Sudah di-invoice / diretur / dibayar: batal otorisasi menghapus posting hutang & jurnal
         // padahal dokumen lanjutan itu masih menunjuk pembelian ini.
-        $pakai = app('App\Http\Controllers\Purchasing\NewPOController')->dipakaiBeli($nobukti);
-        if ($pakai) {
-          return $this->tolak('Pembelian ' . $nobukti . ' sudah dipakai di ' . $pakai . ', otorisasi tidak bisa dibatalkan.');
+        $handler = $oto->handler(self::HREF);
+        if ($blocker = $handler->cancelBlocker($nobukti)) {
+          return $this->tolak($blocker);
         }
-        $update = DB::connection('SML')->update("update dbbeli set IsOtorisasi1 = 0 , OtoUser1 = '' , TglOto1 = NULL, MaxOL = -1 where nobukti = :nobukti", [  'nobukti' => $nobukti ] );
-
-         $values = [
-      '',
-      'dbbeli',
-      $periode->bulan,
-      $periode->tahun,
-      $req->nobukti,
-      0
-    ];
-    DB::connection('SML')->statement('exec sp_ProsesPostingHutPiut ?,?,?,?,?,?', $values);
-    DB::connection('SML')->statement('exec sp_ProsesPostingJurnalOto ?,?,?,?,?,?', $values);
+        $update = $handler->cancelApproval($nobukti, $username, trim((string) $req->pket));
+        if (!$update) {
+          return $this->tolak('Pembelian ' . $nobukti . ' sudah dibatalkan otorisasinya.');
+        }
+        // Tutup permintaan batal yang masih pending + kabari peminta.
+        $oto->closePending(self::HREF, $nobukti, $username, OtorisasiService::BATAL);
 
         return $update;
 

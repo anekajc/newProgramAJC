@@ -17,6 +17,10 @@ interface OtorisasiHandler
 
     public function isApproved(string $nobukti): bool;
 
-    /** Mengembalikan jumlah baris DBTRANS yang ter-update. */
+    /**
+     * Mengembalikan jumlah baris DBTRANS yang ter-update. Handler (juga BatalOtorisasiHandler::cancelApproval) boleh
+     * melempar \DomainException('alasan') untuk menolak (mis. periode terkunci, dokumen belum punya barang): service
+     * membatalkan transaksinya, permintaan tetap pending, dan pesannya ditampilkan ke approver.
+     */
     public function approve(string $nobukti, string $username): int;
 }

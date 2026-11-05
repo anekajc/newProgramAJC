@@ -4567,16 +4567,43 @@ function buttonOtorisasi (nobukti , isoto1) {
 //   }
 
 
+// User tanpa hak Batal: kirim permintaan batal otorisasi (dengan alasan) ke approver ber-hak Batal (push ke HP mereka).
+// Penerima menurut nilai PO (sama dengan Minta Otorisasi); yang menyetujui di HP: dalam plafonnya PO ikut dibatalkan, di atas plafon hanya otorisasinya.
+function buttonMintaBatalOtorisasi (nobukti) {
+  var dlgBatalOtorisasi = alertify.prompt('Minta Batal Otorisasi',
+    'Anda tidak berhak batal otorisasi. Masukkan alasan untuk meminta batal otorisasi PO ' + nobukti, '',
+    function (evt, value) {
+      var alasan = (value || '').trim()
+      if (alasan === '') {
+        alertify.warning('Alasan harus diisi.')
+        return false
+      }
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: PO_HREF, nobukti, tipe: 'B', alasan },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {});
+    dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
+}
+
 function buttonBatalOtorisasi (nobukti) {
   console.log(nobukti)
 
-  let akses = $("#akses_isotorisasi1").val();
+  // Hak batal = IsBatal (bukan IsOtorisasi1), sama dengan halaman PR; tanpa hak itu kirim permintaan.
+  let akses = $("#akses_isbatal").val();
   if (!Number(akses)) {
-    alertify.warning('No access')
+    buttonMintaBatalOtorisasi(nobukti)
     return
   }
 
-  alertify.prompt('Batal Otorisasi',"Masukkan keterangan batal otorisasi nomor  " + nobukti, "",
+  var dlgBatalOtorisasi = alertify.prompt('Batal Otorisasi',"Masukkan keterangan batal otorisasi nomor  " + nobukti, "",
   function(evt, value) {
     // alertify.success("You entered: " + value);
     let xpket = value;
@@ -4619,7 +4646,7 @@ function buttonBatalOtorisasi (nobukti) {
       console.log('no')
       alertify.error("Action cancelled");
     });
-
+    dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
 }
 
 function onChangeCatatan () {

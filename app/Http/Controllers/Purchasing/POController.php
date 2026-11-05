@@ -1010,20 +1010,22 @@ class POController extends Controller
 
     // Aturan level/plafon (dept head > 200 jt, direktur level 2, melebihi plafon) ada di handler - satu sumber
     // dengan approve lewat HP. Kode 2 / 3 adalah jawaban lama yang dibaca JS halaman.
-    $out = $oto->handler('purchaseorder')->approveWithRules($req->nobukti, $username);
+    $out = $oto->handler($menu)->approveWithRules($req->nobukti, $username);
     if ($out['result'] === 'refused') {
       return $out['code'] ?? $this->tolak($out['message']);
     }
     // Otorisasi lengkap (bukan baru level 1): tutup permintaan push yang masih pending + kabari peminta.
-    if ($out['result'] === 'done' && $menu === 'purchaseorder') {
-      $oto->closePending('purchaseorder', $req->nobukti, $username);
+    if ($out['result'] === 'done') {
+      $oto->closePending($menu, $req->nobukti, $username);
     }
 
     return 1;
   }
 
   // Keterangan (alasan) batal otorisasi wajib, sama seperti menu lain; dicatat ke LoggingData('btloto').
-  public function updateBatalOtorisasi (Request $req) {
+  // Hak: IsBatal menu PO-nya (yang tidak punya hak mengirim permintaan lewat tombol yang sama). Akibatnya (plafon:
+  // hanya otorisasi, atau PO ikut dibatalkan) ada di handler - satu sumber dengan batal lewat HP.
+  public function updateBatalOtorisasi (Request $req, OtorisasiService $oto) {
     $username = Auth::user()->username;
     $pket = trim((string) $req->pket);
     if ($pket === '') {
@@ -1033,71 +1035,27 @@ class POController extends Controller
     if (!$po) {
       return $this->tolak('PO ' . $req->nobukti . ' tidak ditemukan, mungkin sudah dihapus.');
     }
-    if ((int) $po->isotorisasi1 !== 1 && (int) $po->isotorisasi2 !== 1) {
+    $menu = (int) ($po->pjasa ?? 0) === 1 ? 'pononstock' : 'purchaseorder';
+    if (!$oto->canCancel($username, $menu)) {
+      return $this->tolak('Anda tidak berhak batal otorisasi PO');
+    }
+    /** @var PurchaseOrderOtorisasi $handler */
+    $handler = $oto->handler($menu);
+    if (!$handler->hasApproval($req->nobukti)) {
       return $this->tolak('PO ' . $req->nobukti . ' belum diotorisasi.');
     }
     // PO yang sudah diterima gudang / sudah ada uang muka tidak boleh dibatalkan: sesudah batal
     // otorisasi itemnya bisa diedit/dihapus, padahal DBBELIDET/DBUMJUAL masih menunjuk PO ini.
-    $terima = $this->dipakaiOleh('DBBELIDET', 'NoPO', $req->nobukti);
-    if ($terima) {
-      return $this->tolak('PO ' . $req->nobukti . ' sudah diterima di ' . $terima . ', otorisasi tidak bisa dibatalkan.');
+    if ($blocker = $handler->cancelBlocker($req->nobukti)) {
+      return $this->tolak($blocker);
     }
-    $um = DB::connection('SML')->selectOne("select top 1 NOBUKTI from DBUMJUAL where NOSO = cast(? as varchar(50)) and isnull(pBeli, 0) = 1 and isnull(IsBatal, 0) = 0", [(string) $req->nobukti]);
-    if ($um) {
-      return $this->tolak('PO ' . $req->nobukti . ' sudah dipakai Uang Muka Beli ' . $um->NOBUKTI . ', otorisasi tidak bisa dibatalkan.');
-    }
-    $maxOL = DB::connection('SML')->select("select * from dbmenu where href = 'purchaseorder'");
-
-    $cekOto = DB::connection('SML')->select("
-select b.*,c.KodeJab,isnull(d.PlafonOtoPO , 0) PlafonOtoPO,
-       case when B.IsOtorisasi1=1 then 1
-   when B.IsOtorisasi2=1 then 2
-   when B.IsOtorisasi3=1 then 3
-   when B.IsOtorisasi4=1 then 4
-   when B.IsOtorisasi5=1 then 5 end leveloto,e.nnet
-       from dbmenu a
-    join dbflmenu b on a.kodemenu = b.l1
-    join DBFLPASS c on b.USERID=c.USERID
-    join DBJABATAN d on c.KodeJab=d.KODEJAB
-    left outer join (select nobukti,SUM(nnet) nnet from DBPODET
-           where NOBUKTI= :nobukti
-           group by nobukti
-           ) E on 1=1
-    where a.href ='purchaseorder' and b.USERID= :username ", ["nobukti" => $req->nobukti , "username" => $username]);
-    if (!$cekOto) {
+    if ($handler->cancelApproval($req->nobukti, $username, $pket) === 0) {
       return $this->tolak('Jabatan/plafon otorisasi PO untuk user ' . $username . ' belum diatur.');
     }
-    $tanggal = date('Y-m-d H:i:s');
-    if ( $cekOto[0]->nnet > $cekOto[0]->PlafonOtoPO ) {
-      if($cekOto[0]->leveloto == 1) {
+    // Tutup permintaan batal yang masih pending + kabari peminta.
+    $oto->closePending($menu, $req->nobukti, $username, OtorisasiService::BATAL);
 
-        $res = DB::connection('SML')->update("update dbpo set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL where nobukti = :nobukti", ["nobukti" => $req->nobukti]);
-        $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'btloto','PO',$req->nobukti,$pket,0,'DBPO');
-
-      } else {
-        $res = DB::connection('SML')->update("update dbpo set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL where nobukti = :nobukti", ["nobukti" => $req->nobukti]);
-        $res = DB::connection('SML')->update("update dbpo set isOtorisasi2 = 0, maxol = -1 , OtoUser2= '' , TglOto2 = NULL where nobukti = :nobukti", ["nobukti" => $req->nobukti]);
-
-         $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'btloto','PO',$req->nobukti,$pket,0,'DBPO');
-         $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'btloto2','PO',$req->nobukti,$pket,0,'DBPO');
-
-
-      }
-
-    } else {
-      $res = DB::connection('SML')->update("update dbpo set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL , isbatal = 1, Userbatal = :username , tglbatal = getDate() where nobukti = :nobukti", ["username" => $username, "nobukti" => $req->nobukti]);
-      $res = DB::connection('SML')->update("update dbpo set isOtorisasi2 = 0, maxol = -1 , OtoUser2= '' , TglOto2 = NULL , isbatal = 1, Userbatal = :username , tglbatal = getDate() where nobukti = :nobukti", ["username" => $username, "nobukti" => $req->nobukti]);
-
-       $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'btloto','PO',$req->nobukti,$pket,0,'DBPO');
-       $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'btloto2','PO',$req->nobukti,$pket,0,'DBPO');
-
-
-    }
-
-
-
-  // $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto2','PO',$req->nobukti,'',0,'DBPO');
-    return $res;
+    return 1;
   }
 
   public function onChangeHeaderSP (Request $req) {

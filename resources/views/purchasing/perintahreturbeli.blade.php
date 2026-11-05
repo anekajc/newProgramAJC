@@ -44,6 +44,7 @@
   {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi + modal
        filter), disamakan dengan newpo.blade.php / uangmukabeli.blade.php. --}}
   <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+  <link rel="stylesheet" href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
 <style>
   /* Isi tabel di semua tab dibuat sebaris (tidak turun ke bawah). Kolom yang panjang
      cukup digeser lewat scroll horizontal .po-table-wrap (overflow:auto). */
@@ -421,23 +422,23 @@
   #tabel_filter {
       display: flex;
       align-items: flex-end;
-      margin-top: 8px;  
+      margin-top: 8px;
       margin-right: 10px;
       margin-bottom: -10px;
     }
 
   #tabel_filter label input {
       width: 150px;
-      padding: 5px 10px; 
-      border-radius: 10px; 
-      border: 1px solid #ccc; 
-      box-shadow: none; 
-      font-size: 0.65rem; 
+      padding: 5px 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      box-shadow: none;
+      font-size: 0.65rem;
     }
 
   #tabel_filter label {
-      font-weight: 600; 
-      font-size: 0.9rem; 
+      font-weight: 600;
+      font-size: 0.9rem;
       color: #333;
     }
   </style>
@@ -455,22 +456,22 @@
 
   #tabel2_filter label input {
       width: 150px;
-      padding: 5px 10px; 
-      border-radius: 10px; 
-      border: 1px solid #ccc; 
-      box-shadow: none; 
-      font-size: 0.65rem; 
+      padding: 5px 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      box-shadow: none;
+      font-size: 0.65rem;
     }
 
   #tabel2_filter label {
-      font-weight: 600; 
-      font-size: 0.9rem; 
+      font-weight: 600;
+      font-size: 0.9rem;
       color: #333;
     }
 
   #tabel2_filter input:focus {
-      border-color: #007bff; 
-      outline: none; 
+      border-color: #007bff;
+      outline: none;
     }
   </style>
 {{-- end tampilan search bar 2 --}}
@@ -487,22 +488,22 @@
 
   #tabel3_filter label input {
       width: 150px;
-      padding: 5px 10px; 
-      border-radius: 10px; 
-      border: 1px solid #ccc; 
-      box-shadow: none; 
-      font-size: 0.65rem; 
+      padding: 5px 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      box-shadow: none;
+      font-size: 0.65rem;
     }
 
   #tabel3_filter label {
-      font-weight: 600; 
-      font-size: 0.9rem; 
+      font-weight: 600;
+      font-size: 0.9rem;
       color: #333;
     }
 
   #tabel3_filter input:focus {
-      border-color: #007bff; 
-      outline: none; 
+      border-color: #007bff;
+      outline: none;
     }
   </style>
 {{-- end tampilan search bar 3 --}}
@@ -517,10 +518,10 @@
     }
     #tabel_add_list_pelanggan_filter label input {
       width: 150px;
-      border-radius: 10px; 
-      border: 1px solid #ccc; 
-      box-shadow: none; 
-      font-size: 0.65rem; 
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      box-shadow: none;
+      font-size: 0.65rem;
     }
   </style>
 {{-- end tampilan search bar modal add pelanggan --}}
@@ -534,9 +535,9 @@
     }
     #tabel_add_list_sales_filter label input {
       width: 150px;
-      border-radius: 10px; 
-      border: 1px solid #ccc; 
-      box-shadow: none; 
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      box-shadow: none;
       font-size: 0.65rem;
     }
   </style>
@@ -546,9 +547,9 @@
   <style>
     #input_search_barang_all {
       width: 150px;
-      border-radius: 10px; 
-      border: 1px solid #ccc; 
-      box-shadow: none; 
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      box-shadow: none;
       font-size: 0.65rem;
       display: flex;
       align-items: flex-end;
@@ -719,12 +720,12 @@
     </div>
     <div class="col-6 text-right">
       <button type="button" class="btn btn-danger btn-lg" style="
-          height: 30px; 
-          padding: 4px 12px; 
-          border-radius: 20px; 
-          font-size: 0.75rem; 
-          font-weight: 600; 
-          text-transform: uppercase; 
+          height: 30px;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          text-transform: uppercase;
           transition: background-color 0.3s, box-shadow 0.3s;
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
           onclick="buttonCloseForm()">
@@ -800,13 +801,13 @@
           {{-- <div class="row" style='margin-top:5px'>
             <div class="col-md-12 mt-2 text-left">
               <button type="button" class="btn btn-primary btn-lg" style="
-                height: 30px; 
+                height: 30px;
                 margin-top: -35px;
-                padding: 4px 12px; 
-                border-radius: 20px; 
-                font-size: 0.75rem; 
-                font-weight: 600; 
-                text-transform: uppercase; 
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
                 transition: background-color 0.3s, box-shadow 0.3s;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
                 onclick="buttonShowHideHeader()" class="btn btn-secondary"><b>Show/Hide Header</b></button>
@@ -852,7 +853,7 @@
                     </div>
                   </div>
                 </div>
-  
+
                 <div class="col-md-3">
                   <div class="row">
                     <div class="col-md-12">
@@ -865,7 +866,7 @@
                     </div>
                   </div>
                 </div>
-  
+
                 <div class="col-md-3">
                   <div class="row">
 
@@ -901,7 +902,7 @@
                         </div>
                       </div>
                     </div>
-  
+
                     <div class="col-md-12">
                       <div class="row">
                         <div class="col-4">
@@ -916,7 +917,7 @@
                         </div>
                       </div>
                     </div>
-  
+
                   </div>
                 </div>
 
@@ -937,7 +938,7 @@
                     </div>
                   </div>
                 </div>
-  
+
                 <div class="col-md-6">
                   <div class="row">
                     <div class="col-md-12">
@@ -953,10 +954,10 @@
                     </div>
                   </div>
                 </div>
-  
+
               </div>
             </div>
-  
+
             {{-- budi sementara 2 --}}
             <div class="col-md-3" hidden>
               <div class="row">
@@ -987,7 +988,7 @@
                 </div>
               </div>
             </div>
-  
+
             <div class="col-md-3" hidden>
               <div class="row">
                 <div class="col-md-6">
@@ -1008,7 +1009,7 @@
                 </div>
               </div>
             </div>
-  
+
             <div class="col-md-3" hidden>
               <div class="row">
                 <div class="col-6" style="margin-top:-40px">
@@ -1016,7 +1017,7 @@
                     <label>Draft PO</label>
                   </div>
                 </div>
-  
+
                 <div class="col-md-6" style="margin-top:-40px">
                   <select onchange="onChangeDraftPO()" id="input_add_draftpo" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
                     <option value=0 selected>Tidak</option>
@@ -1025,15 +1026,15 @@
                 </div>
               </div>
             </div>
-  
+
           </div>
-            
+
         </div>
         <hr/>
       </div>
 
     </div>
-    
+
       <div class="showhidemodalbodyaddmain container-fluid" id="modalBodyAddMainItems">
         <div class="container-fluid" style="overflow:auto; margin-top:-35px;">
           <!-- <input type="hidden" name="noUrut" id="input_add_noUrut" value="" /> -->
@@ -1072,7 +1073,7 @@
         <!-- ADD add -->
         <div id="addAddItem" class="container-fluid showhide">
           <hr/>
-          
+
             <div class="row">
               <div class="col-4">
                 <h4 id="h4AddAddItem" style="margin-left:-35px;">Add Item</h4>
@@ -1107,7 +1108,7 @@
                           </div>
                         </div>
                       </div>
-                      
+
                       <div class="row" style='margin-top:-12px;'>
                         <div class="col-4">
                           <div class="form-group">
@@ -1124,7 +1125,7 @@
                           </div>
                         </div>
                       </div>
-                      
+
                       <div class="row" style='margin-top:-12px;'>
                         <div class="col-4">
                           <div class="form-group">
@@ -1205,7 +1206,7 @@
                             <select id="input_add_add_satuan" class="form-control form-select-lg text-center" aria-label=".form-select-lg example" disabled>
                             </select>
                           </div>
-                          
+
                         </div>
                       </div>
 
@@ -1660,7 +1661,7 @@
 
   <div class="container-fluid" style="margin-top: -10px;">
   {{-- <div class="row">
-    
+
     <!-- Disc % -->
     <div class="col">
       <div class="form-group">
@@ -1717,14 +1718,14 @@
         </div>
         <div class="col-6 text-right">
           <button type="button" class="btn btn-danger btn-lg" style="
-          height: 30px;  
-          padding: 4px 12px; 
-          border-radius: 20px; 
-          font-size: 0.75rem; 
-          font-weight: 600; 
-          text-transform: uppercase; 
+          height: 30px;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          text-transform: uppercase;
           transition: background-color 0.3s, box-shadow 0.3s;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" 
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
           onclick="buttonCloseForm()">Close</button>
         </div>
       </div>
@@ -1973,13 +1974,13 @@
 <div class="row ">
 <div class="col-md-12 mt-2 text-left">
   <button type="button" class="btn btn-primary btn-lg" style="
-  height: 30px; 
+  height: 30px;
   margin-top: -40px;
-  padding: 4px 12px; 
-  border-radius: 20px; 
-  font-size: 0.75rem; 
-  font-weight: 600; 
-  text-transform: uppercase; 
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
   transition: background-color 0.3s, box-shadow 0.3s;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
   onclick="buttonShowHideHeaderDetail()" class="btn btn-secondary"><b>Show Hide Header</b></button>
@@ -2518,7 +2519,7 @@
       loadOptionGudang();
       loadAll();
     };
-    
+
 let dataTableAdd = []
 let dataTableEdit = []
 
@@ -2542,12 +2543,58 @@ let urutTemp = 0
 let tipeform = ''
 let tipeformitem = ''
 
+// User tanpa hak otorisasi: kirim permintaan ke approver (push ke HP mereka). PRB_HREF = kunci di
+// config/otorisasi.php dan DBMENUWEB.href.
+function buttonMintaOtorisasi (nobukti) {
+  var dlgMinta = alertify.confirm('Minta Otorisasi',
+    'Anda tidak berhak otorisasi. Kirim permintaan otorisasi perintah retur ' + nobukti + ' ke approver?',
+    function () {
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: PRB_HREF, nobukti },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {})
+  dlgMinta.elements.root.classList.add('ajs-app-buttons')
+}
+
+// User tanpa hak Batal: kirim permintaan batal otorisasi (dengan alasan) ke approver ber-hak Batal (push ke HP mereka).
+function buttonMintaBatalOtorisasi (nobukti) {
+  var dlgBatalOtorisasi = alertify.prompt('Minta Batal Otorisasi',
+    'Anda tidak berhak batal otorisasi. Masukkan alasan untuk meminta batal otorisasi perintah retur ' + nobukti, '',
+    function (evt, value) {
+      var alasan = (value || '').trim()
+      if (alasan === '') {
+        alertify.warning('Alasan harus diisi.')
+        return false
+      }
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: PRB_HREF, nobukti, tipe: 'B', alasan },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {});
+    dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
+}
+
 function buttonOtorisasi (nobukti) {
   console.log(nobukti)
 
   let akses = $("#akses_isotorisasi1").val();
   if (!Number(akses)) {
-    alertify.warning('No access')
+    buttonMintaOtorisasi(nobukti)
     return
   }
 
@@ -2584,13 +2631,14 @@ function buttonOtorisasi (nobukti) {
 function buttonBatalOtorisasi (nobukti) {
   console.log(nobukti)
 
-  let akses = $("#akses_isotorisasi1").val();
+  // Hak batal = IsBatal (bukan IsOtorisasi1), sama dengan halaman PR; tanpa hak itu kirim permintaan.
+  let akses = $("#akses_isbatal").val();
   if (!Number(akses)) {
-    alertify.warning('No access')
+    buttonMintaBatalOtorisasi(nobukti)
     return
   }
 
-  alertify.prompt("Batal Otorisasi", "Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
+  var dlgBatalOtorisasi = alertify.prompt("Batal Otorisasi", "Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
   function(evt, value) {
     // alertify.success("You entered: " + value);
     let xpket = value;
@@ -2598,7 +2646,7 @@ function buttonBatalOtorisasi (nobukti) {
      if (xpket==''){
           alertify.warning('Keterangan harus diisi.');
           $.abort();
-        }        
+        }
 let _token = $("#_token").val();
 
         $.ajax({
@@ -2632,9 +2680,7 @@ let _token = $("#_token").val();
       console.log('no')
 	alertify.error("Action cancelled");
     });
-
-
-
+    dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
 }
 
 function onChangeCatatan () {
@@ -2741,7 +2787,7 @@ function onChangeDraftPO () {
 
 function onChangeHari () {
   console.log('onChangeHari')
-  if (tipeform == 'edit') 
+  if (tipeform == 'edit')
   {
     let value = $("#input_add_hari").val()
     console.log(value)
@@ -2781,7 +2827,7 @@ function onChangeInputAddDiscRp () {
       }
 }
 
-function refreshUpdateHeader () 
+function refreshUpdateHeader ()
 {
   let _token  = $("#_token").val()
   let nobukti = $("#input_add_nobukti").val()
@@ -2805,7 +2851,7 @@ function refreshUpdateHeader ()
   })
 }
 
-function onChangeHeaderSP (field, value , field1 = null , value2 = null) 
+function onChangeHeaderSP (field, value , field1 = null , value2 = null)
 {
   let _token  = $("#_token").val()
   let nobukti = $("#input_add_nobukti").val()
@@ -2866,7 +2912,7 @@ function submitAddAdd () {
   console.log('submitAddAdd')
 
   let checkDate = new Date($("#input_add_tanggal").val())
-  
+
   let periode_bulan = document.getElementById("periode_bulan").value
   let periode_tahun = document.getElementById("periode_tahun").value
 
@@ -2875,7 +2921,7 @@ function submitAddAdd () {
       return
   }
 
-  let Jmlrecord = 0 
+  let Jmlrecord = 0
   if (dataTableAdd.length) {
     Jmlrecord = 1
   }
@@ -2884,7 +2930,7 @@ function submitAddAdd () {
   let Choice = "I"
 
   let NoBukti = $("#input_add_nobukti").val()
-  let NoUrut = $("#input_add_nourut").val() 
+  let NoUrut = $("#input_add_nourut").val()
   let Tanggal = $("#input_add_tanggal").val()
   let KodeSupp = $("#input_add_add_supplier").val()
   let KodeGdg = $("#input_add_add_gudang").val()
@@ -2994,7 +3040,7 @@ function submitAddAdd () {
         alertify.warning(res.pesan)
         return
       }
-      
+
       if (res == 1) {
 
         loadAll()
@@ -3028,7 +3074,7 @@ function submitAddEdit () {
   console.log('submitAddEdits')
 
   let checkDate = new Date($("#input_add_tanggal").val())
-  
+
   // let periode_bulan = document.getElementById("periode_bulan").value
   // let periode_tahun = document.getElementById("periode_tahun").value
 
@@ -3037,7 +3083,7 @@ function submitAddEdit () {
   //     return
   // }
 
-   let Jmlrecord = 0 
+   let Jmlrecord = 0
   if (dataTableAdd.length) {
     Jmlrecord = 1
   }
@@ -3046,7 +3092,7 @@ function submitAddEdit () {
   let Choice = "U"
 
   let NoBukti = $("#input_add_nobukti").val()
-  let NoUrut = $("#input_add_nourut").val() 
+  let NoUrut = $("#input_add_nourut").val()
   let Tanggal = $("#input_add_tanggal").val()
   let KodeSupp = $("#input_add_add_supplier").val()
   let KodeGdg = $("#input_add_add_gudang").val()
@@ -3312,30 +3358,30 @@ function buttonAddAddItem () {
 }
 
 function showTableHargaTerakhir () {
-  if ( $("#divStockProyeksi").is(':visible')) 
+  if ( $("#divStockProyeksi").is(':visible'))
   {
     $('#divStockProyeksi').hide();
   }
 
-  if (!$("#divhargaterakhir").is(':visible')) 
+  if (!$("#divhargaterakhir").is(':visible'))
   {
     $('#divhargaterakhir').show();
-  } else 
+  } else
   {
     $('#divhargaterakhir').hide();
   }
 }
 
 function showTableStockProyeksi () {
-  if ($("#divhargaterakhir").is(':visible')) 
+  if ($("#divhargaterakhir").is(':visible'))
   {
     $('#divhargaterakhir').hide();
   }
-  
+
   if (!$("#divStockProyeksi").is(':visible'))
   {
     $('#divStockProyeksi').show();
-  } else 
+  } else
   {
     $('#divStockProyeksi').hide();
   }
@@ -3355,7 +3401,7 @@ function buttonAddEditItem (i) {
   }
 
   if (tempAddEdit.NoPNW == ''){
-    tempAddEdit.NoPNW = '-' 
+    tempAddEdit.NoPNW = '-'
   }
 
   urutTemp = tempAddEdit.URUT
@@ -3421,7 +3467,7 @@ function setNewNoBukti () {
       document.getElementById("input_add_nourut").value = res[0].Nourut
 
     }})
-  
+
 }
 
 
@@ -3541,7 +3587,7 @@ function buttonAddAddListBarang () {
   let _token = $("#_token").val();
   let foc = $("#input_add_add_foc").val();
   let noSo = $("#input_add_noso").val();
-  
+
   if (!noSo) {
     alertify.warning("Isi Nomor SO terlebih dahulu")
     return
@@ -3606,7 +3652,7 @@ function buttonAddAddListBarang () {
 
     }) }
     else if ( noBuktiUntukAdd == 0){
-      
+
     $('#tabel_add_list_barang_nonfoc').DataTable().destroy();
 
     $.ajax({
@@ -3660,7 +3706,7 @@ function buttonAddAddListBarang () {
         alertify.warning('Terjadi kesalahan silahkan refresh browser')
       }
 
-    }) 
+    })
 
     }
   } else if (foc == 1) {
@@ -3737,7 +3783,7 @@ function buttonAddAddListBarang () {
             <td>${item.Sisa2PPL}</td>
             <td>${item.NoBukti}</td>
             <td>${item.PartNumber}</td>
-            
+
           </tr>`
         });
 
@@ -3778,7 +3824,7 @@ function buttonAddListNoSO () {
     success: function(res) {
       let rowTable = `
         <tr>
-          <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:5px; margin-bottom:5px;" onclick="buttonAddPickNoSO('-' , '-')" type="button" ><i class="bi bi-plus"></i></button></td> 
+          <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:5px; margin-bottom:5px;" onclick="buttonAddPickNoSO('-' , '-')" type="button" ><i class="bi bi-plus"></i></button></td>
           <td>-</td>
           <td>-</td>
           <td>-</td>
@@ -3790,7 +3836,7 @@ function buttonAddListNoSO () {
         rowTable += `
         <tr>
           <td class="text-center"><button class="btn btn-primary btn-sm" style="margin-top:5px; margin-bottom:5px;" onclick="buttonAddPickNoSO('${item.NOBUKTI}' , '${item.NoPesanan}')" type="button" ><i class="bi bi-plus"></i></button></td>
-        
+
           <td>${item.NOBUKTI}</td>
           <td>${item.Tanggal}</td>
           <td>${item.NoPesanan}</td></tr>`
@@ -3841,7 +3887,7 @@ function buttonAddListGudang () {
         <td>${item.KODEGDG}</td>
         <td>${item.NAMA}</td>
         <td>${item.Alamat}</td>
-        
+
         </tr>`
       });
 
@@ -3888,7 +3934,7 @@ function buttonAddListLokasiPenerima () {
 
         <td>-</td>
         <td>-</td>
-        
+
         </tr>`
       res.forEach((item, i) => {
         rowTable += `
@@ -3924,7 +3970,7 @@ function buttonAddListLokasiPenerima () {
 }
 
 function buttonAddListValas () {
-  
+
   $('#tabel_add_list_valas').DataTable().destroy();
   $.ajax({
     url: "{!! url('polistvalas') !!}",
@@ -3937,12 +3983,12 @@ function buttonAddListValas () {
       let rowTable = ``
       res.forEach((item, i) => {
         rowTable += `
-        <tr> 
+        <tr>
         <td class="text-center"><button class="btn btn-primary btn-sm" onclick="buttonAddPickValas('${item.kodevls}' , '${item.kurs ? parseFloat(item.kurs).toFixed(2) : '0.00'}' )" type="button" ><i class="bi bi-plus"></i></button></td>
         <td>${item.kodevls}</td>
         <td>${item.namavls}</td>
         <td>${item.kurs ? parseFloat(item.kurs).toFixed(2) : '0.00'}</td>
-       
+
         </tr>`
       });
 
@@ -3970,7 +4016,7 @@ function buttonAddListValas () {
 
 }
 
-function buttonAddListPelanggan () 
+function buttonAddListPelanggan ()
 {
   $('#tabel_add_list_pelanggan').DataTable().destroy();
 
@@ -3990,7 +4036,7 @@ function buttonAddListPelanggan ()
         <td>${item.KodeCustSupp}</td>
         <td>${item.NamaCustSupp}</td>
         <td>${item.Alamat}</td>
-        
+
         </tr>`
       });
 
@@ -4079,7 +4125,7 @@ function buttonAddListSales () {
         </tr>`
       });
 
-    
+
       document.getElementById("tabel_data_add_list_sales").innerHTML = rowTable
       $("#tabel_add_list_sales").DataTable({
         "lengthChange": false,
@@ -4221,7 +4267,7 @@ function onChangeInputAddAddNosat () {
   })
 
 }
-      
+
 /* ==========================================================================
  * Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi),
  * urut 1 = tabel PRB gabungan (#tabel), urut 2 = tabel List Retur Jual
@@ -5033,13 +5079,13 @@ let cekQntPO = 0
 let cekQntSisa = 0
 
 function cekQntStock () {
-  
+
   tempStockAdd = dataAddAddListItem[0]
 
   let currentQntPO = 0
 
   cekQntPR = tempStockAdd.Qnt
-  
+
   cekQntPO = tempStockAdd.QntPO
   cekQntSisa = tempStockAdd.SisaPPL
 
@@ -5051,7 +5097,7 @@ function cekQntStock () {
     alertify.warning('Qty PO Tidak boleh melebihi Qty Sisa')
     document.getElementById("input_add_add_qty").value = '0.00'
   }
-  
+
 }
 
 function buttonAddAddPickBarangNonFOC (index , pEdit = 0) {
@@ -5060,7 +5106,7 @@ function buttonAddAddPickBarangNonFOC (index , pEdit = 0) {
 
   console.log(dataAddAddListItem[index])
   tempAddAdd = dataAddAddListItem[index]
-  
+
   cekSatuanBarang(tempAddAdd.KodeBrg)
 
   document.getElementById("input_add_add_kodebarang").value = tempAddAdd.KodeBrg
@@ -5450,13 +5496,13 @@ function lockFormAdd () {
   document.getElementById("input_add_add_quantity").disabled = true
   document.getElementById("input_add_add_satuan").disabled = true
   document.getElementById("input_add_add_gudang").disabled = true
-  document.getElementById("input_add_add_keterangan").disabled = true 
-  
+  document.getElementById("input_add_add_keterangan").disabled = true
+
   document.getElementById("input_add_tipebayar").disabled = true
   document.getElementById("input_add_keterangan").disabled = true
 }
 
-function buttonShowHideHeader () 
+function buttonShowHideHeader ()
 {
   var modal = document.getElementById("modalBodyAddMainHeader");
   console.log($('#modalBodyAddMainHeader').css('display'))
@@ -5663,7 +5709,7 @@ function buttonCloseFormDetail () {
 
 }
 
-function submitAdd () 
+function submitAdd ()
 {
 
   let alamatpelanggan = $("#input_add_alamatsupplier").val();
@@ -5698,7 +5744,7 @@ function buttonDetailMainItems() {
 }
 
 function cekPoDet () {
-  
+
   let _token  = $("#_token").val()
   $.ajax({
     url: "{!! url('cekPoDet') !!}",
@@ -5958,7 +6004,7 @@ function calculateDiscRp() {
   let disc1 = document.getElementById('input_add_add_discpersen1').value
   let disc2 = document.getElementById('input_add_add_discpersen2').value
   let disc3 = document.getElementById('input_add_add_discpersen3').value
-  
+
   let discRp = $('#input_add_add_harga').val()
 
   disc1 = parseFloat(disc1) || 0
@@ -6015,7 +6061,7 @@ function LockFreeOfCharge(){
     document.getElementById('input_add_add_discpersen1').disabled = true;
     document.getElementById('input_add_add_discpersen2').disabled = true;
     document.getElementById('input_add_add_discpersen3').disabled = true;
-    
+
     document.getElementById('input_add_add_harga').value = 0,00 ;
     document.getElementById('input_add_add_discrp').value = 0,00 ;
     document.getElementById('input_add_add_discpersen1').value = 0 ;
@@ -6120,7 +6166,7 @@ function LockFreeOfCharge(){
   document.getElementById("namaModalOpen").innerHTML = 'No. Retur Jual'
 
   pickerKasInit('tabelModalOpen')
-  
+
   $("#formModalOpen").modal('toggle')
 }
 
@@ -6269,7 +6315,7 @@ function buttonSupplier () {
   document.getElementById("namaModalOpen").innerHTML = 'No. Beli'
 
   pickerKasInit('tabelModalOpen')
-  
+
   $("#formModalOpen").modal('toggle')
 }
 
@@ -6462,7 +6508,7 @@ if (isEmpty(kodeBeli)){
   document.getElementById("namaModalOpen").innerHTML = 'Barang'
 
   pickerKasInit('tabelModalOpen')
-  
+
   $("#formModalOpen").modal('toggle')
 }
 
@@ -6507,12 +6553,12 @@ function submitPrint (nobukti) {
         dataPrint = res
 
         console.log(dataPrint)
-        
+
       }
     })
-  
+
     let arrayDataPrint = []
-    for (let i = 0; i < dataPrint.length; i+=7) 
+    for (let i = 0; i < dataPrint.length; i+=7)
     {
       let tempArray = dataPrint.slice(i,i+7)
       arrayDataPrint.push(tempArray)
@@ -6529,7 +6575,7 @@ function submitPrint (nobukti) {
     const now = new Date()
     const jamCetak = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
     const tanggalCetak = now.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '/')
-    
+
     css = `<style type="text/css">
       body {
         font-family: sans-serif;
@@ -6992,7 +7038,7 @@ function submitPrint (nobukti) {
     let subTotal = 0
     let ppnTotal = 0
     let totalTotal = 0
-    
+
     let tempPrintStr = ``
     tempPrintStr += `<html>
     <head>

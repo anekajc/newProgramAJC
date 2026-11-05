@@ -26,4 +26,10 @@ interface LeveledOtorisasiHandler
      * @return array{result: string, message: string, code?: int}
      */
     public function approveWithRules(string $nobukti, string $username): array;
+
+    /**
+     * Sudah ada level yang terisi (level mana pun)? Dipakai untuk permintaan batal: dokumen yang baru sebagian
+     * diotorisasi (isApproved() masih false) tetap boleh dibatalkan otorisasinya.
+     */
+    public function hasApproval(string $nobukti): bool;
 }
