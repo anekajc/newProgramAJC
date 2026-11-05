@@ -10,12 +10,20 @@ use Illuminate\Support\Facades\DB;
  * Penerima permintaan push ditentukan nilai PO (approverLevel): sampai 200 jt ke approver level 1, di atasnya hanya
  * level 2. Yang menyetujui di HP tunduk pada aturan plafon yang sama dengan di halaman.
  *
- * dbPO dipakai bersama PO Non Stock (pJasa = 1, href 'pononstock'), jadi semua query dibatasi pJasa = 0.
+ * Batal otorisasi PO (BatalOtorisasiHandler): sama dengan tombol batal di halaman - di atas plafon approver hanya
+ * otorisasinya yang dihapus, dalam plafon PO-nya ikut dibatalkan (isbatal = 1). Penerima permintaan batal mengikuti
+ * aturan nilai yang sama dengan permintaan otorisasi (approverLevel) dengan hak IsBatal.
+ *
+ * dbPO dipakai bersama PO Non Stock (pJasa = 1, href 'pononstock'): PurchaseOrderNonStockOtorisasi hanya mengganti
+ * $pJasa, dan summary/isApproved/hasApproval dibatasi pJasa itu.
  */
-class PurchaseOrderOtorisasi implements LeveledOtorisasiHandler, OtorisasiHandler
+class PurchaseOrderOtorisasi implements BatalOtorisasiHandler, BatalPreviewHandler, LeveledOtorisasiHandler, OtorisasiHandler
 {
     /** Batas nilai PO (Rp) di atas mana dept head (KodeJab 03) hanya mengisi level 1, level 2 oleh direktur. */
     private const BATAS_DEPT_HEAD = 200000000;
+
+    /** DBPO.pJasa dokumen yang ditangani handler ini: 0 = PO Stock, 1 = PO Non Stock. */
+    protected int $pJasa = 0;
 
     /**
      * PO sampai 200 jt: permintaan ke approver level 1 (dalam plafon mereka menyetujui level 1 dan 2 sekaligus).
@@ -40,8 +48,8 @@ class PurchaseOrderOtorisasi implements LeveledOtorisasiHandler, OtorisasiHandle
                    isnull(A.IsOtorisasi1, 0) IsOtorisasi1, A.OtoUser1, isnull(A.IsOtorisasi2, 0) IsOtorisasi2, A.OtoUser2
             from DBPO A
             left outer join dbCustSupp C on C.KodeCustSupp = A.KodeSupp
-            where A.NoBukti = cast(:nobukti as varchar(50)) and isnull(A.pJasa, 0) = 0
-        ', ['nobukti' => $nobukti]);
+            where A.NoBukti = cast(:nobukti as varchar(50)) and isnull(A.pJasa, 0) = :pjasa
+        ', ['nobukti' => $nobukti, 'pjasa' => $this->pJasa]);
 
         if (! $header) {
             return null;
@@ -101,9 +109,22 @@ class PurchaseOrderOtorisasi implements LeveledOtorisasiHandler, OtorisasiHandle
     /** Lengkap = level 1 dan level 2 sama-sama terisi (sama dengan POController::updateOtorisasi). */
     public function isApproved(string $nobukti): bool
     {
-        $res = DB::connection('SML')->select('select top 1 isnull(IsOtorisasi1, 0) o1, isnull(IsOtorisasi2, 0) o2 from DBPO where NoBukti = cast(:nobukti as varchar(50)) and isnull(pJasa, 0) = 0', ['nobukti' => $nobukti]);
+        $res = $this->statusOtorisasi($nobukti);
 
-        return $res && (int) $res[0]->o1 === 1 && (int) $res[0]->o2 === 1;
+        return $res && (int) $res->o1 === 1 && (int) $res->o2 === 1;
+    }
+
+    /** Level mana pun sudah terisi - syarat batal otorisasi di halaman (PO yang baru level 1 pun boleh dibatalkan). */
+    public function hasApproval(string $nobukti): bool
+    {
+        $res = $this->statusOtorisasi($nobukti);
+
+        return $res && ((int) $res->o1 === 1 || (int) $res->o2 === 1);
+    }
+
+    private function statusOtorisasi(string $nobukti): ?object
+    {
+        return DB::connection('SML')->selectOne('select top 1 isnull(IsOtorisasi1, 0) o1, isnull(IsOtorisasi2, 0) o2 from DBPO where NoBukti = cast(:nobukti as varchar(50)) and isnull(pJasa, 0) = :pjasa', ['nobukti' => $nobukti, 'pjasa' => $this->pJasa]);
     }
 
     public function approve(string $nobukti, string $username): int
@@ -116,8 +137,7 @@ class PurchaseOrderOtorisasi implements LeveledOtorisasiHandler, OtorisasiHandle
         $refuse = fn (string $message, ?int $code = null) => ['result' => 'refused', 'message' => $message] + ($code ? ['code' => $code] : []);
         $db = DB::connection('SML');
 
-        // Sengaja TANPA filter pJasa: POController::updateOtorisasi (endpoint poupdateotorisasi) juga dipakai halaman PO
-        // Non Stock dan aturannya sama. Permintaan push tetap hanya untuk PO Stock (summary/isApproved memakai pJasa = 0).
+        // Tanpa filter pJasa: POController::updateOtorisasi memilih handler dari pJasa dokumennya sendiri.
         $po = $db->selectOne('select top 1 * from DBPO where NoBukti = cast(? as varchar(50))', [$nobukti]);
         if (! $po) {
             return $refuse('PO '.$nobukti.' tidak ditemukan, mungkin sudah dihapus.');
@@ -128,22 +148,17 @@ class PurchaseOrderOtorisasi implements LeveledOtorisasiHandler, OtorisasiHandle
         if ($o1 === 1 && $o2 === 1) {
             return $refuse('PO '.$nobukti.' sudah diotorisasi.');
         }
+        // PO yang sudah dibatalkan (batal otorisasi dalam plafon) tidak boleh diotorisasi lagi.
+        if ((int) ($po->IsBatal ?? $po->isbatal ?? 0) === 1) {
+            return $refuse('PO '.$nobukti.' sudah dibatalkan.');
+        }
 
         // maxol, jabatan dan plafon dibaca dari tabel menu lama (dbmenu/dbflmenu) - sama dengan POController.
         $menu = $db->select("select * from dbmenu where href = 'purchaseorder'");
-        $cekOto = $db->select("
-            select b.USERID, c.KodeJab, isnull(d.PlafonOtoPO, 0) PlafonOtoPO, e.nnet
-            from dbmenu a
-            join dbflmenu b on a.kodemenu = b.l1
-            join DBFLPASS c on b.USERID = c.USERID
-            join DBJABATAN d on c.KodeJab = d.KODEJAB
-            left outer join (select nobukti, SUM(nnetrp) nnet from DBPODET where NOBUKTI = :nobukti group by nobukti) e on 1 = 1
-            where a.href = 'purchaseorder' and b.USERID = :username
-        ", ['nobukti' => $nobukti, 'username' => $username]);
-        if (! $cekOto || ! $menu) {
+        $u = $this->infoPlafon($nobukti, $username);
+        if (! $u || ! $menu) {
             return $refuse('Jabatan/plafon otorisasi PO untuk user '.$username.' belum diatur.');
         }
-        $u = $cekOto[0];
         $maxOL = $menu[0]->OL;
         $nnet = (float) $u->nnet;
         $tanggal = date('Y-m-d H:i:s');
@@ -194,6 +209,101 @@ class PurchaseOrderOtorisasi implements LeveledOtorisasiHandler, OtorisasiHandle
         $log('oto2');
 
         return ['result' => 'done', 'message' => 'Berhasil otorisasi'];
+    }
+
+    /**
+     * Jabatan, plafon otorisasi PO, nilai PO (Rp) dan level otorisasi pertama yang dimiliki user - dari tabel menu lama
+     * (dbmenu/dbflmenu/DBJABATAN), sama dengan POController. Null kalau user belum punya baris/jabatan di sana.
+     * Dipakai approveWithRules() dan batal otorisasi.
+     */
+    private function infoPlafon(string $nobukti, string $username): ?object
+    {
+        return DB::connection('SML')->selectOne("
+            select b.USERID, c.KodeJab, isnull(d.PlafonOtoPO, 0) PlafonOtoPO, e.nnet,
+                   case when b.IsOtorisasi1 = 1 then 1
+                        when b.IsOtorisasi2 = 1 then 2
+                        when b.IsOtorisasi3 = 1 then 3
+                        when b.IsOtorisasi4 = 1 then 4
+                        when b.IsOtorisasi5 = 1 then 5 end leveloto
+            from dbmenu a
+            join dbflmenu b on a.kodemenu = b.l1
+            join DBFLPASS c on b.USERID = c.USERID
+            join DBJABATAN d on c.KodeJab = d.KODEJAB
+            left outer join (select nobukti, SUM(nnetrp) nnet from DBPODET where NOBUKTI = :nobukti group by nobukti) e on 1 = 1
+            where a.href = 'purchaseorder' and b.USERID = :username
+        ", ['nobukti' => $nobukti, 'username' => $username]);
+    }
+
+    public function cancelBlocker(string $nobukti): ?string
+    {
+        // PO yang sudah diterima gudang / sudah ada uang muka tidak boleh dibatalkan: sesudah batal otorisasi itemnya bisa
+        // diedit/dihapus, padahal DBBELIDET/DBUMJUAL masih menunjuk PO ini.
+        $db = DB::connection('SML');
+        $terima = $db->selectOne('select top 1 NoBukti from DBBELIDET where NoPO = cast(? as varchar(50))', [$nobukti]);
+        if ($terima) {
+            return 'PO '.$nobukti.' sudah diterima di '.$terima->NoBukti.', otorisasi tidak bisa dibatalkan.';
+        }
+        $um = $db->selectOne('select top 1 NOBUKTI from DBUMJUAL where NOSO = cast(? as varchar(50)) and isnull(pBeli, 0) = 1 and isnull(IsBatal, 0) = 0', [$nobukti]);
+        if ($um) {
+            return 'PO '.$nobukti.' sudah dipakai Uang Muka Beli '.$um->NOBUKTI.', otorisasi tidak bisa dibatalkan.';
+        }
+
+        return null;
+    }
+
+    /**
+     * Sama dengan POController::updateBatalOtorisasi (yang kini memanggil ini): nilai PO di atas plafon $username - hanya
+     * otorisasi yang dihapus (level 1 saja kalau level pertama user level 1, selain itu keduanya); dalam plafon -
+     * otorisasi dihapus dan PO ikut dibatalkan (isbatal = 1). Nilai PO memakai NNetRp, sama dengan aturan otorisasinya.
+     */
+    public function cancelApproval(string $nobukti, string $username, string $alasan): int
+    {
+        $u = $this->infoPlafon($nobukti, $username);
+        if (! $u) {
+            return 0;
+        }
+
+        $db = DB::connection('SML');
+        $log = fn (string $aktivitas) => app('App\Http\Controllers\GlobalController')->LoggingData($aktivitas, 'PO', $nobukti, $alasan, 0, 'DBPO');
+        $clear1 = "update dbpo set isOtorisasi1 = 0, maxol = -1, OtoUser1 = '', TglOto1 = NULL";
+        $clear2 = "update dbpo set isOtorisasi2 = 0, maxol = -1, OtoUser2 = '', TglOto2 = NULL";
+
+        if ((float) $u->nnet > (float) $u->PlafonOtoPO) {
+            if ((int) $u->leveloto === 1) {
+                $res = $db->update($clear1.' where nobukti = cast(:nobukti as varchar(50))', ['nobukti' => $nobukti]);
+                $log('btloto');
+            } else {
+                $res = $db->update($clear1.' where nobukti = cast(:nobukti as varchar(50))', ['nobukti' => $nobukti]);
+                $res = $db->update($clear2.' where nobukti = cast(:nobukti as varchar(50))', ['nobukti' => $nobukti]);
+                $log('btloto');
+                $log('btloto2');
+            }
+
+            return $res;
+        }
+
+        $batal = ', isbatal = 1, Userbatal = :username, tglbatal = getDate() where nobukti = cast(:nobukti as varchar(50))';
+        $res = $db->update($clear1.$batal, ['username' => $username, 'nobukti' => $nobukti]);
+        $res = $db->update($clear2.$batal, ['username' => $username, 'nobukti' => $nobukti]);
+        $log('btloto');
+        $log('btloto2');
+
+        return $res;
+    }
+
+    public function cancelPreview(string $nobukti, string $username): ?string
+    {
+        $u = $this->infoPlafon($nobukti, $username);
+        if (! $u) {
+            return null;
+        }
+
+        $nilai = 'Rp '.number_format((float) $u->nnet, 2, ',', '.');
+        $plafon = 'Rp '.number_format((float) $u->PlafonOtoPO, 2, ',', '.');
+
+        return (float) $u->nnet > (float) $u->PlafonOtoPO
+            ? 'Nilai PO '.$nilai.' di atas plafon Anda ('.$plafon.'): hanya otorisasinya yang dihapus, PO tetap bisa diedit dan diotorisasi ulang.'
+            : 'Nilai PO '.$nilai.' dalam plafon Anda ('.$plafon.'): otorisasi dihapus DAN PO ikut dibatalkan (ditandai batal).';
     }
 
     /**

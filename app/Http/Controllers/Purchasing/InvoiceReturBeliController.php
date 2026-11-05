@@ -11,10 +11,14 @@ use App\Models\NewPeriode;
 use App\Models\NewUsers;
 use Illuminate\Support\Facades\DB;
 use App\Traits\PenjagaTransaksi;
+use App\Services\OtorisasiService;
 
 class InvoiceReturBeliController extends Controller
 {
   use PenjagaTransaksi;
+
+  // Kunci menu di config/otorisasi.php dan DBMENUWEB.href.
+  private const HREF = 'invoicereturbeli';
 
 
   // Rentang tanggal default = satu bulan penuh periode kerja user (sama seperti Uang Muka Beli).
@@ -239,72 +243,64 @@ public function onChangeHeader (Request $req) {
     return $listData;
   }
 
-  public function spOtorisasi (Request $req) {
-    $tanggal = date('Y-m-d H:i:s');
-    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+  // Hak: IsOtorisasi1 menu Invoice Retur Beli. User tanpa hak mengirim permintaan lewat tombol yang sama
+  // (otorisasirequest). Posting hutang/jurnal ada di InvoiceReturBeliOtorisasi - satu sumber dengan otorisasi lewat HP;
+  // periode terkunci / dokumen tanpa barang ditolaknya sebagai \DomainException. Hasil 0 = sudah diotorisasi (dibaca JS).
+  public function spOtorisasi (Request $req, OtorisasiService $oto) {
     $username = \Auth::user()->username;
     $nobukti = $req->nobukti;
 
-    // Dokumen yang hanya punya header (belum ada barang di dbRBeliDet) tidak boleh
-    // diotorisasi - kalau lolos, posting hutang/jurnal jalan dengan nilai 0.
-    $adaBarang = DB::connection('SML')->select("select top 1 1 x from DBRBELIDET where NOBUKTI = :nobukti", ["nobukti" => $nobukti]);
-    if (!count($adaBarang)) {
-      return $this->tolak('Retur ' . $nobukti . ' belum punya barang, tidak bisa diotorisasi.');
+    if (!$oto->canApprove($username, self::HREF)) {
+      return $this->tolak('Anda tidak berhak otorisasi retur pembelian');
+    }
+    if (!$this->headerDokumen('DBRBELI', $nobukti)) {
+      return $this->tolak('Retur ' . $nobukti . ' tidak ditemukan, mungkin sudah dihapus.');
     }
 
-    return DB::connection('SML')->transaction(function () use ($tanggal, $periode, $username, $nobukti) {
-      // hanya baris yang belum diotorisasi yang boleh diproses - mencegah posting dobel
-      // saat tombol Otorisasi diklik lebih dari sekali.
-      $res = DB::connection('SML')->update(
-        "update dbrbeli set isOtorisasi1 = 1, maxol = 1 , OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti and isnull(isOtorisasi1,0) = 0",
-        ["username" => $username , "tanggal" => $tanggal , "nobukti" => $nobukti]
-      );
+    try {
+      $res = DB::connection('SML')->transaction(fn () => $oto->handler(self::HREF)->approve($nobukti, $username));
+    } catch (\DomainException $e) {
+      return $this->tolak($e->getMessage());
+    }
+    if ($res) {
+      // Tutup permintaan push yang masih pending + kabari peminta.
+      $oto->closePending(self::HREF, $nobukti, $username);
+    }
 
-      if (!$res) {
-        return 0;
-      }
-
-      $values = ['', 'dbrbeli', $periode->bulan, $periode->tahun, $nobukti, 1];
-
-      DB::connection('SML')->statement('exec sp_ProsesPostingHutPiut ?,?,?,?,?,?', $values);
-      DB::connection('SML')->statement('exec sp_ProsesPostingJurnalOto ?,?,?,?,?,?', $values);
-      app('App\Http\Controllers\GlobalController')->LoggingData('oto','RPB',$nobukti,'',0,'DBRBELI');
-
-      return $res;
-    });
+    return $res;
   }
 
-  public function spBatalOtorisasi (Request $req) {
-    $tanggal = date('Y-m-d H:i:s');
-    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
+  // Hak: IsBatal menu Invoice Retur Beli; keterangan (pket) dicatat ke LoggingData('btloto').
+  public function spBatalOtorisasi (Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
     $nobukti = $req->nobukti;
-    $pket = $req->pket;
-    foreach (['NoInvoice', 'NOFAKTUR'] as $kolom) {
-      $dph = $this->dipakaiOleh('DBDPHDET', $kolom, $nobukti);
-      if ($dph) {
-        return $this->tolak('Retur ' . $nobukti . ' sudah dipakai di pelunasan ' . $dph . ', otorisasi tidak bisa dibatalkan.');
-      }
+
+    if (!$oto->canCancel($username, self::HREF)) {
+      return $this->tolak('Anda tidak berhak batal otorisasi retur pembelian');
+    }
+    $retur = $this->headerDokumen('DBRBELI', $nobukti);
+    if (!$retur) {
+      return $this->tolak('Retur ' . $nobukti . ' tidak ditemukan, mungkin sudah dihapus.');
+    }
+    if ((int) $retur->isotorisasi1 !== 1) {
+      return $this->tolak('Retur ' . $nobukti . ' belum diotorisasi.');
+    }
+    $handler = $oto->handler(self::HREF);
+    if ($blocker = $handler->cancelBlocker($nobukti)) {
+      return $this->tolak($blocker);
     }
 
-    return DB::connection('SML')->transaction(function () use ($periode, $nobukti, $pket) {
-      // hanya baris yang sedang terotorisasi yang boleh dibatalkan.
-      $res = DB::connection('SML')->update(
-        "update dbrbeli set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL where nobukti = :nobukti and isOtorisasi1 = 1",
-        ["nobukti" => $nobukti]
-      );
+    try {
+      $res = DB::connection('SML')->transaction(fn () => $handler->cancelApproval($nobukti, $username, trim((string) $req->pket)));
+    } catch (\DomainException $e) {
+      return $this->tolak($e->getMessage());
+    }
+    if ($res) {
+      // Tutup permintaan batal yang masih pending + kabari peminta.
+      $oto->closePending(self::HREF, $nobukti, $username, OtorisasiService::BATAL);
+    }
 
-      if (!$res) {
-        return 0;
-      }
-
-      app('App\Http\Controllers\GlobalController')->LoggingData('btloto','RPB',$nobukti,$pket,0,'DBRBELI');
-      $values = ['', 'dbrbeli', $periode->bulan, $periode->tahun, $nobukti, 0];
-
-      DB::connection('SML')->statement('exec sp_ProsesPostingHutPiut ?,?,?,?,?,?', $values);
-      DB::connection('SML')->statement('exec sp_ProsesPostingJurnalOto ?,?,?,?,?,?', $values);
-
-      return $res;
-    });
+    return $res;
   }
 
   public function spAdd (Request $req) {

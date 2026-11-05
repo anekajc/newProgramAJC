@@ -12,6 +12,7 @@ use App\Models\NewUsers;
 use Illuminate\Support\Facades\DB;
 use App\Traits\PenjagaTransaksi;
 use App\Models\VwPPL;
+use App\Services\OtorisasiService;
 use Illuminate\Auth;
 
 
@@ -20,6 +21,9 @@ use Illuminate\Auth;
 class PerintahReturBeliController extends Controller
 {
   use PenjagaTransaksi;
+
+  // Kunci menu di config/otorisasi.php dan DBMENUWEB.href.
+  private const HREF = 'perintahreturbeli';
 
 
   // Rentang tanggal default = satu bulan penuh periode kerja user (sama seperti Purchase
@@ -174,23 +178,33 @@ class PerintahReturBeliController extends Controller
     return $res;
   }
 
-  public function updateOtorisasi (Request $req) {
-    $tanggal = date('Y-m-d H:i:s');
+  // Hak: IsOtorisasi1 menu Perintah Retur Beli. User tanpa hak mengirim permintaan lewat tombol yang sama
+  // (otorisasirequest). UPDATE + jejak audit ada di PerintahReturBeliOtorisasi - satu sumber dengan otorisasi lewat HP.
+  public function updateOtorisasi (Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
+    if (!$oto->canApprove($username, self::HREF)) {
+      return $this->tolak('Anda tidak berhak otorisasi perintah retur');
+    }
     $prb = $this->headerDokumen('DBPRRBELI', $req->nobukti);
     if (!$prb) {
       return $this->tolak('Perintah retur ' . $req->nobukti . ' tidak ditemukan, mungkin sudah dihapus.');
     }
-    // Syarat belum oto di WHERE: dua user bersamaan tidak saling menimpa user/tanggal otorisasi
-    $res = DB::connection('SML')->update("update DBPRRBELI set isOtorisasi1 = 1, maxol = 1 , OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti and isnull(IsOtorisasi1, 0) = 0", ["username" => \Auth::user()->username , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
+    $res = $oto->handler(self::HREF)->approve($req->nobukti, $username);
     if (!$res) {
       return $this->tolak('Perintah retur ' . $req->nobukti . ' sudah diotorisasi oleh ' . $prb->otouser1 . '.');
     }
-     $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto','PRB',$req->nobukti,'',0,'DBPRRBELI');
-return $res;
+    // Tutup permintaan push yang masih pending + kabari peminta.
+    $oto->closePending(self::HREF, $req->nobukti, $username);
+
+    return $res;
   }
 
-  public function updateBatalOtorisasi (Request $req) {
-    $tanggal = date('Y-m-d H:i:s');
+  // Hak: IsBatal menu Perintah Retur Beli (dulu IsOtorisasi1 di JS); keterangan wajib, dicatat ke LoggingData('btloto').
+  public function updateBatalOtorisasi (Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
+    if (!$oto->canCancel($username, self::HREF)) {
+      return $this->tolak('Anda tidak berhak batal otorisasi perintah retur');
+    }
     $prb = $this->headerDokumen('DBPRRBELI', $req->nobukti);
     if (!$prb) {
       return $this->tolak('Perintah retur ' . $req->nobukti . ' tidak ditemukan, mungkin sudah dihapus.');
@@ -200,13 +214,18 @@ return $res;
     }
     // Sudah dipakai Retur Pembelian Gudang: sesudah batal otorisasi itemnya bisa diedit/dihapus,
     // padahal DBRBELIDET.NOPRB/UrutPRB masih menunjuk item itu.
-    $retur = $this->dipakaiOleh('DBRBELIDET', 'NOPRB', $req->nobukti);
-    if ($retur) {
-      return $this->tolak('Perintah retur ' . $req->nobukti . ' sudah dipakai di ' . $retur . ', otorisasi tidak bisa dibatalkan.');
+    $handler = $oto->handler(self::HREF);
+    if ($blocker = $handler->cancelBlocker($req->nobukti)) {
+      return $this->tolak($blocker);
     }
-    $res = DB::connection('SML')->update("update DBPRRBELI set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL where nobukti = :nobukti", [ "nobukti" => $req->nobukti]);
-    $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'btloto','PRB',$req->nobukti,$req->pket,0,'DBPRRBELI');
- return $res;
+    $res = $handler->cancelApproval($req->nobukti, $username, trim((string) $req->pket));
+    if (!$res) {
+      return $this->tolak('Perintah retur ' . $req->nobukti . ' sudah dibatalkan otorisasinya.');
+    }
+    // Tutup permintaan batal yang masih pending + kabari peminta.
+    $oto->closePending(self::HREF, $req->nobukti, $username, OtorisasiService::BATAL);
+
+    return $res;
   }
 
   public function onChangeHeaderSP (Request $req) {

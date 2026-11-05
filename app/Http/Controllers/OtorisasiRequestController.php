@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Otorisasi\BatalPreviewHandler;
 use App\Services\OtorisasiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -79,11 +80,21 @@ class OtorisasiRequestController extends Controller
             abort(403);
         }
 
+        $handler = $this->oto->handler($request->MENUPATH);
+
+        // Batal otorisasi yang akibatnya bergantung pada approver (PO: dalam plafon PO ikut dibatalkan): jelaskan
+        // dulu apa yang terjadi kalau user ini menyetujui.
+        $cancelNote = ($request->TIPE ?? OtorisasiService::OTORISASI) === OtorisasiService::BATAL
+            && $request->STATUS === 'P' && $canApprove && $handler instanceof BatalPreviewHandler
+            ? $handler->cancelPreview($request->NOBUKTI, $username)
+            : null;
+
         return view('otorisasi.approve', [
             'request' => $request,
             'label' => $this->oto->label($request->MENUPATH),
-            'summary' => $this->oto->handler($request->MENUPATH)->summary($request->NOBUKTI),
+            'summary' => $handler->summary($request->NOBUKTI),
             'canApprove' => $canApprove,
+            'cancelNote' => $cancelNote,
         ]);
     }
 

@@ -39,6 +39,7 @@
 {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi + modal
      filter) --}}
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+<link rel="stylesheet" href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
 <style>
   /* Isi tabel di semua tab dibuat sebaris (tidak turun ke bawah). Kolom yang panjang
      cukup digeser lewat scroll horizontal .po-table-wrap (overflow:auto). */
@@ -3036,7 +3037,7 @@ function refreshDataTableAdd (NOBUKTI = "") {
 
               <td class="text-center">${item.Satuan ? item.Satuan : item.Satuan}</td>
               <td class="text-right">${item.Harga ? formatAngka(parseFloat(item.Harga).toFixed(2)) : '0.00'}</td>
-              
+
               <td class="text-right">${item.DiscTot ? formatAngka(parseFloat(item.DiscTot).toFixed(2)) : '0.00'}</td>
               <td class="text-right">${item.Total ? formatAngka(parseFloat(item.Total).toFixed(2)) : '0.00'}</td>
               <td>${item.NoPRB ? item.NoPRB : ''}</td>
@@ -3065,7 +3066,7 @@ function refreshDataTableAdd (NOBUKTI = "") {
             document.getElementById("input_add_valas").value = res[0].KodeVls
             document.getElementById("input_add_kurs").value = res[0].Kurs
             document.getElementById("input_add_hari").value = res[0].Hari
-          
+
             document.getElementById("input_add_gudang").value = res[0].KodeGdg
             document.getElementById("input_add_catatan").value = res[0].Keterangan
             document.getElementById("input_add_flagtipe").value = res[0].FlagTipe
@@ -3138,7 +3139,7 @@ function buttonDetail (nobukti) {
 
               <td class="text-center">${item.Satuan ? item.Satuan : item.Satuan}</td>
               <td class="text-right">${item.Harga ? formatAngka(parseFloat(item.Harga).toFixed(2)) : '0.00'}</td>
-              
+
               <td class="text-right">${item.DiscTot ? formatAngka(parseFloat(item.DiscTot).toFixed(2)) : '0.00'}</td>
               <td class="text-right">${item.Total ? formatAngka(parseFloat(item.Total).toFixed(2)) : '0.00'}</td>
               <td>${item.NoPRB ? item.NoPRB : ''}</td>
@@ -3346,7 +3347,7 @@ function buttonAddEditItem (i) {
   document.getElementById("AddEditInputSat1").value = tempBarangAddEdit.sat1
   document.getElementById("AddEditInputSat2").value = tempBarangAddEdit.sat2
 
-  
+
   // parseFloat dulu - nilai dari SQL Server datang sebagai '.00' (tanpa angka 0 di depan),
   // sehingga kalau langsung dipasang, field-nya tampil '.00' bukan '0.00'.
   document.getElementById("input_add_add_discpersen1").value = parseFloat(tempBarangAddEdit.DiscP || 0).toFixed(2)
@@ -3562,12 +3563,58 @@ function renderTabelIRB () {
 
 
 
+// User tanpa hak otorisasi: kirim permintaan ke approver (push ke HP mereka). IRB_HREF = kunci di
+// config/otorisasi.php dan DBMENUWEB.href. Approver memposting hutang & jurnal saat menyetujui.
+function buttonMintaOtorisasi (nobukti) {
+  var dlgMinta = alertify.confirm('Minta Otorisasi',
+    'Anda tidak berhak otorisasi. Kirim permintaan otorisasi invoice retur beli ' + nobukti + ' ke approver?',
+    function () {
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: IRB_HREF, nobukti },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {})
+  dlgMinta.elements.root.classList.add('ajs-app-buttons')
+}
+
+// User tanpa hak Batal: kirim permintaan batal otorisasi (dengan alasan) ke approver ber-hak Batal (push ke HP mereka).
+function buttonMintaBatalOtorisasi (nobukti) {
+  var dlgBatalOtorisasi = alertify.prompt('Minta Batal Otorisasi',
+    'Anda tidak berhak batal otorisasi. Masukkan alasan untuk meminta batal otorisasi invoice retur beli ' + nobukti, '',
+    function (evt, value) {
+      var alasan = (value || '').trim()
+      if (alasan === '') {
+        alertify.warning('Alasan harus diisi.')
+        return false
+      }
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: IRB_HREF, nobukti, tipe: 'B', alasan },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {});
+    dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
+}
+
 function buttonBatalOtorisasi (nobukti) {
 
 console.log( $("#akses_isbatal").val());
 let akses = $("#akses_isbatal").val();
   if (!Number(akses)) {
-    alertify.warning('No access batal');
+    buttonMintaBatalOtorisasi(nobukti);
     return;
   }
 
@@ -3641,7 +3688,7 @@ alertify.prompt("Batal Otorisasi", "Masukkan keterangan batal otorisasi nomor   
 function buttonOtorisasi (nobukti) {
   let akses = $("#akses_isotorisasi1").val();
   if (!Number(akses)) {
-    alertify.warning('No access')
+    buttonMintaOtorisasi(nobukti)
     return
   }
 
@@ -3848,12 +3895,12 @@ function submitPrint (nobukti) {
         dataPrint = res
 
         console.log(dataPrint)
-        
+
       }
     })
-  
+
     let arrayDataPrint = []
-    for (let i = 0; i < dataPrint.length; i+=7) 
+    for (let i = 0; i < dataPrint.length; i+=7)
     {
       let tempArray = dataPrint.slice(i,i+7)
       arrayDataPrint.push(tempArray)
@@ -4327,7 +4374,7 @@ function submitPrint (nobukti) {
     let subTotal = 0
     let ppnTotal = 0
     let totalTotal = 0
-    
+
     let tempPrintStr = ``
     tempPrintStr += `<html>
     <head>
@@ -4362,7 +4409,7 @@ item.forEach((itemSub, j) => {
   z++;
 });
 
-// Fill remaining empty rows — table is 225px, each row ~24px, header ~24px = ~8 total slots
+// Fill remaining empty rows ï¿½ table is 225px, each row ~24px, header ~24px = ~8 total slots
 const maxRows = 7;
 const fillerCount = Math.max(0, maxRows - item.length);
 for (let f = 0; f < fillerCount; f++) {

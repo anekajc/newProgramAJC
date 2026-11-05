@@ -513,17 +513,129 @@ optional `App\Otorisasi\LeveledOtorisasiHandler` (`PurchaseOrderOtorisasi`). Dec
 - **Price check on the phone:** `summary()['warnings']` (PO vs SO price, the old `cekHargaOto` SQL, now the static
   `PurchaseOrderOtorisasi::cekHargaBarang()` shared with the desktop) renders as a read-only "Perhatian" card in
   `approve.blade.php`. It never blocks Setujui.
-- **Shared endpoint:** `poupdateotorisasi` is also used by the PO Non Stock page, so `approveWithRules()` is NOT filtered by
-  `pJasa`; `summary()/isApproved()` are (`pJasa = 0`), which keeps the push flow stock-only. The desktop controller
-  checks the right on the PO's own menu (`purchaseorder` or `pononstock`, level 1 **or** 2) and maps the handler result
-  back to the legacy replies the page JS reads (`1`, `2`, `3`, or `tolak`).
+- **Shared endpoint:** `poupdateotorisasi` / `poupdatebatalotorisasi` are used by both PO pages. The controller reads the PO's own
+  `pJasa`, picks the menu (`purchaseorder` or `pononstock`) and its handler from that, checks the right on that menu
+  (otorisasi: level 1 **or** 2; batal: plain `IsBatal`), and maps the handler result back to the legacy replies the page
+  JS reads (`1`, `2`, `3`, or `tolak`). `approveWithRules()` itself is not `pJasa`-filtered; `summary()/isApproved()/
+  hasApproval()` are, by the handler's `$pJasa`.
 - A level-1 user cannot send a request (they have `IsOtorisasi1`, so they are told to authorise directly). A PO left at
   level 1 only that needs a director has no automatic follow-up request unless one already exists.
-- **Not done: "Minta Batal Otorisasi" for PO** (batal branches by plafon, and may also void the PO with `isbatal = 1`).
+- A PO that was voided by batal (`isbatal = 1`) is refused by `approveWithRules()` ("sudah dibatalkan").
 
-Files: `app/Otorisasi/LeveledOtorisasiHandler.php`, `PurchaseOrderOtorisasi.php`, `config/otorisasi.php`,
-`app/Services/OtorisasiService.php` (`requiredLevel`, level-aware `canAct/approvers`, `approveBertingkat`, queue SQL),
-`OtorisasiRequestController::show`, `approve.blade.php`, `POController.php`, `purchaseOrder.blade.php`.
+### 10d.1 PO Non Stock (`pononstock`, `KODEMENU` 030202) — same handler, `pJasa = 1`
+
+`PurchaseOrderNonStockOtorisasi extends PurchaseOrderOtorisasi` and only overrides `protected int $pJasa = 1`;
+registered in `config/otorisasi.php` as `pononstock` ("PO Non Stock"). Same amount routing, plafon rules, summary and
+batal as PO Stock. **Rights prerequisite:** the "highest level" rule needs a level-1-only approver. On this server SA
+was ticked for levels 1–5 on `pononstock` (on `purchaseorder` SA is level 1 only), so a PO up to 200 jt answers
+"Belum ada user yang berhak otorisasi" until an admin leaves only `IsOtorisasi1` for SA there.
+
+### 10d.2 PO batal ("Minta Batal Otorisasi") — PO Stock and PO Non Stock
+
+- **Recipients:** `IsBatal` holders whose highest approval level equals the amount level (`approverLevel`): up to
+  200 jt level 1 (SA), above it level 2 (Ezra). `OtorisasiService::hanyaLevel()` adds `IsOtorisasiN = 1` for batal on
+  leveled handlers. `canCancel()` (the plain right check used by the desktop page and `spRequest`) is **not** level
+  filtered (`canAct(..., $sesuaiLevel: false)`).
+- **What can be cancelled:** `LeveledOtorisasiHandler::hasApproval()` — any level set (a >200 jt PO with only level 1
+  is cancellable, as on the desktop). `OtorisasiService::adaOtorisasi()` uses it instead of `isApproved()`.
+- **What approving does = the desktop button, decided by the approver's plafon** (`PurchaseOrderOtorisasi::cancelApproval`,
+  the old `POController::updateBatalOtorisasi` logic): PO value (`SUM(NNetRp)`) above the approver's plafon → only the
+  approvals are cleared (level 1 only if the approver's first level is 1, else both); within plafon → approvals cleared
+  **and the PO is voided** (`isbatal = 1`, `Userbatal`, `tglbatal`). Logs `btloto` / `btloto2`.
+- **Approve page tells the approver first:** optional `BatalPreviewHandler::cancelPreview()` renders a red "Yang terjadi
+  bila disetujui" card (voided vs approvals only).
+- **Blockers** (`cancelBlocker`): received at warehouse (`DBBELIDET.NoPO`) and Uang Muka Beli (`DBUMJUAL`), checked when the
+  request is created and again when it is approved.
+- **Desktop button now needs `IsBatal`** (was `IsOtorisasi1`) on both PO pages; users without it send a request with a reason.
+  Pending batal requests are closed when someone cancels directly (`closePending(..., BATAL)`).
+- Deviation from the old code: the plafon comparison uses `NNetRp` (rupiah) like the approve rule; the old batal code used `SUM(nnet)`
+  (document currency), which only differs for foreign-currency POs.
+
+Files: `app/Otorisasi/LeveledOtorisasiHandler.php` (+`hasApproval`), `BatalPreviewHandler.php` (new),
+`PurchaseOrderOtorisasi.php`, `PurchaseOrderNonStockOtorisasi.php` (new), `config/otorisasi.php`,
+`app/Services/OtorisasiService.php` (`hanyaLevel` for batal, `canAct($sesuaiLevel)`, `adaOtorisasi`, batal re-route),
+`OtorisasiRequestController::show`, `approve.blade.php`, `POController.php`, `purchaseOrder.blade.php`,
+`purchaseOrderNonStock.blade.php`.
+
+---
+
+## 10e. Pembelian ACC (`newpobeliacc`, `KODEMENU` 0304) — single level, posts hutang + jurnal
+
+One page serves all four old menus (Tunai/Kredit × Stock/Non Stock) over `DBBELI`, so `PembelianAccOtorisasi` has no
+`pJasa`/`TipeBayar` filter; the mobile summary shows the kind as "Kredit - Stock" etc. Decisions with the user: Minta
+Otorisasi **and** Minta Batal, summary = header + item lines (qty × harga) + total (`NNetRp`), and **rights are now
+enforced on the desktop endpoints** (they had no check at all).
+
+- **Approve** (`approve()`): the page's guarded `UPDATE dbbeli … and isnull(IsOtorisasi1,0)=0` followed by
+  `sp_ProsesPostingHutPiut` + `sp_ProsesPostingJurnalOto` (flag 1). The posting uses the **logged-in user's working
+  period** (`GlobalController::getPeriode()`), exactly like pressing Otorisasi on the page — on the phone that is the approver's period.
+- **Batal** (`cancelApproval()`): `IsOtorisasi1 = 0, MaxOL = -1` guarded by `IsOtorisasi1 = 1`, then the same procedures with flag 0.
+  `cancelBlocker()` reuses `NewPOController::dipakaiBeli()` (invoice / return / payment / DPH). The page never stored the batal
+  reason (and still doesn't); on the phone it lives in `DBREQOTORISASI.ALASAN`.
+- **Controller** (`NewPOBeliAccController::spOtorisasi1 / spUnOtorisasi1`): `canApprove` / `canCancel` check first (reply
+  `tolak('Anda tidak berhak …')`), then the handler, then `closePending`. Replies are unchanged (int > 0, or `tolak`).
+- **Blade:** hidden `akses_isotorisasi1` / `akses_isbatal` (also refreshed in `loadAll()`), `buttonMintaOtorisasi` /
+  `buttonMintaBatalOtorisasi`. The gate sits inside `submitOtorisasi1` (both definitions in the file — the later one wins) and
+  `submitUnOtorisasi1`, i.e. a user without the right can still open the detail first and is asked to send a request when
+  pressing the button inside it.
+- Files: `app/Otorisasi/PembelianAccOtorisasi.php`, `config/otorisasi.php`, `NewPOBeliAccController.php`, `newpobeliacc.blade.php`.
+  Verified end-to-end in a rolled-back transaction including the posting procedures (DBHUTPIUT rows 0→1 on approve, 1→0 on batal).
+
+---
+
+## 10f. Perintah Retur Beli (`perintahreturbeli`, `KODEMENU` 030601) — single level, flag only
+
+`PerintahReturBeliOtorisasi` (`DBPRRBELI`, `OL = 1`): the same shape as the PR pages. Built with the answers already settled on
+the other pages (Minta Otorisasi **and** Minta Batal, header + item list + total, generic approve view, audit log from the
+handler, batal right = `IsBatal`, desktop rights enforced) — no new questions were needed.
+
+- **Approve:** the page's guarded `UPDATE DBPRRBELI … and isnull(IsOtorisasi1,0)=0` + `LoggingData('oto','PRB',…)`. No posting.
+- **Batal:** `IsOtorisasi1 = 0, maxol = -1` guarded by `IsOtorisasi1 = 1` + `LoggingData('btloto','PRB', …, alasan)`.
+  `cancelBlocker()`: a Retur Pembelian Gudang already points at it (`DBRBELIDET.NOPRB`).
+- **Summary:** supplier(s) and purchase number(s) come from the item rows (the header has no supplier); lines show qty × harga and `NNetRp`.
+- **Controller:** `canApprove` / `canCancel` first (these endpoints had no check; the JS used IsOtorisasi1 for both buttons), then the
+  handler, then `closePending`. Replies unchanged (int > 0, or `tolak`).
+- Files: `app/Otorisasi/PerintahReturBeliOtorisasi.php`, `config/otorisasi.php`, `PerintahReturBeliController.php`,
+  `perintahreturbeli.blade.php` (`buttonMintaOtorisasi`, `buttonMintaBatalOtorisasi`, `PRB_HREF`).
+
+---
+
+## 10g. Invoice Retur Beli (`invoicereturbeli`, `KODEMENU` 030603) — single level, posts hutang + jurnal
+
+`InvoiceReturBeliOtorisasi` (`DBRBELI`, `OL = 1`): the Pembelian ACC shape (§10e) — same posting procedures in the approver's
+working period, same answers (both flows, header + items + total, `IsBatal` for batal, desktop rights enforced). Differences:
+
+- **Server-side guards moved into the handler** (they only existed in the browser / controller): a locked period
+  (`dblockperiode` for the approver's working period — the page JS asks `/ceklockperiode`) and a document without items
+  (`DBRBELIDET`). Both are refused on the phone **and** now on the desktop endpoint too.
+- **New generic mechanism:** a handler may throw `\DomainException('reason')` from `approve()` / `cancelApproval()`.
+  `OtorisasiService::approve()` catches it: the transaction is rolled back, the request stays `P`, and the message is shown to
+  the approver ("Periode sudah dikunci", "Retur … belum punya barang …"). The desktop controller maps it to `tolak(...)`.
+- **Batal blocker:** already used in a pelunasan (`DBDPHDET.NoInvoice` / `NOFAKTUR`).
+- **Controller** (`spOtorisasi`, `spBatalOtorisasi`): `canApprove` / `canCancel`, handler inside a DB transaction (as before),
+  `closePending`. Replies unchanged (int > 0, `0` = already authorised, or `tolak`).
+- **Blade** has a non-UTF-8 byte: edit with `sed`, not the Edit tool. `buttonMintaOtorisasi` / `buttonMintaBatalOtorisasi` / `IRB_HREF`.
+- Files: `app/Otorisasi/InvoiceReturBeliOtorisasi.php`, `OtorisasiHandler.php` (doc), `OtorisasiService.php`
+  (`approve` → try/catch around `prosesApprove`), `config/otorisasi.php`, `InvoiceReturBeliController.php`, `invoicereturbeli.blade.php`.
+
+---
+
+## 10h. Debet Note (`pembelianpermintaandebetnote`, `KODEMENU` 0307) — single level, posts hutang + jurnal
+
+`DebetNoteOtorisasi` (`DBDEBETNOTE`, `OL = 1`): the Pembelian ACC shape (§10e). Same answers as there (both flows, header + items + total,
+`IsBatal` for batal, desktop rights enforced). Specifics:
+
+- **Mirrors the desktop exactly:** approve does *not* touch `MaxOL` and writes no `oto` log (the page never did); batal sets `maxol = -1`
+  and logs `btloto`. Posting = `sp_ProsesPostingHutPiut` + `sp_ProsesPostingJurnalOto` with `TipeProses` 1 / 0 for `DBDEBETNOTE`, run after the
+  flag is set (`vwPostHutPiut` only reads authorised DNs). The old private `postingDN()` moved into the handler.
+- **Summary lines** come from `DBDEBETNOTEDET`: "Invoice <NoInv>", `NilaiRp`, and for foreign currency "USD 247,50 x kurs 18.000,00" (+ keterangan).
+- **Batal blocker:** used in a pelunasan (`DBDPHDET.NoInvoice` / `NOFAKTUR`).
+- **Controller:** `canApprove` first (reply `tolak`), flag + posting now inside one DB transaction (before they were separate), reply stays
+  `{"success": bool}`. Batal keeps its existing 403 `No access` / 422 reasons, now through `canCancel`.
+- Files: `app/Otorisasi/DebetNoteOtorisasi.php`, `config/otorisasi.php`, `PembelianPermintaanDebetNoteController.php`,
+  `pembelianpermintaandebetnote.blade.php` (`buttonMintaOtorisasi`, `buttonMintaBatalOtorisasi`, `DN_HREF`).
+- The phone batal path was verified on a DN authorised inside the test transaction (the data had no authorised DN); the "already used"
+  blocker was not exercised for lack of data — it is the same code as Invoice Retur Beli (§10g).
 
 ---
 

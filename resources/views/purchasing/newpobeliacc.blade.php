@@ -38,6 +38,7 @@
 </style>
       {{-- Header tabel interaktif drag kolom + roda gigi + bar kolom tersembunyi + modal --}}
     <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+    <link rel="stylesheet" href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
 <style>
   /* Isi tabel di semua tab dibuat sebaris (tidak turun ke bawah). Kolom yang panjang
      cukup digeser lewat scroll horizontal .po-table-wrap (overflow:auto). */
@@ -285,6 +286,8 @@ td input[type="checkbox"] {
     <input type="hidden" id="akses_ishapus" value="{!! $akses->ISHAPUS!!}" />
     <input type="hidden" id="akses_iskoreksi" value="{!! $akses->ISKOREKSI !!}" />
     <input type="hidden" id="akses_iscetak" value="{!! $akses->ISCETAK !!}" />
+    <input type="hidden" id="akses_isotorisasi1" value="{!! $akses->IsOtorisasi1 !!}" />
+    <input type="hidden" id="akses_isbatal" value="{!! $akses->IsBatal !!}" />
 
     <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
 
@@ -2046,6 +2049,10 @@ function detailPembelian1(index) {
 
         function submitOtorisasi1 () {
     console.log('otooo')
+          if (!Number($("#akses_isotorisasi1").val())) {
+            buttonMintaOtorisasi(DataNobukti)
+            return
+          }
           let nobukti = DataNobukti;
           let otorisasi = 1
           console.log(nobukti, otorisasi)
@@ -2087,6 +2094,11 @@ function detailPembelian1(index) {
 
 
         function submitUnOtorisasi1 () {
+          // Hak batal = IsBatal; tanpa hak itu kirim permintaan batal otorisasi.
+          if (!Number($("#akses_isbatal").val())) {
+            buttonMintaBatalOtorisasi(DataNobukti)
+            return
+          }
 
           let nobukti = DataNobukti;
           console.log(nobukti)
@@ -2094,7 +2106,7 @@ function detailPembelian1(index) {
           console.log(nobukti, otorisasi)
 
           // Keterangan batal otorisasi wajib diisi untuk semua jenis (dulu hanya di menu Acc Tunai newSML).
-          alertify.prompt("Batal Otorisasi", "Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
+          var dlgBatalOtorisasi = alertify.prompt("Batal Otorisasi", "Masukkan keterangan batal otorisasi nomor   " + nobukti, "",
             function(evt, value) {
               if (value.trim() == '') {
                 alertify.warning('Keterangan harus diisi.');
@@ -2137,12 +2149,8 @@ function detailPembelian1(index) {
               alertify.error("Action cancelled");
             }
           );
+          dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
         }
-
-
-
-
-
 
         function buttonUnOtoPembelian (nobukti, pjasa) {
 
@@ -2262,6 +2270,10 @@ function detailPembelian1(index) {
 
 
           function submitOtorisasi1 () {
+            if (!Number($("#akses_isotorisasi1").val())) {
+              buttonMintaOtorisasi(DataNobukti)
+              return
+            }
 
             let nobukti = DataNobukti;
             let otorisasi = 1
@@ -2529,8 +2541,56 @@ function formatAngkaX (angka) {
             document.getElementById("akses_iskoreksi").value = res.ISKOREKSI
             document.getElementById("akses_iscetak").value = res.ISCETAK
             document.getElementById("akses_ishapus").value = res.ISHAPUS
+            document.getElementById("akses_isotorisasi1").value = res.IsOtorisasi1
+            document.getElementById("akses_isbatal").value = res.IsBatal
           }
         })
+      }
+
+      // User tanpa hak otorisasi: kirim permintaan ke approver (push ke HP mereka). PBA_HREF = kunci di
+      // config/otorisasi.php dan DBMENUWEB.href. Dipanggil dari tombol Otorisasi di dalam halaman detail.
+      function buttonMintaOtorisasi (nobukti) {
+        var dlgMinta = alertify.confirm('Minta Otorisasi',
+          'Anda tidak berhak otorisasi. Kirim permintaan otorisasi pembelian ' + nobukti + ' ke approver?',
+          function () {
+            $.ajax({
+              url: "{!! url('otorisasirequest') !!}",
+              type: "post",
+              data: { _token: $("#_token").val(), menu: PBA_HREF, nobukti },
+              success: function (res) { alertify.success(res.message) },
+              error: function (err) {
+                console.log(err)
+                alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+              }
+            })
+          },
+          function () {})
+        dlgMinta.elements.root.classList.add('ajs-app-buttons')
+      }
+
+      // User tanpa hak Batal: kirim permintaan batal otorisasi (dengan alasan) ke approver ber-hak Batal.
+      function buttonMintaBatalOtorisasi (nobukti) {
+        var dlgBatalOtorisasi = alertify.prompt('Minta Batal Otorisasi',
+          'Anda tidak berhak batal otorisasi. Masukkan alasan untuk meminta batal otorisasi pembelian ' + nobukti, '',
+          function (evt, value) {
+            var alasan = (value || '').trim()
+            if (alasan === '') {
+              alertify.warning('Alasan harus diisi.')
+              return false
+            }
+            $.ajax({
+              url: "{!! url('otorisasirequest') !!}",
+              type: "post",
+              data: { _token: $("#_token").val(), menu: PBA_HREF, nobukti, tipe: 'B', alasan },
+              success: function (res) { alertify.success(res.message) },
+              error: function (err) {
+                console.log(err)
+                alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+              }
+            })
+          },
+          function () {});
+          dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
       }
 
       function resetDetailPembelian (noBukti, noPO) {

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Traits\PenjagaTransaksi;
+use App\Services\OtorisasiService;
 
 
 class PembelianPermintaanDebetNoteController extends Controller
@@ -15,6 +16,9 @@ class PembelianPermintaanDebetNoteController extends Controller
 // sp_ProsesPostingJurnalOto
 {
   use PenjagaTransaksi;
+
+  // Kunci menu di config/otorisasi.php dan DBMENUWEB.href.
+  private const HREF = 'pembelianpermintaandebetnote';
 
 
   // Rentang tanggal default = satu bulan penuh periode kerja user (sama seperti Uang Muka Beli).
@@ -174,7 +178,13 @@ class PembelianPermintaanDebetNoteController extends Controller
 
   }
 
-public function updateOtorisasi(Request $req) {
+  // Hak: IsOtorisasi1 menu Debet Note. User tanpa hak mengirim permintaan lewat tombol yang sama (otorisasirequest).
+  // Posting hutang/jurnal ada di DebetNoteOtorisasi - satu sumber dengan otorisasi lewat HP.
+  public function updateOtorisasi(Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
+    if (!$oto->canApprove($username, self::HREF)) {
+      return $this->tolak('Anda tidak berhak otorisasi debet note');
+    }
     $dn = $this->headerDokumen('DBDEBETNOTE', $req->nobukti);
     if (!$dn) {
       return $this->tolak('Debet note ' . $req->nobukti . ' tidak ditemukan, mungkin sudah dihapus.');
@@ -182,39 +192,21 @@ public function updateOtorisasi(Request $req) {
     if ((int) $dn->isotorisasi1 === 1) {
       return $this->tolak('Debet note ' . $req->nobukti . ' sudah diotorisasi oleh ' . $dn->otouser1 . '.');
     }
-    $tanggal = now();
-    $res = DB::connection('SML')->update(
-        "UPDATE dbdebetnote
-         SET IsOtorisasi1 = 1, OtoUser1 = :username, TglOto1 = :tanggal
-         WHERE NoBukti = :nobukti AND isnull(IsOtorisasi1, 0) = 0",
-        [
-            "username" => \Auth::user()->username,
-            "tanggal" => $tanggal,
-            "nobukti" => $req->nobukti
-        ]
-    );
-    // Dulu otorisasi hanya mengubah flag, DN tidak pernah masuk DBHUTPIUT/jurnal. Posting sama
-    // seperti Kredit Note & desktop: vwPostHutPiut hanya mengambil DN yang IsOtorisasi1 = 1.
+
+    // Flag + posting dalam satu transaksi: posting gagal -> flag otorisasi ikut dibatalkan.
+    $res = DB::connection('SML')->transaction(fn () => $oto->handler(self::HREF)->approve($req->nobukti, $username));
     if ($res > 0) {
-      $this->postingDN($req->nobukti, 1);
+      // Tutup permintaan push yang masih pending + kabari peminta.
+      $oto->closePending(self::HREF, $req->nobukti, $username);
     }
     return response()->json(['success' => $res > 0]);
-}
-
-  // TipeProses 1 = posting DBHUTPIUT (NOINVOICE 'DN', NOPAJAK = no DN) + DBJurnalOto, 0 = hapus posting.
-  private function postingDN ($nobukti, $tipeProses) {
-    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
-    $values = ['', 'DBDEBETNOTE', $periode->bulan, $periode->tahun, $nobukti, $tipeProses];
-    DB::connection('SML')->statement('exec sp_ProsesPostingHutPiut ?,?,?,?,?,?', $values);
-    DB::connection('SML')->statement('exec sp_ProsesPostingJurnalOto ?,?,?,?,?,?', $values);
   }
 
-
-public function updateBatalOtorisasi(Request $req) {
-    // Hak akses Batal dicek juga di server (bukan hanya di JS), dan alasan wajib diisi -
-    // alasan dicatat ke dbLogFile seperti PembelianPermintaanAgenController@updateBatalOtorisasi.
-    $akses = app('App\Http\Controllers\GlobalController')->getAkses('0307', 'pembelianpermintaandebetnote');
-    if (!$akses || !$akses->IsBatal) {
+  // Hak: IsBatal menu Debet Note (dicek di server; JS mengirim permintaan bila tidak punya hak), alasan wajib -
+  // dicatat ke dbLogFile oleh handler seperti PembelianPermintaanAgenController@updateBatalOtorisasi.
+  public function updateBatalOtorisasi(Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
+    if (!$oto->canCancel($username, self::HREF)) {
       return response()->json(['message' => 'No access'], 403);
     }
     if (trim((string) $req->pket) === '') {
@@ -227,26 +219,18 @@ public function updateBatalOtorisasi(Request $req) {
     if ((int) $dn->isotorisasi1 !== 1) {
       return $this->tolak('Debet note ' . $req->nobukti . ' belum diotorisasi.');
     }
-    foreach (['NoInvoice', 'NOFAKTUR'] as $kolom) {
-      $dph = $this->dipakaiOleh('DBDPHDET', $kolom, $req->nobukti);
-      if ($dph) {
-        return $this->tolak('Debet note ' . $req->nobukti . ' sudah dipakai di pelunasan ' . $dph . ', otorisasi tidak bisa dibatalkan.');
-      }
+    $handler = $oto->handler(self::HREF);
+    if ($blocker = $handler->cancelBlocker($req->nobukti)) {
+      return $this->tolak($blocker);
     }
 
-    $res = DB::connection('SML')->update(
-        "UPDATE dbdebetnote SET isOtorisasi1 = 0, maxol = -1, OtoUser1 = '', TglOto1 = NULL WHERE NoBukti = :nobukti",
-        [
-            "nobukti" => $req->nobukti
-        ]
-    );
+    $res = DB::connection('SML')->transaction(fn () => $handler->cancelApproval($req->nobukti, $username, trim((string) $req->pket)));
     if ($res > 0) {
-      $this->postingDN($req->nobukti, 0);
+      // Tutup permintaan batal yang masih pending + kabari peminta.
+      $oto->closePending(self::HREF, $req->nobukti, $username, OtorisasiService::BATAL);
     }
-
-    app('App\Http\Controllers\GlobalController')->LoggingData('btloto', 'DN', $req->nobukti, $req->pket, 0, 'dbdebetnote');
     return $res;
-}
+  }
 
   public function spAdd (Request $req) {
 

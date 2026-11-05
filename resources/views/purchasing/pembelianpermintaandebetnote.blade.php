@@ -44,6 +44,7 @@
   {{-- Header tabel interaktif (drag kolom + roda gigi + bar kolom tersembunyi + modal
      filter) --}}
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+<link rel="stylesheet" href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
 <style>
   /* Isi tabel di semua tab dibuat sebaris (tidak turun ke bawah). Kolom yang panjang
      cukup digeser lewat scroll horizontal .po-table-wrap (overflow:auto). */
@@ -1912,10 +1913,56 @@ function buttonDetail (nobukti) {
   })
 }
 
+// User tanpa hak otorisasi: kirim permintaan ke approver (push ke HP mereka). DN_HREF = kunci di
+// config/otorisasi.php dan DBMENUWEB.href. Approver memposting hutang & jurnal saat menyetujui.
+function buttonMintaOtorisasi (nobukti) {
+  var dlgMinta = alertify.confirm('Minta Otorisasi',
+    'Anda tidak berhak otorisasi. Kirim permintaan otorisasi debet note ' + nobukti + ' ke approver?',
+    function () {
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: DN_HREF, nobukti },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {})
+  dlgMinta.elements.root.classList.add('ajs-app-buttons')
+}
+
+// User tanpa hak Batal: kirim permintaan batal otorisasi (dengan alasan) ke approver ber-hak Batal (push ke HP mereka).
+function buttonMintaBatalOtorisasi (nobukti) {
+  var dlgBatalOtorisasi = alertify.prompt('Minta Batal Otorisasi',
+    'Anda tidak berhak batal otorisasi. Masukkan alasan untuk meminta batal otorisasi debet note ' + nobukti, '',
+    function (evt, value) {
+      var alasan = (value || '').trim()
+      if (alasan === '') {
+        alertify.warning('Alasan harus diisi.')
+        return false
+      }
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: DN_HREF, nobukti, tipe: 'B', alasan },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {});
+    dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
+}
+
 function buttonOtorisasi (nobukti) {
   let akses = $("#akses_isotorisasi1").val();
   if (!Number(akses)) {
-    alertify.warning('No access');
+    buttonMintaOtorisasi(nobukti);
     return;
   }
 
@@ -2029,7 +2076,7 @@ function buttonCloseForm () {
 function buttonBatalOtorisasi(nobukti) {
   let akses = $("#akses_isbatal").val();
   if (!Number(akses)) {
-    alertify.warning('No access');
+    buttonMintaBatalOtorisasi(nobukti);
     return;
   }
 

@@ -1,10 +1,15 @@
 <?php
 
 use App\Otorisasi\BankOtorisasi;
+use App\Otorisasi\DebetNoteOtorisasi;
+use App\Otorisasi\InvoiceReturBeliOtorisasi;
 use App\Otorisasi\KasOtorisasi;
+use App\Otorisasi\PembelianAccOtorisasi;
 use App\Otorisasi\PembelianPermintaanAgenOtorisasi;
 use App\Otorisasi\PembelianPermintaanNonAgenOtorisasi;
 use App\Otorisasi\PembelianPermintaanNonStockOtorisasi;
+use App\Otorisasi\PerintahReturBeliOtorisasi;
+use App\Otorisasi\PurchaseOrderNonStockOtorisasi;
 use App\Otorisasi\PurchaseOrderOtorisasi;
 
 /*
@@ -51,6 +56,31 @@ return [
     'purchaseorder' => [
         'label' => 'PO Stock',
         'handler' => PurchaseOrderOtorisasi::class,
+    ],
+
+    'pononstock' => [
+        'label' => 'PO Non Stock',
+        'handler' => PurchaseOrderNonStockOtorisasi::class,
+    ],
+
+    'newpobeliacc' => [
+        'label' => 'Pembelian ACC',
+        'handler' => PembelianAccOtorisasi::class,
+    ],
+
+    'perintahreturbeli' => [
+        'label' => 'Perintah Retur Beli',
+        'handler' => PerintahReturBeliOtorisasi::class,
+    ],
+
+    'invoicereturbeli' => [
+        'label' => 'Invoice Retur Beli',
+        'handler' => InvoiceReturBeliOtorisasi::class,
+    ],
+
+    'pembelianpermintaandebetnote' => [
+        'label' => 'Debet Note',
+        'handler' => DebetNoteOtorisasi::class,
     ],
 
 ];
