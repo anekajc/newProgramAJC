@@ -8,6 +8,7 @@
 
 @section('css')
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+<link rel="stylesheet" href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
 
 {{-- Modal pemilih (Customer/No Invoice/No Beli/Barang) disamakan persis dengan modal
      pemilih menu Kas - lihat public/css/picker-kas.css, pola yang sama seperti
@@ -2855,10 +2856,56 @@ function loadAll () {
 
 // Pola batal otorisasi yang disepakati (purchasing / SO): prompt berjudul "Batal Otorisasi",
 // keterangan wajib diisi (prompt tetap terbuka bila kosong), dicatat ke LoggingData('btloto').
+// User tanpa hak Otorisasi: kirim permintaan otorisasi ke approver ber-hak (push ke HP mereka).
+function buttonMintaOtorisasi (nobukti) {
+  var dlgMinta = alertify.confirm('Minta Otorisasi',
+    'Anda tidak berhak otorisasi. Kirim permintaan otorisasi PRJ ' + nobukti + ' ke approver?',
+    function () {
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: PRJ_HREF, nobukti },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {})
+  dlgMinta.elements.root.classList.add('ajs-app-buttons')
+}
+
+// User tanpa hak Batal: kirim permintaan batal otorisasi (dengan alasan) ke approver ber-hak Batal (push ke HP mereka).
+function buttonMintaBatalOtorisasi (nobukti) {
+  var dlgBatalOtorisasi = alertify.prompt('Minta Batal Otorisasi',
+    'Anda tidak berhak batal otorisasi. Masukkan alasan untuk meminta batal otorisasi PRJ ' + nobukti, '',
+    function (evt, value) {
+      var alasan = (value || '').trim()
+      if (alasan === '') {
+        alertify.warning('Alasan harus diisi.')
+        return false
+      }
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: PRJ_HREF, nobukti, tipe: 'B', alasan },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {});
+    dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
+}
+
 function buttonBatalOtorisasi (nobukti) {
-  let akses = $("#akses_isotorisasi1").val();
+  // Hak batal = IsBatal (dulu IsOtorisasi1); tanpa hak -> kirim permintaan batal ke approver.
+  let akses = $("#akses_isbatal").val();
   if (!Number(akses)) {
-    alertify.warning('No access')
+    buttonMintaBatalOtorisasi(nobukti)
     return
   }
 
@@ -2911,7 +2958,7 @@ function buttonBatalOtorisasi (nobukti) {
 function buttonOtorisasi (nobukti) {
   let akses = $("#akses_isotorisasi1").val();
   if (!Number(akses)) {
-    alertify.warning('No access')
+    buttonMintaOtorisasi(nobukti)
     return
   }
 
@@ -2985,12 +3032,12 @@ function submitPrint (nobukti) {
         dataPrint = res
 
         console.log(dataPrint)
-        
+
       }
     })
-  
+
     let arrayDataPrint = []
-    for (let i = 0; i < dataPrint.length; i+=7) 
+    for (let i = 0; i < dataPrint.length; i+=7)
     {
       let tempArray = dataPrint.slice(i,i+7)
       arrayDataPrint.push(tempArray)
@@ -3007,7 +3054,7 @@ function submitPrint (nobukti) {
 
     const now = new Date()
     const jamCetak = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-    
+
     css = `<style type="text/css">
       body {
         font-family: sans-serif;
@@ -3430,9 +3477,9 @@ function submitPrint (nobukti) {
                     </div>
 
                     <div style="display: flex; width: 100%">
-               
+
                         <div class="pb-1" style="width: 100%"></div>
-                       
+
                       </div>
 
 
@@ -3461,8 +3508,8 @@ function submitPrint (nobukti) {
                       <div class="pb-1" style="width: 5%">:</div>
                       <div class="pb-1" style="width: 75%">${tanggalOnly}</div>
                     </div>
-                    
-                    
+
+
                   </div>
 
                 </div>
@@ -3471,7 +3518,7 @@ function submitPrint (nobukti) {
     style="width: 100%; height: 225px; max-height: 225px; font-family: sans-serif; display: table; font-size: 10px; border: 1px solid #3c3c3c;">
                 <thead>
                   <tr>
-                    
+
                   </tr>
                   <tr>
                     <td class="text-center" style="width: 2%" >No.</td>
@@ -3490,7 +3537,7 @@ function submitPrint (nobukti) {
     let subTotal = 0
     let ppnTotal = 0
     let totalTotal = 0
-    
+
     let tempPrintStr = ``
     tempPrintStr += `<html>
     <head>
@@ -3522,7 +3569,7 @@ item.forEach((itemSub, j) => {
       <td style='border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; ' class="no-border" style="width: 5%;">${itemSub.PartNumber}</td>
       <td style='border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; ' class="no-border" style="width: 5%;">${itemSub.SATUAN}</td>
       <td style='border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; ' class="no-border" style="width: 5%;">${itemSub.QNT ? parseFloat(itemSub.QNT).toFixed(2) : ''}</td>
-      
+
     </tr>`;
   z++;
 });
@@ -3561,7 +3608,7 @@ for (let f = 0; f < fillerCount; f++) {
           <p class="m-0" style=" font-size:12px;">(...............................)</p>
         </td>
       </tr>
-      
+
     </table>
   </div>
 
@@ -3589,7 +3636,7 @@ for (let f = 0; f < fillerCount; f++) {
         </td>
       </tr>
       <tr>
-        
+
       </tr>
     </table>
   </div>
@@ -3633,12 +3680,12 @@ function submitPrintBA (nobukti) {
         dataPrint = res
 
         console.log(dataPrint)
-        
+
       }
     })
-  
+
     let arrayDataPrint = []
-    for (let i = 0; i < dataPrint.length; i+=7) 
+    for (let i = 0; i < dataPrint.length; i+=7)
     {
       let tempArray = dataPrint.slice(i,i+7)
       arrayDataPrint.push(tempArray)
@@ -3655,7 +3702,7 @@ function submitPrintBA (nobukti) {
 
     const now = new Date()
     const jamCetak = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-    
+
     css = `<style type="text/css">
       body {
         font-family: sans-serif;
@@ -4078,9 +4125,9 @@ function submitPrintBA (nobukti) {
                     </div>
 
                     <div style="display: flex; width: 100%">
-               
+
                         <div class="pb-1" style="width: 100%"></div>
-                       
+
                       </div>
 
 
@@ -4124,8 +4171,8 @@ function submitPrintBA (nobukti) {
                       <div class="pb-1" style="width: 5%">:</div>
                       <div class="pb-1" style="width: 75%">${dataPrint[0].NoPesanan}</div>
                     </div>
-                    
-                    
+
+
                   </div>
 
                 </div>
@@ -4134,7 +4181,7 @@ function submitPrintBA (nobukti) {
     style="width: 100%; height: 225px; max-height: 225px; font-family: sans-serif; display: table; font-size: 10px; border: 1px solid #3c3c3c;">
                 <thead>
                   <tr>
-                    
+
                   </tr>
                   <tr>
                     <td class="text-center" style="width: 2%" >No.</td>
@@ -4154,7 +4201,7 @@ function submitPrintBA (nobukti) {
     let subTotal = 0
     let ppnTotal = 0
     let totalTotal = 0
-    
+
     let tempPrintStr = ``
     tempPrintStr += `<html>
     <head>
@@ -4187,7 +4234,7 @@ item.forEach((itemSub, j) => {
       <td style='border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; ' class="no-border" style="width: 5%;">${itemSub.NAMASUPPLIER}</td>
       <td style='border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; ' class="no-border" style="width: 5%;">${itemSub.NoPO}</td>
       <td style='border-left:1px solid black; border-right:1px solid black; border-bottom:1px solid black; ' class="no-border" style="width: 5%;">${itemSub.nobeli}</td>
-      
+
     </tr>`;
   z++;
 });
@@ -4252,8 +4299,8 @@ for (let f = 0; f < fillerCount; f++) {
       <tr>
         <td class="no-border text-center" style="width: 34%; font-size:13px;"></td>
       </tr>
-   
-      
+
+
 
       <tr>
         <td class="no-border text-center" style="width: 35%; font-size:13px;">Dibuat oleh</td>
@@ -4266,7 +4313,7 @@ for (let f = 0; f < fillerCount; f++) {
           <p class="m-0" style=" font-size:12px;">(...............................)</p>
         </td>
       </tr>
-      
+
     </table>
   </div>
 
@@ -4274,10 +4321,10 @@ for (let f = 0; f < fillerCount; f++) {
 
 
 
-   
 
-      
-   
+
+
+
 
 
 
@@ -4292,7 +4339,7 @@ for (let f = 0; f < fillerCount; f++) {
 
     <table style="width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 6px;">
 
-    
+
 
       <tr>
         <td class="no-border text-center" style="width: 34%; font-size:13px;"></td>
@@ -4356,7 +4403,7 @@ for (let f = 0; f < fillerCount; f++) {
         </td>
       </tr>
       <tr>
-        
+
       </tr>
     </table>
   </div>

@@ -338,8 +338,8 @@ on the approve view and a decision on what the mobile summary should show.
   (only an optional client-side `akses_isotorisasi1` check). Kas is fixed; Bank and the rest are not.
   Converting a page per this guide closes that hole for it. Fixing all of them is a separate task.
 - **Multi-level otorisasi is supported only for handlers that implement `LeveledOtorisasiHandler`** (so far PO Stock,
-  §10d). Everything else is still single-level `IsOtorisasi1`. `dbso`/`dbpenawaranso` also compute `maxol` and have
-  NOT been converted — each has its own level/plafon rules, so ask the user before copying the PO approach.
+  §10d). Everything else is single-level `IsOtorisasi1`. `dbso`/`dbpenawaranso` compute `maxol` from `dbmenu.OL` (1) and are
+  converted as single-level (§10i, §10j); SO keeps its own blacklist/plafon rules inside the handler.
 - **Kas handler has no `NoBukti` prefix filter** (nothing prevents `menu=kas` with a Bank number).
   Bank's handler has one (§10); Kas still needs the BKK/BKM equivalent — a small change plus a retest.
 - **Requester's own device:** approvers who are the requester are excluded from the push
@@ -636,6 +636,202 @@ working period, same answers (both flows, header + items + total, `IsBatal` for 
   `pembelianpermintaandebetnote.blade.php` (`buttonMintaOtorisasi`, `buttonMintaBatalOtorisasi`, `DN_HREF`).
 - The phone batal path was verified on a DN authorised inside the test transaction (the data had no authorised DN); the "already used"
   blocker was not exercised for lack of data — it is the same code as Invoice Retur Beli (§10g).
+
+---
+
+## 10i. Penawaran SO (`penawaranso`, `KODEMENU` 04011) — single level, flag only
+
+`PenawaranSOOtorisasi` (`DBPENAWARANSO`, `dbmenu.OL = 1`; SA and Ezra also carry stray `IsOtorisasi2` flags, harmless because the handler is not
+a `LeveledOtorisasiHandler`). An older-style page: its controller had no header checks, no "already authorised" guard in the UPDATE, no
+`PenjagaTransaksi` trait, and its JS ignored `{ok:0, pesan}` replies. Done with the settled defaults (both flows, header + items + total, `IsBatal`
+for batal, desktop rights enforced). Specifics:
+
+- **Mirrors the desktop:** `maxol` from `dbmenu.OL` on approve, `maxol = -1` on batal, logs `oto` / `btloto` with source `PNW` (wrapped in
+  try/catch like the controller's old `catatLog`). **New:** the UPDATEs are guarded (`IsOtorisasi1 = 0` / `= 1`), so a double click now
+  answers "sudah diotorisasi oleh X" instead of silently re-stamping the approver and date.
+- **Summary:** customer, perihal (`KETERANGAN`), catatan (`VALIDITAS`), PIC, "Berlaku sampai" (`MasaBerlaku`); lines from `DBPENAWARANSODET`
+  (`nmsat`, `HARGA`, `NNETRP`). `PEMBAYARAN` is a numeric code with no known mapping, so it is not shown.
+- **No batal blocker (open decision):** the desktop never checked usage. A Penawaran is referenced by SO lines (`DBSODET.NOtawar` / `urutTawar`)
+  and PO lines (`DBPODET.nopnw`). `PenawaranSOOtorisasi::cancelBlocker()` returns null on purpose; put a check there if cancelling an
+  already-used penawaran should be refused.
+- **Blade:** `buttonMintaOtorisasi` / `buttonMintaBatalOtorisasi` / `PSO_HREF`; the JS now handles `res.pesan` replies (it did not before) and
+  batal is gated by `akses_isbatal`.
+- Files: `app/Otorisasi/PenawaranSOOtorisasi.php`, `config/otorisasi.php`, `PenawaranSOController.php`, `penawaranso.blade.php`.
+
+---
+
+## 10j. SO (`so`, `KODEMENU` 04021) — single level, flag only, with blacklist + plafon rules
+
+`SOOtorisasi` (`DBSO`, `dbmenu.OL = 1`, every SO has `MaxOL` 1 or -1, so it is **not** a `LeveledOtorisasiHandler`). Not the same shape as
+Penawaran SO (§10i): the old endpoints applied two rules, which now live in the handler so the desktop and the phone share them.
+
+- **Blacklist:** `DBCUSTSUPP.pblacklist = 1` refuses the approval ("Customer masuk dalam daftar blacklist"; old reply code 9).
+- **Plafon:** `SUM(DBSODET.nnet)` above the approver's `DBJABATAN.PlafonOtoSO` refuses **both approve and batal** when the approver is level 1
+  in the *old* `dbflmenu` table for `dbmenu.href = 'so'` (old reply code 2 / 0). Approvers at a higher level are not limited. The jabatan/level
+  is read from the old tables exactly like the controller did (SA and Ezra are DEPT.HEAD, 5 miliar, and both count as level 1 because
+  `IsOtorisasi1` is checked first, so the plafon applies to both). A user with no `DBFLPASS`/`DBJABATAN` row is refused with a message
+  (the old code crashed with a 500).
+- **How refusals work:** the handler throws `\DomainException`; on the phone the request stays `P` and the message is shown (§10g), on the
+  desktop the controller maps it to `tolak(...)` = `{ok:0, pesan}`. The page JS now reads `res.pesan` (the old codes 0/9/2 are still handled).
+- **Price-margin warnings:** the old `cekHargaOto` SQL moved to the static `SOOtorisasi::cekHarga()` (the controller endpoint `socekhargaoto`
+  calls it, so the desktop confirm dialog is unchanged). On the phone, items outside the margin ("Margin Kurang dari Harga Minimal" /
+  "Margin Lebih dari 100%") show as the read-only "Perhatian" card, as for PO (§10d). They never block Setujui.
+- **Mirrors the desktop:** `maxol` from `dbmenu.OL` on approve, `maxol = -1` on batal, logs `oto` / `btloto` with source `SO`. UPDATEs are now
+  guarded (`IsOtorisasi1 = 0` / `= 1`), so a double click answers "sudah diotorisasi oleh X".
+- **No batal blocker (decision with the user):** like the desktop, cancelling an SO that already has a Surat Jalan (`dbSPBDet.NoSo`), Invoice
+  (`dbInvoicePLDet.NoSO`), Uang Muka Jual (`DBUMJUAL.NOSO`), PO (`DBPO.NOSO`) or Perintah Retur Jual (`dbPRRJual.NOSO`) is allowed.
+  `SOOtorisasi::cancelBlocker()` returns null on purpose; put the check there if that changes.
+- **Summary:** customer, sales, PIC, No. Pesanan, keterangan, catatan, Pembayaran (`TIPEBAYAR` 0 CBD / 1 Kredit + `HARI` / 2 Termin, the
+  codes of the page's Tipe Bayar filter), Tgl Kirim, currency; lines from `DBSODET` (qty `SATUAN` x `HARGA`, `NNETRp`; cancelled lines are marked).
+- **Blade:** the page already has `SO_HREF = 'marketingso'` (used only for the header-save helper), so the otorisasi key is a separate
+  `SO_OTO_HREF = 'so'`. `buttonMintaOtorisasi` / `buttonMintaBatalOtorisasi`; batal is gated by `akses_isbatal` (was `IsOtorisasi1`).
+  "Open CBD" (`lockCBD`, `IsOtorisasi5`) and `updateCBD` are a different feature and were not touched.
+- Rights on `04021`: SA and Ezra hold `IsOtorisasi1` + `IsBatal` (Ezra also a stray level 2, SA a level 5 for Open CBD); Noel has none.
+- Files: `app/Otorisasi/SOOtorisasi.php`, `config/otorisasi.php`, `app/Http/Controllers/Marketing/SOController.php`,
+  `resources/views/marketing/so.blade.php`.
+
+---
+
+## 10k. Performa (`performance`, `KODEMENU` 04024) — single level, a second flag on `DBSO`
+
+`PerformanceOtorisasi extends SOOtorisasi` (`dbmenu.OL = 1`). "Oto Perf" is an extra authorisation on a **fully SO-authorised** SO that is CBD
+(`TIPEBAYAR = 0`) or has an advance (`DP > 0`); the flag `DBSO.OtoPerf` (bit) is what lets a Uang Muka Jual be made. Same answers as the other
+single-level pages (both flows, header + items + total, `IsBatal` for batal, desktop rights enforced). Specifics:
+
+- **Mirrors the desktop:** approve = `OtoPerf = 1, TglOtoPerf = GetDate(), UserOtoPerf`; batal clears the three columns. The page never wrote to
+  `dbLogFile` and never asked for a reason, so neither does the handler (the phone batal reason lives in `DBREQOTORISASI.ALASAN`).
+- **New guards:** the UPDATEs only touch the matching state (`OtoPerf = 0` / `= 1`), so a double click answers "sudah diotorisasi oleh X". Approve is
+  refused (`\DomainException`) when the SO is not fully authorised (`NeedOtorisasi = 1`, the same condition that hides it from the page's list).
+- **Batal blocker:** a Uang Muka Jual already exists for the SO (`dbumjual.noso`) — the desktop's own 422 text, now in `cancelBlocker()`, checked when the
+  request is created and again when it is approved; the desktop endpoint still answers `422` + that text (the page JS reads it).
+- **Summary:** inherited from SO (customer, sales, PIC, pembayaran, items, total) plus "Uang Muka (DP)" and "Otorisasi SO oleh"; no margin warnings, and none
+  of the SO blacklist/plafon rules (this page never used them). `SOOtorisasi::peringatanHarga` became `protected` so the subclass can switch it off.
+- **Blade:** the gate sits inside `submitAdd` (row key and modal button) and `submitBatalOto` (modal button), so a user without the right can still open the
+  detail first; `PERF_HREF = 'performance'` already was the menu key. The JS reads `res.pesan`.
+- Rights on `04024`: SA and Ezra hold `IsOtorisasi1` + `IsBatal`; Noel has none.
+- Files: `app/Otorisasi/PerformanceOtorisasi.php` (new), `SOOtorisasi.php` (one visibility change), `config/otorisasi.php`, `PerformanceController.php`,
+  `performance.blade.php`.
+
+---
+
+## 10l. Uang Muka Jual (`uangmukajual`, `KODEMENU` 04025) — single level, posts a journal
+
+`UangMukaJualOtorisasi` (`DBUMJUAL`, `dbmenu.OL = 1`): the Pembelian ACC shape (§10e). Same answers as the other single-level pages (both flows,
+`IsBatal` for batal, desktop rights enforced); no new questions were needed. Specifics:
+
+- **Shared table:** `DBUMJUAL` also holds Uang Muka Beli (`pBeli = 1`, ~5,700 rows vs 2 jual rows). Every handler query and UPDATE filters
+  `isnull(pBeli,0) = 0`; the controller treats a Beli number as "not found" (reply 5).
+- **Approve** = the page's UPDATE (`TGLOTO1, ISOTORISASI1, OTOUSER1`; **no** `MaxOL` change, as before) now guarded by `isnull(ISOTORISASI1,0) = 0`, then
+  `LoggingData('oto','UMJ')`, then `sp_ProsesPostingHutPiut` + `sp_ProsesPostingJurnalOto` (flag 1) **in the approver's working period**. Batal is the mirror
+  (`isnull(ISOTORISASI1,0) = 1`, `btloto`, flag 0). Both run inside one DB transaction (controller and phone service), so a posting failure undoes the flag.
+- **What the posting writes:** journal rows in `DBJurnalOto` (`Jenis = 'UMJ'`, `NoBuktiTrans` = the UMJ number; `NoBukti` there is the journal's own number).
+  The real posted UMJ has 2 rows; cancelling removes them, approving writes them again. The `vwPostJurnalOto` view yields nothing for a UMJ whose `NOJURNAL`
+  is NULL (the one unauthorised jual document in the data), so that document cannot show posting in a test.
+- **Batal blocker (already on the page, now shared):** a non-cancelled faktur has used the uang muka (`DBINVOICEPL.NoSPP/NUangMuka`, `DBJUAL.NobuktiUM`).
+  `UangMukaJualOtorisasi::invoicePemakai()` is static and also used by the controller's koreksi/hapus guard, so the SQL exists once. The desktop keeps its reply
+  `{status: 7, invoice}`; the phone request is refused when created and again when approved.
+- **Desktop replies are unchanged** (they are codes the page JS reads): `1` ok, `3` already authorised / not authorised, `4` empty reason, `5` not found,
+  `{status:7, invoice}`; a missing right answers `tolak(...)` = `{ok:0, pesan}`, which the JS now shows (it did not exist before).
+- **Summary:** a UMJ has no item lines, so the approve page shows two lines (DPP uang muka with the percentage and the SO's DPP; PPN) in the document currency
+  and the total in rupiah (`SUBTOTAL * KURS`), plus customer and SO number.
+- **Not checked, as on the desktop:** a locked period (`dblockperiode`) does not stop the Otorisasi button (only add / edit / delete ask `/ceklockperiode`).
+- **Operational note:** posting uses the *approver's* period (`dbperiode`), on the phone and on the desktop alike. Approving a UMJ from a month other than the
+  document's month writes no journal rows. Check the approver's working period when journals look missing.
+- Rights on `04025`: SA and Ezra hold `IsOtorisasi1` + `IsBatal`; Noel has none.
+- Files: `app/Otorisasi/UangMukaJualOtorisasi.php` (new), `config/otorisasi.php`, `UangMukaJualController.php`, `uangmukajual.blade.php`.
+
+---
+
+## 10m. Surat Jalan (`suratjalan`, `KODEMENU` 04031) — single level, flag only, batal VOIDS the SPB
+
+`SuratJalanOtorisasi` (`dbSPB`, `dbmenu.OL = 1`). `dbSPB` has no header trigger and the page's endpoints never called a posting procedure, so
+authorising is a plain flag (stock is handled by the `dbSPBDet` triggers when the document is saved). Same answers as the other single-level
+pages (both flows, header + items, `IsBatal` for batal, desktop rights enforced). Specifics:
+
+- **"Batal Otorisasi" voids the SPB.** The old UPDATE sets `IsBatal = 1, UserBatal, TglBatal` *and* clears the authorisation (`IsOtorisasi1 = 0, MaxOL = -1`);
+  authorising again clears the void (`IsBatal/UserBatal/TglBatal = NULL`). The handler does exactly that, so approving a batal request on the phone voids the
+  document. The approve page shows "Status: Dibatalkan oleh X" for a voided SPB.
+- **No batal blocker (decision with the user):** like the desktop, an SPB already used by an Invoice Penjualan (`dbInvoicePLDet.NoSPB`), a Retur Surat Jalan
+  (`DBRSPB` / `DBRSPBDet.NoSPB`) or a Retur Invoice (`DBRInvoicePL.NOSPB`) can still be voided. `SuratJalanOtorisasi::cancelBlocker()` returns null on purpose.
+- **Shared table:** `dbSPB` also holds POS/kasir documents; the page's list excludes `NoBukti like '%POS%'`, so every handler query and UPDATE does too
+  and the controller answers "tidak ditemukan" for such a number.
+- **Mirrors the desktop:** no `dbLogFile` entry and no reason column (the page never had either); the phone batal reason lives in `DBREQOTORISASI.ALASAN`. New: the UPDATEs are
+  guarded (`IsOtorisasi1 = 0` / `= 1`), so a double click answers "sudah diotorisasi oleh X" instead of re-stamping the approver/date.
+- **Summary:** customer, tipe (`IsFlag`: 0 SPB Barang Jadi, 1 Bahan Baku dan Lain-lain), SO number(s), gudang, ekspedisi, polisi, sopir, resi, container/seal, catatan;
+  lines from `dbSPBDet` (qty in the line's `NOSAT` unit, gross weight, gudang). No money value, so `total => null`.
+- **Blade:** `SJ_OTO_HREF = 'suratjalan'`, `buttonMintaOtorisasi` / `buttonMintaBatalOtorisasi`; the row buttons (`buttonOtorisasiSPB`, `buttonBatalOtorisasiSPB`) gate on
+  `akses_isotorisasi1` / `akses_isbatal` (batal used IsOtorisasi1 before). The JS used to show "Berhasil" whatever the server answered; it now shows `res.pesan` refusals.
+- Rights on `04031`: SA and Ezra hold `IsOtorisasi1` + `IsBatal`; Noel has none.
+- Files: `app/Otorisasi/SuratJalanOtorisasi.php` (new), `config/otorisasi.php`, `SuratJalanController.php`, `suratjalan.blade.php`.
+
+---
+
+## 10n. Retur Surat Jalan (`retursuratjalan`, `KODEMENU` 04032) — single level, flag only, active-period rule
+
+`ReturSuratJalanOtorisasi` (`dbRSPB`, `dbmenu.OL = 1`, no triggers, no posting). An already well-guarded page (readable string replies, `oto` / `btloto` log with source `RSJ`),
+so only the rights check, the UPDATE guard and the phone flow were missing. Done with the settled answers (both flows, header + items without a total, `IsBatal` for batal,
+desktop rights enforced); no new questions were needed. Specifics:
+
+- **Active-period rule (from the page):** approve and batal only work for a retur dated in the logged-in user's working month (`dbperiode`). The handler enforces it by throwing
+  `\DomainException('Retur SJ … di luar periode aktif Anda (MM/YYYY), tidak bisa …')`, so on the phone the request stays `P` and the approver is told which period to switch to.
+  **Practical effect:** SA and Ezra are in 11/2026, so they cannot approve a September retur from their phone until their working period matches it — exactly as on the desktop.
+- **Mirrors the desktop:** `MaxOL = 1` on approve, `maxol = -1` on batal, `LoggingData('oto' | 'btloto', 'RSJ')` (the batal reason goes to the log; on the phone it comes from the request).
+  New: the UPDATEs are guarded (`IsOtorisasi1 = 0` / `= 1`), so a double click answers "sudah diotorisasi oleh X".
+- **No batal blocker (open, as on SO / Surat Jalan):** the page never checked whether a retur is used further down (`DBUMJUAL.NoRetur`, `DBHUTPIUT.NoRetur`, `DBPERSEDIAANJALAN.NoRetur`).
+  `cancelBlocker()` returns null on purpose.
+- **Replies stay plain strings** (`1` = ok; anything else is shown by the JS with `alertify.warning(res)`), so this controller does not use the `PenjagaTransaksi` JSON `tolak()`.
+  The flag + log run inside one DB transaction.
+- **Summary:** customer, tipe (`IsFlag`), the original Surat Jalan with its date, gudang, polisi, container/seal, catatan; lines from `dbRSPBDet` (qty in the line's `NOSAT` unit,
+  gross weight). No money value, so `total => null`.
+- **Blade:** uses the page's existing `RSJ_HREF`; `buttonOto` (opens the detail first) and `buttonBatalOto` gate on `akses_isotorisasi1` / `akses_isbatal` (batal used IsOtorisasi1 before).
+- Rights on `04032`: SA and Ezra hold `IsOtorisasi1` + `IsBatal`; Noel has none.
+- Files: `app/Otorisasi/ReturSuratJalanOtorisasi.php` (new), `config/otorisasi.php`, `ReturSuratJalanController.php`, `retursuratjalan.blade.php`.
+
+---
+
+## 10o. Invoice Penjualan (`invoicepenjualan`, `KODEMENU` 04041) — single level, posts piutang + jurnal, batal VOIDS the invoice
+
+`InvoicePenjualanOtorisasi` (`dbInvoicePL`, `dbmenu.OL = 1`): the Pembelian ACC shape (§10e). Same answers as the other single-level pages (both flows, header + items + total, `IsBatal` for batal,
+desktop rights enforced). Specifics:
+
+- **Shared table:** `dbInvoicePL` also holds Invoice Jasa (`pJasa = 1`, menu `invoicejasa`) and kasir/POS invoices (`FlagKasir = 1`). The page's list excludes both, so every handler query and UPDATE does
+  too (`isnull(FlagKasir,0)=0 and isnull(pJasa,0)=0`); other numbers answer "sudah diotorisasi atau tidak ditemukan". When Invoice Jasa is converted, give it its own handler.
+- **Approve** = the page's UPDATE (`IsOtorisasi1, OtoUser1, TglOto1, MaxOL = 1`, clears `IsBatal/UserBatal/TglBatal`) guarded by `isnull(IsOtorisasi1,0) = 0`, then `LoggingData('oto','INVC')`, then
+  `sp_ProsesPostingHutPiut` + `sp_ProsesPostingJurnalOto` (flag 1) **in the approver's working period**. The page JS already warned that the flag could be saved while the posting failed; both endpoints
+  now run in one DB transaction, so a posting failure undoes the flag.
+- **"Batal Otorisasi" VOIDS the invoice** (as on Surat Jalan, §10m): `IsBatal = 1, UserBatal, TglBatal, IsOtorisasi1 = 0, MaxOL = -1`, `btloto` log with the reason, and the posting reversed (flag 0).
+  Approving a batal request on the phone therefore voids the invoice and removes its piutang and journal; authorising again un-voids it.
+- **No batal blocker (decision with the user):** like the desktop, an invoice already used by a pelunasan (`DBDPHDET.NoInvoice/NOFAKTUR`), a Nota Retur Penjualan (`DBINVOICERPJ.NoInvoice`), a Retur Invoice
+  (`DBRInvoicePL.NoInvoice`) or a Kredit/Debet Note (`DBKreditNoteDET` / `DBDebetNoteDET.NoInv`) can still be voided. `InvoicePenjualanOtorisasi::cancelBlocker()` returns null on purpose.
+- **What the posting writes** (verified on a real authorised invoice, rolled back): journal rows in `DBJurnalOto` (`Jenis = 'INVC'`, `NoBuktiTrans`) and a piutang row in `DBHUTPIUT` (`NoFaktur`); cancelling removes both,
+  approving writes them again. As with Uang Muka Jual (§10l), posting follows the *approver's* period (`dbperiode`), on the phone and on the desktop alike.
+- **Desktop replies are unchanged:** `1` ok, `{status: 0, pesan}` otherwise (the JS already read this shape); the new rights refusal uses the same shape.
+- **Summary:** customer, SO and Surat Jalan numbers (from the lines), pembayaran (`TipeBayar` 0 CBD / 1 Kredit + `HARI` / 2 Termin), no. pajak, currency, DPP, PPN, uang muka; lines from
+  `dbInvoicePLDet` (qty x harga, `NNetRp` incl. PPN); total = `vwRpDetInvoicePL.TotNetRp` (equals the sum of the lines).
+- **Blade:** uses the page's `IP_HREF`; the gates sit in `buttonOtorisasi` (opens the detail), `submitOtorisasi` (also the detail's button) and `buttonBatalOtorisasi` (`akses_isbatal`, was IsOtorisasi1).
+- Rights on `04041`: SA and Ezra hold `IsOtorisasi1` + `IsBatal`; Noel has none.
+- Files: `app/Otorisasi/InvoicePenjualanOtorisasi.php` (new), `config/otorisasi.php`, `InvoicePenjualanController.php`, `invoicepenjualan.blade.php`.
+
+---
+
+## 10p. Perintah Retur Jual (`perintahreturjual`, `KODEMENU` 04051) — single level, flag only, shared table with the (-) page
+
+`PerintahReturJualOtorisasi` (`dbPRRJual`, `dbmenu.OL = 1`, no triggers, no posting). The page was already hardened (refusals as `{status: 0, pesan}`, which its JS shows via `prjDitolak`, `oto` /
+`btloto` log with source `PRJ`, and a batal blocker), so only the rights check and the phone flow were missing. Settled answers (both flows, header + items without a total, `IsBatal` for batal,
+desktop rights enforced); no new questions were needed. Specifics:
+
+- **Shared table, template for the next page:** Perintah Retur Jual (`pMIN = 0`) and Perintah Retur Jual (-) (`pMIN = 1`, href `perintahreturjualminus`) live in `dbPRRJual`. Every query and UPDATE filters
+  `isnull(pMIN,0) = $pMin`, and the controller answers "tidak ditemukan" for a number of the other page. **The (-) page is then a one-line subclass:** `class PerintahReturJualMinusOtorisasi extends
+  PerintahReturJualOtorisasi { protected int $pMin = 1; }` plus its own config entry and controller/blade edits (its controller already has the same guarded UPDATEs).
+- **Batal blocker (already on the page, now shared):** the PRJ is used by a Retur Penjualan Gudang (`dbSPBRJualDet.NoPRRJUAL`). `PerintahReturJualOtorisasi::dipakaiGudang()` is static and also feeds
+  `getDetail` (`IsProses`) and `cancelBlocker()`, so the SQL exists once. The desktop keeps its message; a phone request is refused when created and again when approved.
+- **Mirrors the desktop:** `maxol = 1` on approve (guard `isnull(isOtorisasi1,0) <> 1`), `maxol = -1` on batal (guard `isOtorisasi1 = 1`), logs `oto` / `btloto`. Replies are unchanged: the number of rows on success,
+  `{status: 0, pesan}` otherwise (the new rights refusal uses the same shape).
+- **Summary:** customer, the invoice(s) being returned (from the lines, else `NoRPJ`), SO, gudang, catatan; lines from `dbPRRJualDet` (qty in the line's `NOSAT` unit, invoice number, `KETDET`). No money value, so `total => null`.
+- **Test data limits:** only 4 unauthorised PRJ exist (3 are old ones already used by a gudang retur) and no authorised PRJ is unused, so the happy path was tested on one document inside the rolled-back transaction.
+- **Blade:** uses the page's `PRJ_HREF`; `buttonOtorisasi` and `buttonBatalOtorisasi` gate on `akses_isotorisasi1` / `akses_isbatal` (batal used IsOtorisasi1 before).
+- Rights on `04051`: SA and Ezra hold `IsOtorisasi1` + `IsBatal`; Noel has none.
+- Files: `app/Otorisasi/PerintahReturJualOtorisasi.php` (new), `config/otorisasi.php`, `PerintahReturJualController.php`, `perintahreturjual.blade.php`.
 
 ---
 

@@ -43,6 +43,7 @@
   }
 </style>
     <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+    <link rel="stylesheet" href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
 <style>
   /* Isi tabel di semua tab dibuat sebaris (tidak turun ke bawah). Kolom yang panjang
      cukup digeser lewat scroll horizontal .po-table-wrap (overflow:auto). */

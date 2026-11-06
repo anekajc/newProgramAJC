@@ -10,11 +10,14 @@ use App\Models\DBFLMENU;
 use App\Models\NewPeriode;
 use App\Models\NewUsers;
 use Illuminate\Support\Facades\DB;
+use App\Services\OtorisasiService;
 
 // use App\Http\Controllers\NewMenuController;
 
 class ReturSuratJalanController extends Controller
 {
+  // Kunci menu di config/otorisasi.php dan DBMENUWEB.href.
+  private const HREF = 'retursuratjalan';
 
   public function index(Request $req) {
     $kodemenu = '041015';
@@ -414,41 +417,64 @@ if ($header) {
   }
 
 
+  // Hak: IsOtorisasi1 menu Retur Surat Jalan. User tanpa hak mengirim permintaan lewat tombol yang sama (otorisasirequest).
+  // UPDATE, aturan periode aktif dan log ada di ReturSuratJalanOtorisasi - satu sumber dengan otorisasi lewat HP.
   // Hasil: 1 = berhasil, selain itu teks pesan yang ditampilkan JS sebagai peringatan.
-  public function spOtorisasi ( Request $req) {
-    $cek = DB::connection('SML')->select("select Isnull(IsOtorisasi1,0) IsOtorisasi1, Tanggal from dbRSPB where NoBukti = :nobukti", ["nobukti" => $req->nobukti]);
+  public function spOtorisasi ( Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
+    if (!$oto->canApprove($username, self::HREF)) {
+      return 'Anda tidak berhak otorisasi retur surat jalan';
+    }
+    $cek = DB::connection('SML')->select("select Isnull(IsOtorisasi1,0) IsOtorisasi1, OtoUser1 from dbRSPB where NoBukti = :nobukti", ["nobukti" => $req->nobukti]);
     if (!$cek) {
       return 'Retur SJ ' . $req->nobukti . ' tidak ditemukan';
     }
     if ((int) $cek[0]->IsOtorisasi1 == 1) {
-      return 'Retur SJ ' . $req->nobukti . ' sudah diotorisasi';
-    }
-    if (!$this->dalamPeriodeAktif($cek[0]->Tanggal)) {
-      return 'Retur SJ ' . $req->nobukti . ' di luar periode aktif, tidak bisa diotorisasi';
+      return 'Retur SJ ' . $req->nobukti . ' sudah diotorisasi oleh ' . $cek[0]->OtoUser1;
     }
 
-    $res = DB::connection('SML')->update("update dbrSPB set IsOtorisasi1 = 1, OtoUser1 = :username , TglOto1 = getDate(), MaxOL = 1  where NoBukti = :nobukti", ["username" => \Auth::user()->username , "nobukti" => $req->nobukti ]);
-    app('App\Http\Controllers\GlobalController')->LoggingData('oto', 'RSJ', $req->nobukti, '', 0, 'dbrSPB');
+    try {
+      $res = DB::connection('SML')->transaction(fn () => $oto->handler(self::HREF)->approve($req->nobukti, $username));
+    } catch (\DomainException $e) {
+      return $e->getMessage();
+    }
+    if (!$res) {
+      return 'Retur SJ ' . $req->nobukti . ' sudah diotorisasi';
+    }
+    // Tutup permintaan push yang masih pending + kabari peminta.
+    $oto->closePending(self::HREF, $req->nobukti, $username);
+
     return 1;
   }
 
-  public function spBatalOtorisasi ( Request $req) {
+  // Hak: IsBatal menu Retur Surat Jalan (dulu IsOtorisasi1 di JS); keterangan (pket) wajib dan dicatat ke LoggingData('btloto').
+  public function spBatalOtorisasi ( Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
+    if (!$oto->canCancel($username, self::HREF)) {
+      return 'Anda tidak berhak batal otorisasi retur surat jalan';
+    }
     if (trim((string) $req->pket) == '') {
       return 'Keterangan batal otorisasi harus diisi';
     }
-    $cek = DB::connection('SML')->select("select Isnull(IsOtorisasi1,0) IsOtorisasi1, Tanggal from dbRSPB where NoBukti = :nobukti", ["nobukti" => $req->nobukti]);
+    $cek = DB::connection('SML')->select("select Isnull(IsOtorisasi1,0) IsOtorisasi1 from dbRSPB where NoBukti = :nobukti", ["nobukti" => $req->nobukti]);
     if (!$cek) {
       return 'Retur SJ ' . $req->nobukti . ' tidak ditemukan';
     }
     if ((int) $cek[0]->IsOtorisasi1 != 1) {
       return 'Retur SJ ' . $req->nobukti . ' belum diotorisasi';
     }
-    if (!$this->dalamPeriodeAktif($cek[0]->Tanggal)) {
-      return 'Retur SJ ' . $req->nobukti . ' di luar periode aktif, tidak bisa batal otorisasi';
-    }
 
-    $res = DB::connection('SML')->update("update dbrSPB set IsOtorisasi1 = 0, OtoUser1 = '' , TglOto1 = NULL , maxol = -1 where NoBukti = :nobukti ", [ "nobukti" => $req->nobukti ]);
-    app('App\Http\Controllers\GlobalController')->LoggingData('btloto', 'RSJ', $req->nobukti, $req->pket, 0, 'dbrSPB');
+    try {
+      $res = DB::connection('SML')->transaction(fn () => $oto->handler(self::HREF)->cancelApproval($req->nobukti, $username, trim((string) $req->pket)));
+    } catch (\DomainException $e) {
+      return $e->getMessage();
+    }
+    if (!$res) {
+      return 'Retur SJ ' . $req->nobukti . ' belum diotorisasi';
+    }
+    // Tutup permintaan batal yang masih pending + kabari peminta.
+    $oto->closePending(self::HREF, $req->nobukti, $username, OtorisasiService::BATAL);
+
     return 1;
   }
 

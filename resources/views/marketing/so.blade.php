@@ -9,6 +9,7 @@
 @section('css')
 
   <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+  <link rel="stylesheet" href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
 
   {{-- Modal pemilih (Pelanggan/Supplier/dst.) disamakan persis dengan modal pemilih menu Kas - lihat public/css/picker-kas.css. --}}
   <link rel="stylesheet" href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
@@ -582,7 +583,7 @@
     <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
     <input type="hidden" id="level" value="{!! $level !!}" />
 
-    
+
     <div class="po-kpi-strip" id="poKpiStrip"></div>
 
     <div class="card mb-3 tab-card">
@@ -906,7 +907,7 @@
                 <input type="text" data-a-sign="" data-a-dec="." data-a-sep="," class="form-control text-left input-partial-number" id="input_add_dp" value='0.00' onBlur="onChangeDP()">
               </div>
             </div>
-            
+
             <div class="col-md-4" style="margin-top:-10px;">
               <div class="form-group"><label>Sales</label></div>
             </div>
@@ -1088,7 +1089,7 @@
 
               <div id="dropdown_nopo" class="dropdown-menu w-100"></div>
             </div>
-            
+
               <div class="col-md-4" style="margin-top:-10px;"><div class="form-group"><label>Draft PO</label></div></div>
               <div class="col-md-8" style="margin-top:-10px;">
                 <select onchange="onChangeDraftPO()" id="input_add_draftpo" class="form-control form-select-lg mb-3" aria-label=".form-select-lg example">
@@ -2647,6 +2648,8 @@ let tempNoPenyerahan = {}
 let soCart = { 1 : [], 2 : [] } // 1 = #tabel7 (Penawaran), 2 = #tabel (SO)
 let soActiveUrut = 0
 const SO_HREF = 'marketingso'
+// Kunci menu otorisasi (DBMENUWEB.href = config/otorisasi.php), beda dengan SO_HREF di atas yang dipakai simpan header.
+const SO_OTO_HREF = 'so'
 const SO_TIPE_NAMA = { 0 : 'varchar', 1 : 'float', 2 : 'date', 3 : 'bool' }
 const SO_TIPE_KODE = { varchar : 0, float : 1, date : 2, bool : 3 }
 
@@ -4387,6 +4390,51 @@ function onChangeHeader1 (a,b,c) {
   console.log(c)
 }
 
+// User tanpa hak Otorisasi: kirim permintaan otorisasi ke approver ber-hak (push ke HP mereka).
+function buttonMintaOtorisasi (nobukti) {
+  var dlgMinta = alertify.confirm('Minta Otorisasi',
+    'Anda tidak berhak otorisasi. Kirim permintaan otorisasi SO ' + nobukti + ' ke approver?',
+    function () {
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: SO_OTO_HREF, nobukti },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {})
+  dlgMinta.elements.root.classList.add('ajs-app-buttons')
+}
+
+// User tanpa hak Batal: kirim permintaan batal otorisasi (dengan alasan) ke approver ber-hak Batal (push ke HP mereka).
+function buttonMintaBatalOtorisasi (nobukti) {
+  var dlgBatalOtorisasi = alertify.prompt('Minta Batal Otorisasi',
+    'Anda tidak berhak batal otorisasi. Masukkan alasan untuk meminta batal otorisasi SO ' + nobukti, '',
+    function (evt, value) {
+      var alasan = (value || '').trim()
+      if (alasan === '') {
+        alertify.warning('Alasan harus diisi.')
+        return false
+      }
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: SO_OTO_HREF, nobukti, tipe: 'B', alasan },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {});
+    dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
+}
+
 function buttonOtorisasi (nobukti) {
 
   console.log('buttonOtorisasi')
@@ -4395,7 +4443,7 @@ function buttonOtorisasi (nobukti) {
 
   let akses = $("#akses_isotorisasi1").val();
   if (!Number(akses)) {
-    alertify.warning('No access')
+    buttonMintaOtorisasi(nobukti)
     return
   }
 
@@ -4453,6 +4501,12 @@ function buttonOtorisasi (nobukti) {
                 },
                 success: function(res) {
      console.log ('update ottttttttoooooo',res)
+                  // Server menolak (blacklist / melebihi plafon / sudah diotorisasi / tidak berhak) -> {ok: 0, pesan}
+                  if (res && res.pesan) {
+                    alertify.warning(res.pesan)
+                    loadAll()
+                    return
+                  }
                   if (res == 0) {
                     alertify.warning("Tidak ada akses. Melebihi plafon")
                     return
@@ -4513,6 +4567,11 @@ function buttonOtorisasi (nobukti) {
           success: function(res) {
   console.log('-----------------------!')
 console.log(res)
+            if (res && res.pesan) {
+              alertify.warning(res.pesan)
+              loadAll()
+              return
+            }
             if (res == 0) {
               alertify.warning("Tidak ada akses. Melebihi plafon")
               return
@@ -4602,9 +4661,10 @@ function buttonBatalOtorisasi (nobukti) {
 
 
 
-  let akses = $("#akses_isotorisasi1").val();
+  // Hak batal = IsBatal (dulu IsOtorisasi1); tanpa hak -> kirim permintaan batal ke approver.
+  let akses = $("#akses_isbatal").val();
   if (!Number(akses)) {
-    alertify.warning('No access')
+    buttonMintaBatalOtorisasi(nobukti)
     return
   }
 
@@ -4635,6 +4695,12 @@ function buttonBatalOtorisasi (nobukti) {
           },
           success: function(res) {
 
+            // Server menolak (plafon / belum diotorisasi / tidak berhak) -> {ok: 0, pesan}
+            if (res && res.pesan) {
+              alertify.warning(res.pesan)
+              loadAll()
+              return
+            }
             if (res == 0) {
               alertify.warning("Tidak ada akses. Melebihi plafon")
               return

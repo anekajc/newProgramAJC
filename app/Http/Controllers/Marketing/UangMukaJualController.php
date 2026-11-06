@@ -10,11 +10,18 @@ use App\Models\NewPeriode;
 use App\Models\NewUsers;
 use Illuminate\Support\Facades\DB;
 use App\Models\VwPPL;
+use App\Otorisasi\UangMukaJualOtorisasi;
+use App\Services\OtorisasiService;
+use App\Traits\PenjagaTransaksi;
 
 // use App\Http\Controllers\NewMenuController;
 
 class UangMukaJualController extends Controller
 {
+  use PenjagaTransaksi;
+
+  // Kunci menu di config/otorisasi.php dan DBMENUWEB.href.
+  private const HREF = 'uangmukajual';
 
   public function index(Request $req) {
     $kodemenu = '041013';
@@ -386,103 +393,80 @@ order by A.NoBukti" , ["tglawal" => $tglawal, "tglawal2" => $tglawal, "tglakhir"
       // NUangMuka <> 0, seperti view REPORTOUTUMJual) dan DBJUAL.NobuktiUM.
       // UMJ seperti ini tidak boleh dibatal otorisasi / dikoreksi / dihapus.
       private function invoicePemakaiUMJ ($nobukti) {
-        $pakai = DB::connection('SML')->select("
-          select top 1 X.NOBUKTI from (
-            select A.NOBUKTI
-            from DBINVOICEPL A
-            join DBUMJUAL B on A.NoSPP = B.NOSO and isnull(B.pBeli,0) = 0
-            where B.NOBUKTI = ? and isnull(A.NUangMuka,0) <> 0 and isnull(A.IsBatal,0) = 0
-            union all
-            select J.NOBUKTI from DBJUAL J
-            where J.NobuktiUM = ? and isnull(J.ISBATAL,0) = 0
-          ) X", [$nobukti, $nobukti]);
-        return $pakai ? $pakai[0]->NOBUKTI : null;
+        return UangMukaJualOtorisasi::invoicePemakai($nobukti);
       }
 
 
-      public function spOto (Request $req) {
-        // $tanggal = date('Y-m-d H:i:s');
-     //    $tanggal = date('Y-m-d H:i:s');
-    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
-
-        // Update status otorisasi, log, posting piutang & posting jurnal dijalankan
-        // dalam satu transaksi: kalau posting gagal, status otorisasi ikut dibatalkan
-        // (tidak ada UMJ "sudah otorisasi" tanpa piutang/jurnal).
-        return DB::connection('SML')->transaction(function () use ($req, $periode) {
-
-        // Cegah otorisasi dua kali (layar belum di-refresh / dua user bersamaan) -
-        // otorisasi ulang akan memposting piutang & jurnal lagi. Baris dikunci
-        // sampai transaksi selesai.
-        $cekOto = DB::connection('SML')->select('select isnull(IsOtorisasi1,0) IsOtorisasi1 from dbumjual with (updlock, holdlock) where NOBUKTI = :nobukti', ["nobukti" => $req->nobukti]);
-        if (!$cekOto) {
+      // Hak: IsOtorisasi1 menu Uang Muka Jual. User tanpa hak mengirim permintaan lewat tombol yang sama (otorisasirequest).
+      // Flag + log + posting piutang/jurnal ada di UangMukaJualOtorisasi (satu sumber dengan otorisasi lewat HP) dan berjalan dalam
+      // satu transaksi: kalau posting gagal, status otorisasi ikut dibatalkan. UPDATE-nya hanya menyentuh UMJ yang belum diotorisasi,
+      // jadi klik ganda / dua user bersamaan tidak memposting dua kali. Balasan: 1 sukses, 3 sudah diotorisasi, 5 tidak ditemukan.
+      public function spOto (Request $req, OtorisasiService $oto) {
+        $username = \Auth::user()->username;
+        if (!$oto->canApprove($username, self::HREF)) {
+          return $this->tolak('Anda tidak berhak otorisasi uang muka jual');
+        }
+        $umj = $this->headerDokumen('DBUMJUAL', $req->nobukti);
+        if (!$umj || (int) $umj->pbeli === 1) {
           return 5;
         }
-        if ((int) $cekOto[0]->IsOtorisasi1 === 1) {
+
+        try {
+          $res = DB::connection('SML')->transaction(fn () => $oto->handler(self::HREF)->approve($req->nobukti, $username));
+        } catch (\DomainException $e) {
+          return $this->tolak($e->getMessage());
+        }
+        if (!$res) {
           return 3;
         }
-
-        $res = DB::connection('SML')->update("Update DBUMJUAL set TGLOTO1 = GetDate() ,  ISOTORISASI1 = 1,  OTOUSER1 = :username where nobukti= :nobukti", ["username" => \Auth::user()->username , "nobukti" => $req->nobukti ]);
-          $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData('oto','UMJ',$req->nobukti,'',0,'DBUMJUAL');
-	$values = [
-               '',
-               'DBUMJUAL',
-               $periode->bulan,
-               $periode->tahun,
-               $req->nobukti,
-               1
-          ];
-          DB::connection('SML')->statement('exec sp_ProsesPostingHutPiut ?,?,?,?,?,?', $values);
-          DB::connection('SML')->statement('exec sp_ProsesPostingJurnalOto ?,?,?,?,?,?', $values);
-
+        // Tutup permintaan push yang masih pending + kabari peminta.
+        $oto->closePending(self::HREF, $req->nobukti, $username);
 
         return 1;
-        });
       }
 
-      public function spBatalOto (Request $req) {
-        // $tanggal = date('Y-m-d H:i:s');
-     //    $tanggal = date('Y-m-d H:i:s');
-    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
-
+      // Hak: IsBatal menu Uang Muka Jual (dulu IsOtorisasi1 di JS); keterangan (pket) wajib dan dicatat ke LoggingData('btloto').
+      // Balasan: 1 sukses, 3 belum diotorisasi, 4 keterangan kosong, 5 tidak ditemukan, {status: 7, invoice} sudah dipakai faktur.
+      public function spBatalOto (Request $req, OtorisasiService $oto) {
+        $username = \Auth::user()->username;
+        if (!$oto->canCancel($username, self::HREF)) {
+          return $this->tolak('Anda tidak berhak batal otorisasi uang muka jual');
+        }
         if (trim((string) $req->pket) === '') {
           return 4;
         }
-
-        // Satu transaksi seperti spOto: kalau hapus posting gagal, status
-        // otorisasi tidak ikut berubah.
-        return DB::connection('SML')->transaction(function () use ($req, $periode) {
-
-        // Cegah batal otorisasi dua kali (layar belum di-refresh / dua user bersamaan).
-        $cekOto = DB::connection('SML')->select('select isnull(IsOtorisasi1,0) IsOtorisasi1 from dbumjual with (updlock, holdlock) where NOBUKTI = :nobukti', ["nobukti" => $req->nobukti]);
-        if (!$cekOto) {
+        $umj = $this->headerDokumen('DBUMJUAL', $req->nobukti);
+        if (!$umj || (int) $umj->pbeli === 1) {
           return 5;
         }
-        if ((int) $cekOto[0]->IsOtorisasi1 !== 1) {
+        if ((int) $umj->isotorisasi1 !== 1) {
           return 3;
         }
 
-        // Uang muka yang sudah dipotong di faktur penjualan tidak boleh dibatal
-        // otorisasi - faktur harus dibatalkan/dikoreksi dulu.
-        $invoice = $this->invoicePemakaiUMJ($req->nobukti);
-        if ($invoice) {
-          return ["status" => 7, "invoice" => $invoice];
+        // Satu transaksi seperti spOto: kalau hapus posting gagal, status otorisasi tidak ikut berubah. Faktur yang sudah memotong
+        // uang muka ini menolak batal (faktur harus dibatalkan/dikoreksi dulu) - dicek di dalam transaksi yang sama.
+        $handler = $oto->handler(self::HREF);
+        try {
+          $res = DB::connection('SML')->transaction(function () use ($handler, $req, $username) {
+            $invoice = UangMukaJualOtorisasi::invoicePemakai($req->nobukti);
+            if ($invoice) {
+              return ["status" => 7, "invoice" => $invoice];
+            }
+            return $handler->cancelApproval($req->nobukti, $username, trim((string) $req->pket));
+          });
+        } catch (\DomainException $e) {
+          return $this->tolak($e->getMessage());
         }
-
-        $res = DB::connection('SML')->update("Update DBUMJUAL set TGLOTO1 = NULL ,  ISOTORISASI1 = 0,  OTOUSER1 = '' where nobukti= :nobukti", [ "nobukti" => $req->nobukti ]);
-	 $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'btloto','UMJ',$req->nobukti,$req->pket,0,'DBUMJUAL');
-     $values = [
-      '',
-      'DBUMJUAL',
-      $periode->bulan,
-      $periode->tahun,
-      $req->nobukti,
-      0
-    ];
-    DB::connection('SML')->statement('exec sp_ProsesPostingHutPiut ?,?,?,?,?,?', $values);
-    DB::connection('SML')->statement('exec sp_ProsesPostingJurnalOto ?,?,?,?,?,?', $values);
+        if (is_array($res)) {
+          return $res;
+        }
+        if (!$res) {
+          return 3;
+        }
+        // Tutup permintaan batal yang masih pending + kabari peminta.
+        $oto->closePending(self::HREF, $req->nobukti, $username, OtorisasiService::BATAL);
 
         return 1;
-        });
       }
 
 

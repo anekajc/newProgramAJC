@@ -11,13 +11,19 @@ use App\Models\NewPeriode;
 use App\Models\NewUsers;
 use Illuminate\Support\Facades\DB;
 use App\Models\VwPPL;
+use App\Services\OtorisasiService;
+use App\Traits\PenjagaTransaksi;
 use Illuminate\Auth;
 
-  
+
 // use App\Http\Controllers\NewMenuController;
 
 class PenawaranSOController extends Controller
 {
+  use PenjagaTransaksi;
+
+  // Kunci menu di config/otorisasi.php dan DBMENUWEB.href.
+  private const HREF = 'penawaranso';
 
   public function index(Request $req) {
     $kodemenu = '04101';
@@ -289,32 +295,51 @@ order by NoBukti" , ["tglawal" => $tglawal , "tglakhir" => $tglakhir]);
 
 
 
-  public function updateOtorisasi (Request $req) {
+  // Hak: IsOtorisasi1 menu Penawaran SO. User tanpa hak mengirim permintaan lewat tombol yang sama (otorisasirequest).
+  // UPDATE + jejak audit ada di PenawaranSOOtorisasi - satu sumber dengan otorisasi lewat HP.
+  public function updateOtorisasi (Request $req, OtorisasiService $oto) {
     $username = \Auth::user()->username;
-     $maxOL = DB::connection('SML')->select("select * from dbmenu where href ='penawaranso'");
-     
-    $tanggal = date('Y-m-d H:i:s');
-  
+    if (!$oto->canApprove($username, self::HREF)) {
+      return $this->tolak('Anda tidak berhak otorisasi penawaran SO');
+    }
+    $pnw = $this->headerDokumen('DBPENAWARANSO', $req->nobukti);
+    if (!$pnw) {
+      return $this->tolak('Penawaran SO ' . $req->nobukti . ' tidak ditemukan, mungkin sudah dihapus.');
+    }
+    $res = $oto->handler(self::HREF)->approve($req->nobukti, $username);
+    if (!$res) {
+      return $this->tolak('Penawaran SO ' . $req->nobukti . ' sudah diotorisasi oleh ' . $pnw->otouser1 . '.');
+    }
+    // Tutup permintaan push yang masih pending + kabari peminta.
+    $oto->closePending(self::HREF, $req->nobukti, $username);
 
-        $res = DB::connection('SML')->update("update dbpenawaranso set isOtorisasi1 = 1, maxol = :maxol , OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username ,"maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
-         $this->catatLog('oto','PNW',$req->nobukti,'',0,'DBPENAWARANSO');
-
-return $res;
+    return $res;
   }
 
-  
 
-  public function updateBatalOtorisasi (Request $req) {
+
+  // Hak: IsBatal menu Penawaran SO (dulu IsOtorisasi1 di JS); keterangan wajib, dicatat ke LoggingData('btloto').
+  public function updateBatalOtorisasi (Request $req, OtorisasiService $oto) {
     $username = \Auth::user()->username;
-    $maxOL = DB::connection('SML')->select("select * from dbmenu where href = 'penawaranso'");
-
- 
-    $tanggal = date('Y-m-d H:i:s');
-    // return [$req->pket,$req->nobukti];
-        $res = DB::connection('SML')->update("update dbpenawaranso set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL where nobukti = :nobukti", ["nobukti" => $req->nobukti]);
-        $this->catatLog('btloto','PNW',$req->nobukti,$req->pket,0,'DBPENAWARANSO');
-
-
+    if (!$oto->canCancel($username, self::HREF)) {
+      return $this->tolak('Anda tidak berhak batal otorisasi penawaran SO');
+    }
+    if (trim((string) $req->pket) === '') {
+      return $this->tolak('Keterangan batal otorisasi harus diisi.');
+    }
+    $pnw = $this->headerDokumen('DBPENAWARANSO', $req->nobukti);
+    if (!$pnw) {
+      return $this->tolak('Penawaran SO ' . $req->nobukti . ' tidak ditemukan, mungkin sudah dihapus.');
+    }
+    if ((int) $pnw->isotorisasi1 !== 1) {
+      return $this->tolak('Penawaran SO ' . $req->nobukti . ' belum diotorisasi.');
+    }
+    $res = $oto->handler(self::HREF)->cancelApproval($req->nobukti, $username, trim((string) $req->pket));
+    if (!$res) {
+      return $this->tolak('Penawaran SO ' . $req->nobukti . ' sudah dibatalkan otorisasinya.');
+    }
+    // Tutup permintaan batal yang masih pending + kabari peminta.
+    $oto->closePending(self::HREF, $req->nobukti, $username, OtorisasiService::BATAL);
 
     return $res;
   }

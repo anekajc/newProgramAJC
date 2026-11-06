@@ -8,6 +8,14 @@ use App\Otorisasi\PembelianAccOtorisasi;
 use App\Otorisasi\PembelianPermintaanAgenOtorisasi;
 use App\Otorisasi\PembelianPermintaanNonAgenOtorisasi;
 use App\Otorisasi\PembelianPermintaanNonStockOtorisasi;
+use App\Otorisasi\PenawaranSOOtorisasi;
+use App\Otorisasi\PerformanceOtorisasi;
+use App\Otorisasi\SOOtorisasi;
+use App\Otorisasi\InvoicePenjualanOtorisasi;
+use App\Otorisasi\PerintahReturJualOtorisasi;
+use App\Otorisasi\ReturSuratJalanOtorisasi;
+use App\Otorisasi\SuratJalanOtorisasi;
+use App\Otorisasi\UangMukaJualOtorisasi;
 use App\Otorisasi\PerintahReturBeliOtorisasi;
 use App\Otorisasi\PurchaseOrderNonStockOtorisasi;
 use App\Otorisasi\PurchaseOrderOtorisasi;
@@ -81,6 +89,46 @@ return [
     'pembelianpermintaandebetnote' => [
         'label' => 'Debet Note',
         'handler' => DebetNoteOtorisasi::class,
+    ],
+
+    'penawaranso' => [
+        'label' => 'Penawaran SO',
+        'handler' => PenawaranSOOtorisasi::class,
+    ],
+
+    'so' => [
+        'label' => 'SO',
+        'handler' => SOOtorisasi::class,
+    ],
+
+    'performance' => [
+        'label' => 'Performa',
+        'handler' => PerformanceOtorisasi::class,
+    ],
+
+    'uangmukajual' => [
+        'label' => 'Uang Muka Jual',
+        'handler' => UangMukaJualOtorisasi::class,
+    ],
+
+    'suratjalan' => [
+        'label' => 'Surat Jalan',
+        'handler' => SuratJalanOtorisasi::class,
+    ],
+
+    'retursuratjalan' => [
+        'label' => 'Retur Surat Jalan',
+        'handler' => ReturSuratJalanOtorisasi::class,
+    ],
+
+    'invoicepenjualan' => [
+        'label' => 'Invoice Penjualan',
+        'handler' => InvoicePenjualanOtorisasi::class,
+    ],
+
+    'perintahreturjual' => [
+        'label' => 'Perintah Retur Jual',
+        'handler' => PerintahReturJualOtorisasi::class,
     ],
 
 ];

@@ -9,9 +9,13 @@ use App\Models\DBFLMENU;
 use App\Models\NewPeriode;
 use App\Models\NewUsers;
 use Illuminate\Support\Facades\DB;
+use App\Otorisasi\PerintahReturJualOtorisasi;
+use App\Services\OtorisasiService;
 
 class PerintahReturJualController extends Controller
 {
+  // Kunci menu di config/otorisasi.php dan DBMENUWEB.href.
+  private const HREF = 'perintahreturjual';
 
   public function index(Request $req) {
     $kodemenu = '04105';
@@ -133,12 +137,11 @@ class PerintahReturJualController extends Controller
 
   // PRJ yang sudah dipakai Retur Penjualan Gudang tidak boleh diubah / dibatal otorisasi.
   private function sudahDiprosesGudang ($nobukti) {
-    $cek = DB::connection('SML')->select("select top 1 1 ada from dbSPBRJualDet where NoPRRJUAL = cast(? as varchar(100))", [$nobukti]);
-    return count($cek) > 0;
+    return PerintahReturJualOtorisasi::dipakaiGudang((string) $nobukti);
   }
 
   private function headerPRJ ($nobukti) {
-    $cek = DB::connection('SML')->select("select NoBukti, isnull(IsOtorisasi1,0) IsOtorisasi1 from dbPRRJual where NoBukti = cast(? as varchar(100))", [$nobukti]);
+    $cek = DB::connection('SML')->select("select NoBukti, isnull(IsOtorisasi1,0) IsOtorisasi1, cast(isnull(pMIN,0) as int) pMIN from dbPRRJual where NoBukti = cast(? as varchar(100))", [$nobukti]);
     return $cek ? $cek[0] : null;
   }
 
@@ -263,46 +266,59 @@ class PerintahReturJualController extends Controller
 
   // Jawaban penolakan berbentuk {status: 0, pesan}; JS menampilkan pesannya lalu memuat
   // ulang data. Jawaban sukses tetap seperti semula (jumlah baris / 1).
-  public function spOtorisasi (Request $req) {
+  // Hak: IsOtorisasi1 menu Perintah Retur Jual. User tanpa hak mengirim permintaan lewat tombol yang sama (otorisasirequest).
+  // UPDATE + log ada di PerintahReturJualOtorisasi - satu sumber dengan otorisasi lewat HP.
+  public function spOtorisasi (Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
+    if (!$oto->canApprove($username, self::HREF)) {
+      return ["status" => 0, "pesan" => "Anda tidak berhak otorisasi perintah retur jual"];
+    }
     $header = $this->headerPRJ($req->nobukti);
-    if (!$header) {
+    if (!$header || (int) $header->pMIN !== 0) {
       return ["status" => 0, "pesan" => "Data PRJ " . $req->nobukti . " tidak ditemukan, mungkin sudah dihapus"];
     }
     if ((int) $header->IsOtorisasi1 === 1) {
       return ["status" => 0, "pesan" => "PRJ " . $req->nobukti . " sudah diotorisasi"];
     }
 
-    $tanggal = date('Y-m-d H:i:s');
-    // isnull(isOtorisasi1,0) <> 1: penjaga terakhir kalau dua user menekan Otorisasi bersamaan.
-    $res = DB::connection('SML')->update("update dbprrjual set isOtorisasi1 = 1, maxol = 1 , OtoUser1= :username , TglOto1 = :tanggal where nobukti = cast(:nobukti as varchar(100)) and isnull(isOtorisasi1,0) <> 1", ["username" => \Auth::user()->username , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
+    $res = $oto->handler(self::HREF)->approve($req->nobukti, $username);
     if (!$res) {
       return ["status" => 0, "pesan" => "PRJ " . $req->nobukti . " sudah diotorisasi"];
     }
-    $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto','PRJ',$req->nobukti,$req->pket,0,'DBPRRJUAL');
+    // Tutup permintaan push yang masih pending + kabari peminta.
+    $oto->closePending(self::HREF, $req->nobukti, $username);
 
     return $res;
   }
-  public function spBatalOtorisasi (Request $req) {
+
+  // Hak: IsBatal menu Perintah Retur Jual (dulu IsOtorisasi1 di JS); keterangan (pket) wajib dan dicatat ke LoggingData('btloto').
+  public function spBatalOtorisasi (Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
+    if (!$oto->canCancel($username, self::HREF)) {
+      return ["status" => 0, "pesan" => "Anda tidak berhak batal otorisasi perintah retur jual"];
+    }
     if (trim((string) $req->pket) === '') {
       return ["status" => 0, "pesan" => "Keterangan batal otorisasi harus diisi"];
     }
     $header = $this->headerPRJ($req->nobukti);
-    if (!$header) {
+    if (!$header || (int) $header->pMIN !== 0) {
       return ["status" => 0, "pesan" => "Data PRJ " . $req->nobukti . " tidak ditemukan, mungkin sudah dihapus"];
     }
     if ((int) $header->IsOtorisasi1 !== 1) {
       return ["status" => 0, "pesan" => "PRJ " . $req->nobukti . " belum diotorisasi"];
     }
-    if ($this->sudahDiprosesGudang($req->nobukti)) {
-      return ["status" => 0, "pesan" => "PRJ " . $req->nobukti . " sudah diproses Retur Penjualan Gudang, tidak bisa batal otorisasi"];
+    $handler = $oto->handler(self::HREF);
+    if ($blocker = $handler->cancelBlocker($req->nobukti)) {
+      return ["status" => 0, "pesan" => $blocker];
     }
 
-    $tanggal = date('Y-m-d H:i:s');
-    $res = DB::connection('SML')->update("update dbprrjual set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL where nobukti = cast(:nobukti as varchar(100)) and isOtorisasi1 = 1", [ "nobukti" => $req->nobukti]);
+    $res = $handler->cancelApproval($req->nobukti, $username, trim((string) $req->pket));
     if (!$res) {
       return ["status" => 0, "pesan" => "PRJ " . $req->nobukti . " belum diotorisasi"];
     }
-     $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'btloto','PRJ',$req->nobukti,$req->pket,0,'DBPRRJUAL');
+    // Tutup permintaan batal yang masih pending + kabari peminta.
+    $oto->closePending(self::HREF, $req->nobukti, $username, OtorisasiService::BATAL);
+
     return $res;
   }
 
