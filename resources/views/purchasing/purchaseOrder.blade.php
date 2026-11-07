@@ -4588,7 +4588,7 @@ function buttonMintaBatalOtorisasi (nobukti) {
           alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
         }
       })
-    },
+    }, 
     function () {});
     dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
 }

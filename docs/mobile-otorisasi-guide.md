@@ -30,7 +30,7 @@ Clicks the key icon on a row
                                          [Setujui]  → handler->approve()  (same UPDATE as the page)
                                          [Tolak]    → reason required → STATUS 'R'
 Push back: "disetujui" / "ditolak: ..." ◄─────────────────────┘
-Bell badge in header + /otorisasiinbox ("Perlu diproses" and "Permintaan saya")
+Bell badge in header + /otorisasiinbox ("Menunggu saya", "Permintaan saya" and "Riwayat" = the last 100 requests this user approved, otorisasi and batal; `OtorisasiService::approvedBy()`)
 Home page (mobile only) shows the same counts as a summary panel
 ```
 
@@ -832,6 +832,61 @@ desktop rights enforced); no new questions were needed. Specifics:
 - **Blade:** uses the page's `PRJ_HREF`; `buttonOtorisasi` and `buttonBatalOtorisasi` gate on `akses_isotorisasi1` / `akses_isbatal` (batal used IsOtorisasi1 before).
 - Rights on `04051`: SA and Ezra hold `IsOtorisasi1` + `IsBatal`; Noel has none.
 - Files: `app/Otorisasi/PerintahReturJualOtorisasi.php` (new), `config/otorisasi.php`, `PerintahReturJualController.php`, `perintahreturjual.blade.php`.
+
+---
+
+## 10q. Perintah Retur Jual (-) (`perintahreturjualminus`, `KODEMENU` 041051) — one-line subclass of §10p
+
+Done exactly as announced in §10p: `PerintahReturJualMinusOtorisasi extends PerintahReturJualOtorisasi { protected int $pMin = 1; }`, config entry `perintahreturjualminus` ("Perintah Retur Jual (-)"). Nothing else is new in the
+handler: summary, approve, batal blocker (gudang retur) and logs (`oto` / `btloto`, source `PRJ`) are inherited. No new questions were needed.
+
+- **Summary:** (-) documents have no invoice or SO (stored as `-`), so those header rows are skipped by the existing `'-'` checks; the card shows customer, gudang, catatan and the item lines.
+- **Controller:** `PerintahReturJualMinusController::spOtorisasi` / `spBatalOtorisasi` now check `canApprove` / `canCancel` (refusal `{status: 0, pesan}`, same shape the page already used), call the handler and
+  `closePending`. `headerPRJ` already filtered `pmin = 1`, so a plain-PRJ number answers "tidak ditemukan" here, and the plain page answers the same for a (-) number (verified both ways).
+  `sudahDiprosesGudang` delegates to `PerintahReturJualOtorisasi::dipakaiGudang()`. The `pket` argument the old `oto` log passed (always empty) is gone.
+- **Blade:** same two dialogs as §10p with `PRJ_HREF = 'perintahreturjualminus'`; `buttonOtorisasi` / `buttonBatalOtorisasi` gate on `akses_isotorisasi1` / `akses_isbatal` (batal used IsOtorisasi1 before).
+- **Test data:** one usable unauthorised (-) PRJ (`SML/PRJ/00001/0916`) and one authorised-but-used (`SML/PRJ/00001/0416`, for the blocker); no authorised unused (-) PRJ, so the plain batal path was covered by the phone flow.
+- Files: `app/Otorisasi/PerintahReturJualMinusOtorisasi.php` (new), `config/otorisasi.php`, `PerintahReturJualMinusController.php`, `perintahreturjualminus.blade.php`.
+
+---
+
+## 10r. Retur Penjualan Gudang (`returpenjualangudang`, `KODEMENU` 04053) — single level, flag only (SPR)
+
+`ReturPenjualanGudangOtorisasi` on `dbSPBRJual` (documents `SML/SPR/...`; no triggers, no posting; `dbmenu` has no row for 04053, so OL 1 is assumed from the code, which only uses `IsOtorisasi1`). The page was already
+hardened (refusals as `{status: 0, pesan}` read by `rpgDitolak`, `oto` / `btloto` log with source `RPJ`, a batal blocker), so only the rights check and the phone flow were missing. Settled answers apply; no new questions.
+
+- **What approval does:** sets `IsOtorisasi1 = 1`, `MaxOL = 1` (batal: `0` / `-1`), `OtoUser1`, `TglOto1`. Nota Retur Penjualan only pulls SPRs that are authorised (`vwBrowsOutSPBRJual`), which is why the blocker below exists.
+- **Batal blocker (already on the page, now shared):** the SPR was pulled into a Nota Retur Penjualan (`DBINVOICERPJDet.NOSPR`). `ReturPenjualanGudangOtorisasi::dipakaiNotaRetur()` is static and feeds both the controller's
+  `sudahDipakaiNotaRetur()` and `cancelBlocker()`; a phone request is refused when created and again when approved.
+- **Table filter:** every handler query/UPDATE adds `NoBukti like '%SPR%'` (the same filter the page's list uses). Today every row of `dbSPBRJual` is an SPR; the filter only protects against other document types appearing later.
+- **Summary:** customer, PRJ number(s) and invoice(s) from the lines (fallback `NoRPJ`), SO, gudang, vehicle, driver, catatan; lines from `dbSPBRJualDet` (qty in the line's `NOSAT` unit, invoice, reject qty). `HPP` is cost data and is not shown; `total => null`.
+- **Mirrors the desktop:** guard `isnull(isOtorisasi1,0) <> 1` on approve, `isOtorisasi1 = 1` on batal, same logs. Replies unchanged (rows on success, `{status: 0, pesan}` otherwise, including the new rights refusal).
+- **Blade:** uses the page's `RPG_HREF`; `buttonOtorisasiPenerimaan` / `buttonBatalOtorisasiPenerimaan` gate on `akses_isotorisasi1` / `akses_isbatal` (batal used IsOtorisasi1 before).
+- **Test data:** the two oldest unauthorised SPRs (2017, 2025) are already referenced by a Nota Retur row, so the test deleted those references inside the rolled-back transaction to exercise the unblocked batal path; the three authorised SPRs
+  are all used by a Nota Retur (blocker verified on `SML/SPR/00002/1026`). Verified afterwards that the references were back.
+- Rights on `04053`: SA holds `IsOtorisasi1` + `IsBatal`; Ezra the same (plus a stray level 2); Noel has none.
+- Files: `app/Otorisasi/ReturPenjualanGudangOtorisasi.php` (new), `config/otorisasi.php`, `ReturPenjualanGudangController.php`, `returpenjualangudang.blade.php`.
+
+---
+
+## 10s. Nota Retur Penjualan (`notareturpenjualan`, `KODEMENU` 04055) — single level, posts piutang + jurnal, batal VOIDS the nota
+
+`NotaReturPenjualanOtorisasi` on `DBINVOICERPJ` / `DBINVOICERPJDet` (documents `…/IVRJ/…`; only this page uses the table, so no extra filter; no triggers; `dbmenu` has no row for 04055, one level assumed from the code).
+Same shape as Invoice Penjualan (§10o): the page already had `{status: 0, pesan}` refusals (`nrpDitolak`), `oto` / `btloto` logs with source `IVRJ` and posting; only the rights check and the phone flow were missing. Settled answers
+(same-as-desktop, no new blocker) applied; no new questions.
+
+- **Posting:** `sp_ProsesPostingHutPiut` + `sp_ProsesPostingJurnalOto` with `('', 'DBINVOICERPJ', bulan, tahun, nobukti, 1|0)` in the **approver's working period**, as on the desktop. Rows land in `DBJurnalOto` (`Jenis = 'RPJ'`,
+  `NoBuktiTrans` = the nota) and `DBHUTPIUT` (`NoFaktur`; one baseline row per nota exists before approval, so approval takes it 1 → 2 and batal back to 1). A nota outside the approver's month posts nothing, so
+  approve on the phone with the period set to the nota's month. Handler and controller run inside `DB::connection('SML')->transaction`, so a failed posting undoes the flag.
+- **Batal VOIDS:** `IsBatal = 1`, `UserBatal`, `TglBatal`, `IsOtorisasi1 = 0`, `MaxOL = -1`, posting reversed; approving again clears `IsBatal` (the phone summary shows "Status: Dibatalkan oleh …" for a voided nota). `cancelBlocker()` is empty because the
+  page checks no usage (e.g. a pelunasan on the nota) - that is where a blocker would go.
+- **"Belum punya item":** the old pre-check moved into `approve()` as a `\DomainException` (service rolls back, keeps the request `P`, shows the message on the phone); the controller keeps the same refusal text.
+- **Summary:** customer, invoice asal, retur gudang (SPR) from the lines (fallback `NORPJ`), pembayaran (CBD / Kredit n hari / Termin), no. pajak, mata uang, DPP, PPN, catatan; lines show `Rp NNETRp` with `qty x harga` (qty in the line's `Nosat` unit: 1 = `Qnt` / `SAT_1`, otherwise `Qnt2` / `SAT_2`, as the print query does); total = sum of `NNETRp`.
+- **Mirrors the desktop:** guard `isnull(IsOtorisasi1,0) <> 1` on approve, `IsOtorisasi1 = 1` on batal. Replies unchanged: `1` on success, `{status: 0, pesan}` otherwise (the rights refusals use the same shape).
+- **Blade:** uses the page's `NRP_HREF`; `buttonOtorisasi` / `buttonBatalOtorisasi` gate on `akses_isotorisasi1` / `akses_isbatal` (batal used IsOtorisasi1 before).
+- **Test data:** the oldest nota (2015) and one 2025 nota are unauthorised (the 2025 one is already voided); the test set SA/Ezra/Noel's working period to the nota's month inside the transaction and proved posting and reversal on a real posted nota (`SML/IVRJ/00001/1025`: journal rows 2 → 0 → 2). A nota without items was made in-transaction by deleting its detail rows.
+- Rights on `04055`: SA holds `IsOtorisasi1` + `IsBatal`; Ezra the same (plus a stray level 2); Noel has none.
+- Files: `app/Otorisasi/NotaReturPenjualanOtorisasi.php` (new), `config/otorisasi.php`, `NotaReturPenjualanController.php`, `notareturpenjualan.blade.php`.
 
 ---
 

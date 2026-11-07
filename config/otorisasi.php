@@ -4,15 +4,19 @@ use App\Otorisasi\BankOtorisasi;
 use App\Otorisasi\DebetNoteOtorisasi;
 use App\Otorisasi\InvoiceReturBeliOtorisasi;
 use App\Otorisasi\KasOtorisasi;
+use App\Otorisasi\KreditNoteOtorisasi;
 use App\Otorisasi\PembelianAccOtorisasi;
 use App\Otorisasi\PembelianPermintaanAgenOtorisasi;
 use App\Otorisasi\PembelianPermintaanNonAgenOtorisasi;
 use App\Otorisasi\PembelianPermintaanNonStockOtorisasi;
+use App\Otorisasi\NotaReturPenjualanOtorisasi;
 use App\Otorisasi\PenawaranSOOtorisasi;
 use App\Otorisasi\PerformanceOtorisasi;
 use App\Otorisasi\SOOtorisasi;
 use App\Otorisasi\InvoicePenjualanOtorisasi;
+use App\Otorisasi\PerintahReturJualMinusOtorisasi;
 use App\Otorisasi\PerintahReturJualOtorisasi;
+use App\Otorisasi\ReturPenjualanGudangOtorisasi;
 use App\Otorisasi\ReturSuratJalanOtorisasi;
 use App\Otorisasi\SuratJalanOtorisasi;
 use App\Otorisasi\UangMukaJualOtorisasi;
@@ -129,6 +133,26 @@ return [
     'perintahreturjual' => [
         'label' => 'Perintah Retur Jual',
         'handler' => PerintahReturJualOtorisasi::class,
+    ],
+
+    'perintahreturjualminus' => [
+        'label' => 'Perintah Retur Jual (-)',
+        'handler' => PerintahReturJualMinusOtorisasi::class,
+    ],
+
+    'returpenjualangudang' => [
+        'label' => 'Retur Penjualan Gudang',
+        'handler' => ReturPenjualanGudangOtorisasi::class,
+    ],
+
+    'notareturpenjualan' => [
+        'label' => 'Nota Retur Penjualan',
+        'handler' => NotaReturPenjualanOtorisasi::class,
+    ],
+
+    'kreditnote' => [
+        'label' => 'Kredit Note',
+        'handler' => KreditNoteOtorisasi::class,
     ],
 
 ];

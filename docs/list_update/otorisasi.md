@@ -13,11 +13,11 @@ How to convert one more page: `docs/mobile-otorisasi-guide.md` (checklist in §3
 - The list was built from the live routes (controllers with an authorisation endpoint), so dead copies such as
   `*-copy.php`, `*(1105).php` or `*Old.php` are not counted.
 
-Progress: **19 converted, 33 to do** (8 Accounting, 17 Gudang, 6 Marketing, 2 Purchasing).
+Progress: **22 converted, 30 to do** (8 Accounting, 17 Gudang, 3 Marketing, 2 Purchasing).
 
 ---
 
-## Converted (19)
+## Converted (22)
 
 - [x] **Kas** — `kas` (0202)
 - [x] **Bank** — `bank` (0203)
@@ -38,6 +38,9 @@ Progress: **19 converted, 33 to do** (8 Accounting, 17 Gudang, 6 Marketing, 2 Pu
 - [x] **Retur Surat Jalan** — `retursuratjalan` (04032) — Otorisasi + Batal; approver's period must match the retur's month (§10n)
 - [x] **Invoice Penjualan** — `invoicepenjualan` (04041) — Otorisasi + Batal, posts piutang + jurnal; batal VOIDS the invoice, no blocker (§10o)
 - [x] **Perintah Retur Jual** — `perintahreturjual` (04051) — Otorisasi + Batal; batal blocked by Retur Penjualan Gudang; `$pMin = 0`, so the (-) page is a one-line subclass (§10p)
+- [x] **Perintah Retur Jual (-)** — `perintahreturjualminus` (04052) — Otorisasi + Batal; one-line subclass with `$pMin = 1`, same gudang-retur blocker (§10q)
+- [x] **Retur Penjualan Gudang** — `returpenjualangudang` (04053) — Otorisasi + Batal; flag only (SPR in `dbSPBRJual`); batal blocked by Nota Retur Penjualan (§10r)
+- [x] **Nota Retur Penjualan** — `notareturpenjualan` (04055) — Otorisasi + Batal, posts piutang + jurnal; batal VOIDS the nota (IsBatal = 1), no blocker (§10s)
 
 ---
 
@@ -46,13 +49,10 @@ Progress: **19 converted, 33 to do** (8 Accounting, 17 Gudang, 6 Marketing, 2 Pu
 - [ ] **Kelengkapan Dokumen** — `invoicepembelian` (0305) — OL 1 — `InvoicePembelianController` (`spOtorisasi1` / `spUnOtorisasi1`)
 - [ ] **Uang Muka Beli** — `uangmukabeli` (030205) — OL 1 — `UangMukaBeliController`
 
-## To do — Marketing (6)
+## To do — Marketing (3)
 
 - [ ] **Verifikasi Penawaran** — `verifikasipenawaran` (04012) — OL 1
 - [ ] **Verifikasi Barang** — `verifikasibarang` (04013) — **OL 2** (multi-level)
-- [ ] **Perintah Retur Jual (-)** — `perintahreturjualminus` (04052) — OL 1 — shares `dbPRRJual` (`pMIN = 1`): subclass `PerintahReturJualOtorisasi` with `protected int $pMin = 1` (§10p)
-- [ ] **Retur Penjualan Gudang** — `returpenjualangudang` (04053) — OL 1
-- [ ] **Nota Retur Penjualan** — `notareturpenjualan` (04055) — OL 1
 - [ ] **Kredit Note** — `kreditnote` (0406) — OL 1
 
 ## To do — Accounting (8)

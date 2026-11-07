@@ -62,10 +62,12 @@ a.oto-item:hover { border-color: #bfdbfe; color: inherit; text-decoration: none;
   <div class="oto-tabs">
     <button type="button" class="oto-tab" data-tab="pending">Menunggu saya<span class="n" id="otoNPending"></span></button>
     <button type="button" class="oto-tab" data-tab="saya">Permintaan saya<span class="n" id="otoNMine"></span></button>
+    <button type="button" class="oto-tab" data-tab="riwayat">Riwayat</button>
   </div>
 
   <div id="otoListPending"></div>
   <div id="otoListMine" style="display:none"></div>
+  <div id="otoListHistory" style="display:none"></div>
 </div>
 @endsection
 
@@ -82,10 +84,14 @@ a.oto-item:hover { border-color: #bfdbfe; color: inherit; text-decoration: none;
     return $('<div>').text(s == null ? '' : String(s)).html();
   }
 
-  function itemHtml(r, mine) {
-    var sub = mine
-      ? 'Diminta ' + esc(r.tglreq) + (r.actuser ? ' · ' + (r.status === 'R' ? 'ditolak' : 'diproses') + ' oleh ' + esc(r.actuser) + ' ' + esc(r.tglact) : '')
-      : 'Dari ' + esc(r.requser) + ' · ' + esc(r.tglreq);
+  // mode: 'pending' (Menunggu saya), 'mine' (Permintaan saya), 'history' (Riwayat: yang saya setujui)
+  function itemHtml(r, mode) {
+    var mine = mode === 'mine';
+    var sub = mode === 'history'
+      ? 'Dari ' + esc(r.requser) + ' · diminta ' + esc(r.tglreq) + '<br>Saya setujui ' + esc(r.tglact)
+      : mine
+        ? 'Diminta ' + esc(r.tglreq) + (r.actuser ? ' · ' + (r.status === 'R' ? 'ditolak' : 'diproses') + ' oleh ' + esc(r.actuser) + ' ' + esc(r.tglact) : '')
+        : 'Dari ' + esc(r.requser) + ' · ' + esc(r.tglreq);
     var note = r.status === 'R' && r.catatan ? '<div class="oto-item-note">Alasan: ' + esc(r.catatan) + '</div>' : '';
     // Permintaan batal otorisasi (tipe B): tandai di judul dan tampilkan alasan peminta
     var batal = r.tipe === 'B';
@@ -97,14 +103,15 @@ a.oto-item:hover { border-color: #bfdbfe; color: inherit; text-decoration: none;
       '<span class="oto-status ' + r.status + '">' + STATUS[r.status] + '</span></a>';
   }
 
-  function render(list, el, mine, empty) {
-    $(el).html(list.length ? list.map(function (r) { return itemHtml(r, mine); }).join('') : '<div class="oto-empty">' + empty + '</div>');
+  function render(list, el, mode, empty) {
+    $(el).html(list.length ? list.map(function (r) { return itemHtml(r, mode); }).join('') : '<div class="oto-empty">' + empty + '</div>');
   }
 
   function load() {
     $.get(URLS.loadAll, function (res) {
-      render(res.pending, '#otoListPending', false, 'Tidak ada permintaan yang menunggu otorisasi Anda');
-      render(res.mine, '#otoListMine', true, 'Anda belum pernah meminta otorisasi');
+      render(res.pending, '#otoListPending', 'pending', 'Tidak ada permintaan yang menunggu otorisasi Anda');
+      render(res.mine, '#otoListMine', 'mine', 'Anda belum pernah meminta otorisasi');
+      render(res.history, '#otoListHistory', 'history', 'Anda belum pernah menyetujui permintaan otorisasi');
       $('#otoNPending').text(res.pending.length ? '(' + res.pending.length + ')' : '');
       $('#otoNMine').text('');
       if (window.OtoPush) OtoPush.refreshCount();
@@ -115,10 +122,12 @@ a.oto-item:hover { border-color: #bfdbfe; color: inherit; text-decoration: none;
     $('.oto-tab').removeClass('active').filter('[data-tab="' + tab + '"]').addClass('active');
     $('#otoListPending').toggle(tab === 'pending');
     $('#otoListMine').toggle(tab === 'saya');
+    $('#otoListHistory').toggle(tab === 'riwayat');
   }
 
   $('.oto-tab').on('click', function () { showTab($(this).data('tab')); });
-  showTab(new URLSearchParams(location.search).get('tab') === 'saya' ? 'saya' : 'pending');
+  var tabAwal = new URLSearchParams(location.search).get('tab');
+  showTab(tabAwal === 'saya' || tabAwal === 'riwayat' ? tabAwal : 'pending');
   load();
 
   // Status notifikasi perangkat ini
