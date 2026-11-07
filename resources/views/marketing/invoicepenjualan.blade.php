@@ -8,6 +8,7 @@
 
 @section('css')
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+<link rel="stylesheet" href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
 <style>
 .toolbar {
   display: flex;
@@ -56,7 +57,7 @@
 }
 
 #content { padding-top: 12px; }
-/* 
+/*
 {{-- Everything below this line, up to the closing style tag, is copied verbatim
      from marketing/so.blade.php's own @section('css') (which itself copied it
      from purchaseOrder.blade.php) -- only the id list was retargeted from
@@ -617,8 +618,8 @@
 @section('content')
 <div id="page1" class="mainpage">
 
-  
-  
+
+
 
   <div id="printContainer" style="display:none">
 
@@ -822,7 +823,7 @@
         <!-- <div id="qrcode"></div> -->
         <div class="row">
           <div class="col-6 text-left">
-            
+
           </div>
           <div class="col-6 text-right">
             <button type="button" class="btn btn-danger btn-lg" style="
@@ -3566,7 +3567,7 @@ function openPrintModalAll(nobukti) {
     alertify.warning('Tidak ada invoice dipilih')
     return
   }
-  
+
   $('#modalListChecklistInvoice').modal('toggle')
   $('#modalPrintAll').modal('toggle')
 }
@@ -3886,12 +3887,59 @@ function buttonAdd (noso , namacust, kodecust, tglso , ppncust) {
 
 }
 
+// User tanpa hak Otorisasi: kirim permintaan otorisasi ke approver ber-hak (push ke HP mereka).
+function buttonMintaOtorisasi (nobukti) {
+  var dlgMinta = alertify.confirm('Minta Otorisasi',
+    'Anda tidak berhak otorisasi. Kirim permintaan otorisasi invoice penjualan ' + nobukti + ' ke approver?',
+    function () {
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: IP_HREF, nobukti },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {})
+  dlgMinta.elements.root.classList.add('ajs-app-buttons')
+}
+
+// User tanpa hak Batal: kirim permintaan batal otorisasi (dengan alasan) ke approver ber-hak Batal (push ke HP mereka).
+// Perhatian: batal otorisasi invoice penjualan membatalkan (void) invoice-nya dan membalik posting piutang/jurnal.
+function buttonMintaBatalOtorisasi (nobukti) {
+  var dlgBatalOtorisasi = alertify.prompt('Minta Batal Otorisasi',
+    'Anda tidak berhak batal otorisasi. Masukkan alasan untuk meminta batal otorisasi invoice penjualan ' + nobukti, '',
+    function (evt, value) {
+      var alasan = (value || '').trim()
+      if (alasan === '') {
+        alertify.warning('Alasan harus diisi.')
+        return false
+      }
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: IP_HREF, nobukti, tipe: 'B', alasan },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {});
+    dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
+}
+
 function buttonBatalOtorisasi (nobukti) {
   console.log('buttonBatalOtorisasi' , nobukti)
-  let akses = $("#akses_isotorisasi1").val();
+  // Hak batal = IsBatal (dulu IsOtorisasi1); tanpa hak -> kirim permintaan batal ke approver.
+  let akses = $("#akses_isbatal").val();
 
   if (!Number(akses)) {
-    alertify.warning('No access')
+    buttonMintaBatalOtorisasi(nobukti)
     return
   }
 
@@ -3961,7 +4009,7 @@ function submitOtorisasi (nobukti) {
   let akses = $("#akses_isotorisasi1").val();
 
   if (!Number(akses)) {
-    alertify.warning('No access')
+    buttonMintaOtorisasi(nobukti)
     return
   }
 
@@ -4011,7 +4059,7 @@ function buttonOtorisasi (nobukti) {
   let akses = $("#akses_isotorisasi1").val();
 
   if (!Number(akses)) {
-    alertify.warning('No access')
+    buttonMintaOtorisasi(nobukti)
     return
   }
 
@@ -4072,7 +4120,7 @@ function buttonOtorisasi (nobukti) {
         document.getElementById("input_otorisasi_hari").value = res[0].HARI
         document.getElementById("input_otorisasi_sales").value = res[0].NamaSls
         document.getElementById("input_otorisasi_uangmuka").value = parseFloat(res[0].nUangMuka).toFixed(2)
-        
+
         document.getElementById("input_otorisasix_disc").value = formatAngkaX(res[0].DISC)
         document.getElementById("input_otorisasix_discrp").value = formatAngkaX(res[0].DiscRp)
         document.getElementById("input_otorisasix_ppn").value = formatAngkaX(res[0].TotalPPn)
@@ -4502,7 +4550,7 @@ function buttonKoreksifirstadd (nobukti , isoto) {
 function buttonKoreksiDeletefirstadd (index, nobukti, urut) {
   let akses = $("#akses_ishapus").val();
 
-  
+
   console.log('buttonKoreksiDelete' , index, nobukti, urut )
 
 
@@ -4917,7 +4965,7 @@ function submitPrint3All () {
       // console.log(res[0][0].IsOtorisasi1)
     }
   })
-  
+
   // $('#modalPrintAll').modal('toggle')
 
   let css = `<style type="text/css">
@@ -5529,7 +5577,7 @@ function submitPrint3All () {
           <td style="border:none; text-align:left; font-weight:bold; padding:3px 4px;">IDR</td>
           <td style="border:none; text-align:right; font-weight:bold; padding:3px 4px;">${Math.round(Number(dataPrint[0].NdppRp || 0)).toLocaleString('id-ID')}</td>
         </tr>
-        <tr> 
+        <tr>
           <td colspan="3" style="border:none;"></td>
           <td style="border:none; text-align:left; font-weight:bold; padding:3px 4px;">PPN</td>
           <td style="border:none; text-align:left; font-weight:bold; padding:3px 4px;">IDR</td>
@@ -5690,7 +5738,7 @@ function submitPrintAll (nobukti) {
       }
     })
     // return
-    
+
   // $('#modalPrintAll').modal('toggle')
     let css = `<style type="text/css">
       body {
@@ -6386,7 +6434,7 @@ function submitPrintAll (nobukti) {
         });
 
 
-        
+
 
 
         // cek sini
@@ -6429,7 +6477,7 @@ function submitPrintAll (nobukti) {
     }
   })
   let tempPrintStr = ''
-  
+
   // $('#modalPrintAll').modal('toggle')
   let css = `<style type="text/css">
     body {
@@ -6506,7 +6554,7 @@ function submitPrintAll (nobukti) {
   let tanggalOnly = dataPrint[0].Tanggal.split(' ')[0].split('-').reverse().join('/');
   let tanggalJthTempo = dataPrint[0].JthTmpo ? dataPrint[0].JthTmpo.split(' ')[0].split('-').reverse().join('/') : '-';
 
-  
+
 
   hdr = `<div style="display: flex; width: 100%">
     <div class="pe-1" style="width: 60%">
@@ -6748,16 +6796,16 @@ function submitPrintAll (nobukti) {
     tempPrintStr += `</div>`
   });
 
-  
 
-  
+
+
   } )
   tempPrintStr += `</body></html>`
   w = window.open(' ')
   w.document.write(tempPrintStr)
   w.print()
   w.close()
-  
+
 }
 
   function submitPrintJBG (nobukti) {
@@ -6777,7 +6825,7 @@ function submitPrintAll (nobukti) {
       console.log(res[0][0])
     }
   })
- 
+
   let arrayDataPrint = []
   for (let i = 0; i < dataPrint.length; i += 20) {
     let tempArray = dataPrint.slice(i, i + 20)
@@ -8086,7 +8134,7 @@ function submitPrintKwitansiAll (nobukti) {
       console.log(res[0])
     }
   })
-  
+
   $('#modalPrintAll').modal('toggle')
   let html = ''
   dataPrintx.forEach((item, i, arr) => {
@@ -8210,7 +8258,7 @@ function submitPrintKwitansiAll (nobukti) {
     </style>
   </head>
   <body onload="window.print()">`
-  
+
 
    html += `
 

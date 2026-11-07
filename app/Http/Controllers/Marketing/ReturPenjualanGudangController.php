@@ -10,9 +10,13 @@ use App\Models\DBFLMENU;
 use App\Models\NewPeriode;
 use App\Models\NewUsers;
 use Illuminate\Support\Facades\DB;
+use App\Otorisasi\ReturPenjualanGudangOtorisasi;
+use App\Services\OtorisasiService;
 
 class ReturPenjualanGudangController extends Controller
 {
+  // Kunci menu di config/otorisasi.php dan DBMENUWEB.href.
+  private const HREF = 'returpenjualangudang';
 
   public function index(Request $req) {
     $kodemenu = '04105';
@@ -81,8 +85,7 @@ $tempPenerimaan = $this->queryPenerimaan($tglawal, $tglakhir, 0, 0);
   // mengambil SPR yang sudah diotorisasi (vwBrowsOutSPBRJual: NilaiOL=MaxOL), jadi SPR seperti
   // ini tidak boleh dibatalkan otorisasinya - pola sama dengan PRJ yang sudah dipakai gudang.
   private function sudahDipakaiNotaRetur ($nobukti) {
-    $cek = DB::connection('SML')->select("select top 1 1 ada from DBINVOICERPJDet where NOSPR = cast(? as varchar(100))", [$nobukti]);
-    return count($cek) > 0;
+    return ReturPenjualanGudangOtorisasi::dipakaiNotaRetur((string) $nobukti);
   }
 
   // Penjaga Edit/Hapus item & ubah header: SPR harus masih ada dan belum diotorisasi
@@ -330,7 +333,13 @@ order by B.Urut
 
   // Jawaban ditolak berbentuk {status:0, pesan} (dibaca rpgDitolak() di view); jawaban
   // sukses tetap seperti semula (jumlah baris).
-  public function spOtorisasi (Request $req) {
+  // Hak: IsOtorisasi1 menu Retur Penjualan Gudang. User tanpa hak mengirim permintaan lewat tombol yang sama (otorisasirequest).
+  // UPDATE + log ada di ReturPenjualanGudangOtorisasi - satu sumber dengan otorisasi lewat HP.
+  public function spOtorisasi (Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
+    if (!$oto->canApprove($username, self::HREF)) {
+      return ["status" => 0, "pesan" => "Anda tidak berhak otorisasi retur penjualan gudang"];
+    }
     $header = $this->headerSPR($req->nobukti);
     if (!$header) {
       return ["status" => 0, "pesan" => "Data SPR " . $req->nobukti . " tidak ditemukan, mungkin sudah dihapus"];
@@ -339,17 +348,22 @@ order by B.Urut
       return ["status" => 0, "pesan" => "SPR " . $req->nobukti . " sudah diotorisasi"];
     }
 
-    $tanggal = date('Y-m-d H:i:s');
-    // isnull(isOtorisasi1,0) <> 1: penjaga terakhir kalau dua user menekan Otorisasi bersamaan.
-    $res = DB::connection('SML')->update("update dbSPBRJUAL set isOtorisasi1 = 1, maxol = 1 , OtoUser1= :username , TglOto1 = :tanggal where nobukti = cast(:nobukti as varchar(100)) and isnull(isOtorisasi1,0) <> 1", ["username" => \Auth::user()->username , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
+    $res = $oto->handler(self::HREF)->approve($req->nobukti, $username);
     if (!$res) {
       return ["status" => 0, "pesan" => "SPR " . $req->nobukti . " sudah diotorisasi"];
     }
-    $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto','RPJ',$req->nobukti,'',0,'dbSPBRJUAL');
+    // Tutup permintaan push yang masih pending + kabari peminta.
+    $oto->closePending(self::HREF, $req->nobukti, $username);
 
     return $res;
   }
-  public function spBatalOtorisasi (Request $req) {
+
+  // Hak: IsBatal menu Retur Penjualan Gudang (dulu IsOtorisasi1 di JS); keterangan (pket) wajib dan dicatat ke LoggingData('btloto').
+  public function spBatalOtorisasi (Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
+    if (!$oto->canCancel($username, self::HREF)) {
+      return ["status" => 0, "pesan" => "Anda tidak berhak batal otorisasi retur penjualan gudang"];
+    }
     if (trim((string) $req->pket) === '') {
       return ["status" => 0, "pesan" => "Keterangan batal otorisasi harus diisi"];
     }
@@ -360,15 +374,18 @@ order by B.Urut
     if ((int) $header->IsOtorisasi1 !== 1) {
       return ["status" => 0, "pesan" => "SPR " . $req->nobukti . " belum diotorisasi"];
     }
-    if ($this->sudahDipakaiNotaRetur($req->nobukti)) {
-      return ["status" => 0, "pesan" => "SPR " . $req->nobukti . " sudah dipakai Nota Retur Penjualan, tidak bisa batal otorisasi"];
+    $handler = $oto->handler(self::HREF);
+    if ($blocker = $handler->cancelBlocker($req->nobukti)) {
+      return ["status" => 0, "pesan" => $blocker];
     }
 
-    $res = DB::connection('SML')->update("update dbSPBRJUAL set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL where nobukti = cast(:nobukti as varchar(100)) and isOtorisasi1 = 1", [ "nobukti" => $req->nobukti]);
+    $res = $handler->cancelApproval($req->nobukti, $username, trim((string) $req->pket));
     if (!$res) {
       return ["status" => 0, "pesan" => "SPR " . $req->nobukti . " belum diotorisasi"];
     }
-    $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'btloto','RPJ',$req->nobukti,trim((string) $req->pket),0,'dbSPBRJUAL');
+    // Tutup permintaan batal yang masih pending + kabari peminta.
+    $oto->closePending(self::HREF, $req->nobukti, $username, OtorisasiService::BATAL);
+
     return $res;
   }
 

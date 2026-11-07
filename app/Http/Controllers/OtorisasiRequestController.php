@@ -75,8 +75,8 @@ class OtorisasiRequestController extends Controller
         $username = \Auth::user()->username;
         $canApprove = $this->oto->canAct($username, $request->MENUPATH, $request->TIPE ?? OtorisasiService::OTORISASI, (int) $request->LEVELOTO);
 
-        // Selain approver, hanya peminta sendiri yang boleh melihat isinya.
-        if (! $canApprove && $request->REQUSER !== $username) {
+        // Selain approver, hanya peminta sendiri dan user yang menyetujuinya (tab Riwayat) yang boleh melihat isinya.
+        if (! $canApprove && $request->REQUSER !== $username && $request->ACTUSER !== $username) {
             abort(403);
         }
 
@@ -147,6 +147,7 @@ class OtorisasiRequestController extends Controller
         $res = [
             'pending' => array_map($map, $this->oto->pendingFor($username)),
             'mine' => array_map($map, $this->oto->requestsBy($username)),
+            'history' => array_map($map, $this->oto->approvedBy($username)),
         ];
 
         // Hasil permintaan saya dianggap terbaca begitu daftar ini dimuat.

@@ -37,6 +37,7 @@
     <link rel="stylesheet"
         href="{!! URL::asset('css/newmaster.css') !!}?v={{ @filemtime(base_path('public/css/newmaster.css')) ?: '1' }}">
     <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+    <link rel="stylesheet" href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -1036,6 +1037,13 @@
     <script src="{!! URL::asset('js/datatables.min.js') !!}"></script>
     <script src="{!! URL::asset('js/jquery-ui.min.js') !!}"></script>
     <script src="{!! URL::asset('js/qrcode.min.js') !!}"></script>
+    <script type="text/javascript">
+        // Modal Bootstrap 4 menarik fokus kembali ke dalam modal, sehingga kolom ketik di dialog alertify yang dibuka
+        // dari dalam modal (mis. alasan "Minta Batal Otorisasi") tidak bisa diisi. Layout master lain sudah mematikannya.
+        if ($.fn.modal && $.fn.modal.Constructor) {
+            $.fn.modal.Constructor.prototype._enforceFocus = function() {};
+        }
+    </script>
 
     <!-- Footer Scripts
  ============================================= -->

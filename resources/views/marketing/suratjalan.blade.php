@@ -557,7 +557,7 @@
        this page's tabs still run on the Bootstrap 4 tab plugin, matching the existing
        markup's own convention; changing it isn't part of this restyle). The commented-out
        "Out SO Booking" tab stays commented -- unreachable before this rebuild, unreachable
-       after it. --}} 
+       after it. --}}
   <div class="card mb-3 tab-card">
     <div class="card-body">
       <div class="nav nav-tabs border-0 custom-tabs" id="nav-tab" role="tablist">
@@ -3085,7 +3085,7 @@
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
-          
+
           <div class="row">
             <div class="col-4 text-left">
               <div class="form-group text-left">
@@ -3095,7 +3095,7 @@
 
           </div>
 
-          
+
           <div class="row">
             <div class="col-8">
               <div class="form-group">
@@ -3133,7 +3133,7 @@
 
           </div>
 
-            
+
           <div class="row">
             <div class="col-4 text-left">
               <div class="form-group text-left">
@@ -3175,7 +3175,7 @@
 
         <div class="container-fluid">
           <input type="hidden" name="noUrut" id="input_add_noUrut" value="" />
-          
+
           <div class="row">
             <div class="col-4 text-left">
               <div class="form-group text-left">
@@ -3185,7 +3185,7 @@
 
           </div>
 
-          
+
           <div class="row">
             <div class="col-8">
               <div class="form-group">
@@ -4956,13 +4956,62 @@ function setNewNoBukti (xppn) {
 }
 
 
+// Kunci menu otorisasi (DBMENUWEB.href = config/otorisasi.php).
+const SJ_OTO_HREF = 'suratjalan'
+
+// User tanpa hak Otorisasi: kirim permintaan otorisasi ke approver ber-hak (push ke HP mereka).
+function buttonMintaOtorisasi (nobukti) {
+  var dlgMinta = alertify.confirm('Minta Otorisasi',
+    'Anda tidak berhak otorisasi. Kirim permintaan otorisasi surat jalan ' + nobukti + ' ke approver?',
+    function () {
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: SJ_OTO_HREF, nobukti },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {})
+  dlgMinta.elements.root.classList.add('ajs-app-buttons')
+}
+
+// User tanpa hak Batal: kirim permintaan batal otorisasi (dengan alasan) ke approver ber-hak Batal (push ke HP mereka).
+// Perhatian: batal otorisasi surat jalan membatalkan (void) SPB-nya.
+function buttonMintaBatalOtorisasi (nobukti) {
+  var dlgBatalOtorisasi = alertify.prompt('Minta Batal Otorisasi',
+    'Anda tidak berhak batal otorisasi. Masukkan alasan untuk meminta batal otorisasi surat jalan ' + nobukti, '',
+    function (evt, value) {
+      var alasan = (value || '').trim()
+      if (alasan === '') {
+        alertify.warning('Alasan harus diisi.')
+        return false
+      }
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: SJ_OTO_HREF, nobukti, tipe: 'B', alasan },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {});
+    dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
+}
+
 function buttonOtorisasiSPB (NOBUKTI) {
   console.log('buttonOtorisasiSPB' , NOBUKTI)
 
   let akses = $("#akses_isotorisasi1").val();
 
   if (!Number(akses)) {
-    alertify.warning('No access')
+    buttonMintaOtorisasi(NOBUKTI)
     return
   }
 
@@ -4985,6 +5034,12 @@ function buttonOtorisasiSPB (NOBUKTI) {
             console.log('!', res)
             loadAll()
 
+            // Server menolak (tidak berhak / sudah diotorisasi / tidak ditemukan) -> {ok: 0, pesan}
+            if (res && res.pesan) {
+              alertify.warning(res.pesan)
+              return
+            }
+
             // lockFormAdd()
 
             alertify.success('Berhasil Otorisasi SPB')
@@ -5006,10 +5061,11 @@ function buttonOtorisasiSPB (NOBUKTI) {
 function buttonBatalOtorisasiSPB (NOBUKTI) {
   console.log('buttonBatalOtorisasiSPB' , NOBUKTI)
 
-  let akses = $("#akses_isotorisasi1").val();
+  // Hak batal = IsBatal (dulu IsOtorisasi1); tanpa hak -> kirim permintaan batal ke approver.
+  let akses = $("#akses_isbatal").val();
 
   if (!Number(akses)) {
-    alertify.warning('No access')
+    buttonMintaBatalOtorisasi(NOBUKTI)
     return
   }
 
@@ -5031,6 +5087,12 @@ function buttonBatalOtorisasiSPB (NOBUKTI) {
           success: function(res) {
             console.log('!', res)
             loadAll()
+
+            // Server menolak (tidak berhak / belum diotorisasi / tidak ditemukan) -> {ok: 0, pesan}
+            if (res && res.pesan) {
+              alertify.warning(res.pesan)
+              return
+            }
 
             // lockFormAdd()
 
@@ -5416,7 +5478,7 @@ function submitKirimTerima () {
     let tanggalKirim = document.getElementById("input_add_tanggalKirim").value
     let tanggalTerimaBarang = document.getElementById("input_add_tanggalTerimaBarang").value
     let tanggalTerima = document.getElementById("input_add_tanggalTerima").value
-  
+
     console.log(
       {
           tanggalKirim, tanggalTerimaBarang, tanggalTerima
@@ -5439,7 +5501,7 @@ function submitKirimTerima () {
       },
       success: function(res) {
           loadAll()
-          
+
 
   $("#formKirimTerima").modal('toggle')
 
@@ -5460,7 +5522,7 @@ function submitKirimTerimaAcc () {
 
     let _token = $("#_token").val();
     let tanggalKirimAcc = document.getElementById("input_add_tanggalKirimAcc").value
-  
+
     console.log(
       {
           tanggalKirimAcc
@@ -5481,7 +5543,7 @@ function submitKirimTerimaAcc () {
       },
       success: function(res) {
           loadAll()
-          
+
 
   $("#formKirimTerimaAcc").modal('toggle')
 
@@ -5521,7 +5583,7 @@ function buttonKirimTerima(kodeInvoice, kodeCust, tglKirim, tglTerimaBarang, tgl
   document.getElementById('input_add_tanggalKirim').value = formatTanggal(tglKirim)
   document.getElementById('input_add_tanggalTerimaBarang').value = formatTanggal(tglTerimaBarang)
   document.getElementById('input_add_tanggalTerima').value = formatTanggal(tglTerima)
-  
+
 
   $("#formKirimTerima").modal('toggle')
 
@@ -5536,7 +5598,7 @@ function buttonTerimaAcc (kodeInvoice, kodeCust, tglAcc){
   document.getElementById('titleSupplier2').innerHTML = kodeCust;
 
   document.getElementById('input_add_tanggalKirimAcc').value = formatTanggal(tglAcc)
-  
+
 
   $("#formKirimTerimaAcc").modal('toggle')
 

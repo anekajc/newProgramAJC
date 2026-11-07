@@ -10,6 +10,8 @@ use App\Models\NewPeriode;
 use App\Models\NewUsers;
 use Illuminate\Support\Facades\DB;
 use App\Models\VwPPL;
+use App\Services\OtorisasiService;
+use App\Traits\PenjagaTransaksi;
 
 
 
@@ -17,6 +19,10 @@ use App\Models\VwPPL;
 
 class SuratJalanController extends Controller
 {
+  use PenjagaTransaksi;
+
+  // Kunci menu di config/otorisasi.php dan DBMENUWEB.href.
+  private const HREF = 'suratjalan';
 
   public function index(Request $req) {
     $kodemenu = '041014';
@@ -1403,13 +1409,47 @@ order by B.Urut
 
 
 
-  public function spOtorisasi ( Request $req) {
-    $res = DB::connection('SML')->update("update dbSPB set IsOtorisasi1 = 1, OtoUser1 = :username , TglOto1 = getDate() , IsBatal = NULL, UserBatal = NULL , TglBatal = NULL , MaxOL = 1  where NoBukti = :nobukti", ["username" => \Auth::user()->username , "nobukti" => $req->NOBUKTI ]);
+  // Hak: IsOtorisasi1 menu Surat Jalan. User tanpa hak mengirim permintaan lewat tombol yang sama (otorisasirequest).
+  // UPDATE ada di SuratJalanOtorisasi - satu sumber dengan otorisasi lewat HP. Balasan sukses tetap 1; penolakan {ok:0, pesan}.
+  public function spOtorisasi ( Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
+    if (!$oto->canApprove($username, self::HREF)) {
+      return $this->tolak('Anda tidak berhak otorisasi surat jalan');
+    }
+    $spb = $this->headerDokumen('dbSPB', $req->NOBUKTI);
+    if (!$spb || stripos($req->NOBUKTI, 'POS') !== false) {
+      return $this->tolak('Surat jalan ' . $req->NOBUKTI . ' tidak ditemukan, mungkin sudah dihapus.');
+    }
+    $res = $oto->handler(self::HREF)->approve($req->NOBUKTI, $username);
+    if (!$res) {
+      return $this->tolak('Surat jalan ' . $req->NOBUKTI . ' sudah diotorisasi oleh ' . $spb->otouser1 . '.');
+    }
+    // Tutup permintaan push yang masih pending + kabari peminta.
+    $oto->closePending(self::HREF, $req->NOBUKTI, $username);
+
     return 1;
   }
 
-  public function spBatalOtorisasi ( Request $req) {
-    $res = DB::connection('SML')->update("update dbSPB set IsBatal = 1, UserBatal = :username , TglBatal = GETDATE() , IsOtorisasi1 = 0, OtoUser1 = '' , TglOto1 = NULL , maxol = -1 where NoBukti = :nobukti ", ["username" => \Auth::user()->username , "nobukti" => $req->NOBUKTI ]);
+  // Hak: IsBatal menu Surat Jalan (dulu IsOtorisasi1 di JS). Batal otorisasi di sini MEMBATALKAN (void) SPB - lihat SuratJalanOtorisasi.
+  public function spBatalOtorisasi ( Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
+    if (!$oto->canCancel($username, self::HREF)) {
+      return $this->tolak('Anda tidak berhak batal otorisasi surat jalan');
+    }
+    $spb = $this->headerDokumen('dbSPB', $req->NOBUKTI);
+    if (!$spb || stripos($req->NOBUKTI, 'POS') !== false) {
+      return $this->tolak('Surat jalan ' . $req->NOBUKTI . ' tidak ditemukan, mungkin sudah dihapus.');
+    }
+    if ((int) $spb->isotorisasi1 !== 1) {
+      return $this->tolak('Surat jalan ' . $req->NOBUKTI . ' belum diotorisasi.');
+    }
+    $res = $oto->handler(self::HREF)->cancelApproval($req->NOBUKTI, $username, '');
+    if (!$res) {
+      return $this->tolak('Surat jalan ' . $req->NOBUKTI . ' sudah dibatalkan otorisasinya.');
+    }
+    // Tutup permintaan batal yang masih pending + kabari peminta.
+    $oto->closePending(self::HREF, $req->NOBUKTI, $username, OtorisasiService::BATAL);
+
     return 1;
   }
 

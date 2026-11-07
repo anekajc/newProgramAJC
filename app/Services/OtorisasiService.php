@@ -541,6 +541,18 @@ class OtorisasiService
         ', ['username' => $username]);
     }
 
+    /**
+     * Riwayat persetujuan user ini (100 terakhir): permintaan otorisasi maupun batal otorisasi yang ia setujui, baik lewat HP
+     * maupun lewat tombol di halaman transaksi (closePending mengisi ACTUSER). Yang ditolak (R) tidak ikut. Persetujuan
+     * sebagian di handler bertingkat (PO) belum terekam di ACTUSER, hanya persetujuan yang menutup permintaan.
+     */
+    public function approvedBy(string $username): array
+    {
+        return DB::connection('SML')->select("
+            select top 100 * from DBREQOTORISASI where ACTUSER = :username and STATUS = 'A' order by TGLACT desc
+        ", ['username' => $username]);
+    }
+
     /** Angka badge lonceng: pending untuk saya + hasil permintaan saya yang belum dibaca. */
     public function badgeCount(string $username): array
     {

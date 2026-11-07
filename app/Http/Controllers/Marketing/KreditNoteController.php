@@ -10,6 +10,7 @@ use App\Models\DBFLMENU;
 use App\Models\NewPeriode;
 use App\Models\NewUsers;
 use Illuminate\Support\Facades\DB;
+use App\Services\OtorisasiService;
 
 
 class KreditNoteController extends Controller
@@ -19,6 +20,8 @@ class KreditNoteController extends Controller
 // sp_ProsesPostingHutPiut
 // sp_ProsesPostingJurnalOto
 {
+  // Kunci menu di config/otorisasi.php dan DBMENUWEB.href.
+  private const HREF = 'kreditnote';
 
   public function index(Request $req) {
     $kodemenu = '04110';
@@ -234,7 +237,14 @@ left outer join DBKOTA b on a.KOTA = b.KodeKota  where a.Jenis = 1");
   // Pengaman server (otorisasi/batal/simpan): dulu KN yang sudah diotorisasi user lain bisa
   // diotorisasi lagi (posting hutpiut/jurnal diulang), dibatalkan dua kali, atau itemnya
   // diubah/dihapus. Jawaban ditolak berbentuk {status:0, pesan}.
-  public function spOtorisasi (Request $req) {
+  // Hak: IsOtorisasi1 menu Kredit Note. User tanpa hak mengirim permintaan lewat tombol yang sama (otorisasirequest).
+  // UPDATE + posting piutang/jurnal ada di KreditNoteOtorisasi - satu sumber dengan otorisasi lewat HP; dijalankan dalam satu
+  // transaksi supaya kalau posting gagal flag-nya ikut batal.
+  public function spOtorisasi (Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
+    if (!$oto->canApprove($username, self::HREF)) {
+      return ["status" => 0, "pesan" => "Anda tidak berhak otorisasi kredit note"];
+    }
     $header = $this->headerKN($req->nobukti);
     if (!$header) {
       return ["status" => 0, "pesan" => "KN " . $req->nobukti . " tidak ditemukan, mungkin sudah dihapus"];
@@ -243,29 +253,28 @@ left outer join DBKOTA b on a.KOTA = b.KodeKota  where a.Jenis = 1");
       return ["status" => 0, "pesan" => "KN " . $req->nobukti . " sudah diotorisasi"];
     }
 
-    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
-    // TglOto1 memakai jam SQL Server (getdate), sama seperti tanggal KN; dulu date() PHP web server.
-    $res = DB::connection('SML')->update("update dbkreditnote set isOtorisasi1 = 1, maxol = 1 , OtoUser1= :username , TglOto1 = getdate() where nobukti = cast(:nobukti as varchar(100)) and isnull(isOtorisasi1,0) <> 1", ["username" => \Auth::user()->username , "nobukti" => $req->nobukti]);
+    try {
+      $res = DB::connection('SML')->transaction(fn () => $oto->handler(self::HREF)->approve($req->nobukti, $username));
+    } catch (\DomainException $e) {
+      return ["status" => 0, "pesan" => $e->getMessage()];
+    }
     if (!$res) {
       return ["status" => 0, "pesan" => "KN " . $req->nobukti . " sudah diotorisasi"];
     }
-
-     $values = [
-      '',
-      'DBKREDITNOTE',
-      $periode->bulan,
-      $periode->tahun,
-      $req->nobukti,
-      1
-    ];
-    DB::connection('SML')->statement('exec sp_ProsesPostingHutPiut ?,?,?,?,?,?', $values);
-    DB::connection('SML')->statement('exec sp_ProsesPostingJurnalOto ?,?,?,?,?,?', $values);
-
+    // Tutup permintaan push yang masih pending + kabari peminta.
+    $oto->closePending(self::HREF, $req->nobukti, $username);
 
     return $res;
   }
-  public function spBatalOtorisasi (Request $req) {
-    if (trim((string) $req->pket) === '') {
+
+  // Hak: IsBatal menu Kredit Note (dulu IsOtorisasi1 di JS); keterangan (pket) wajib dan dicatat ke LoggingData('btloto').
+  public function spBatalOtorisasi (Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
+    if (!$oto->canCancel($username, self::HREF)) {
+      return ["status" => 0, "pesan" => "Anda tidak berhak batal otorisasi kredit note"];
+    }
+    $pket = trim((string) $req->pket);
+    if ($pket === '') {
       return ["status" => 0, "pesan" => "Keterangan batal otorisasi harus diisi"];
     }
     $header = $this->headerKN($req->nobukti);
@@ -276,25 +285,16 @@ left outer join DBKOTA b on a.KOTA = b.KodeKota  where a.Jenis = 1");
       return ["status" => 0, "pesan" => "KN " . $req->nobukti . " belum diotorisasi"];
     }
 
-    $periode = app('App\Http\Controllers\GlobalController')->getPeriode();
-    $res = DB::connection('SML')->update("update dbkreditnote set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL where nobukti = cast(:nobukti as varchar(100)) and isOtorisasi1 = 1", [ "nobukti" => $req->nobukti]);
+    try {
+      $res = DB::connection('SML')->transaction(fn () => $oto->handler(self::HREF)->cancelApproval($req->nobukti, $username, $pket));
+    } catch (\DomainException $e) {
+      return ["status" => 0, "pesan" => $e->getMessage()];
+    }
     if (!$res) {
       return ["status" => 0, "pesan" => "KN " . $req->nobukti . " belum diotorisasi"];
     }
-
-
-     $values = [
-      '',
-      'DBKREDITNOTE',
-      $periode->bulan,
-      $periode->tahun,
-      $req->nobukti,
-      0
-    ];
-    DB::connection('SML')->statement('exec sp_ProsesPostingHutPiut ?,?,?,?,?,?', $values);
-    DB::connection('SML')->statement('exec sp_ProsesPostingJurnalOto ?,?,?,?,?,?', $values);
-
-    app('App\Http\Controllers\GlobalController')->LoggingData('btloto', 'KN', $req->nobukti, $req->pket, 0, 'DBKREDITNOTE');
+    // Tutup permintaan batal yang masih pending + kabari peminta.
+    $oto->closePending(self::HREF, $req->nobukti, $username, OtorisasiService::BATAL);
 
     return $res;
   }
