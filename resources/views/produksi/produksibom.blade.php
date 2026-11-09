@@ -872,7 +872,7 @@ function buttonAdd (kodebrg) {
 function buttonEditBom (kodebom, isdefault) {
   $('.showhide').hide();
 
-  document.getElementById('formAddBOMTitle').textContent = 'Edit BOM'
+  document.getElementById('formAddBOMTitle').textContent = 'BOM'
   document.getElementById('input_BOM_kodeBOM').value = kodebom
   document.getElementById('input_BOM_noUrut').value = kodebom.split('-').pop()
   document.getElementById('input_BOM_default').checked = !!Number(isdefault)
@@ -890,7 +890,7 @@ function buttonEditBom (kodebom, isdefault) {
 function buttonTambahDetail (kodebom, kodeprs) {
   $('.showhide').hide();
 
-  document.getElementById('formAddBOMTitle').textContent = 'Edit BOM'
+  document.getElementById('formAddBOMTitle').textContent = 'BOM'
   document.getElementById('input_BOM_kodeBOM').value = kodebom
   document.getElementById('input_BOM_noUrut').value = kodebom.split('-').pop()
   document.getElementById('input_BOM_default').checked = false

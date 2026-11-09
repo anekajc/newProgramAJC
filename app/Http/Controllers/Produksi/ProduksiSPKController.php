@@ -61,8 +61,8 @@ class ProduksiSPKController extends Controller
 
     if ($length >= 0) {
       $data = DB::connection('SML')->select("
-        SELECT NOBUKTI, TANGGAL, KodeMsn, Ket FROM (
-          SELECT a.NOBUKTI, a.TANGGAL, msn.KodeMsn, msn.Ket,
+        SELECT NOBUKTI, TANGGAL, KodeMsn, Ket, IsOtorisasi1, OtoUser1, TglOto1 FROM (
+          SELECT a.NOBUKTI, a.TANGGAL, msn.KodeMsn, msn.Ket, a.IsOtorisasi1, a.OtoUser1, a.TglOto1,
                  ROW_NUMBER() OVER (ORDER BY a.NOBUKTI ASC) as RowNum
           {$baseSql}
         ) sub
@@ -71,7 +71,7 @@ class ProduksiSPKController extends Controller
       ", array_merge($filterBindings, ['start' => $start + 1, 'end' => $start + $length]));
     } else {
       $data = DB::connection('SML')->select("
-        SELECT a.NOBUKTI, a.TANGGAL, msn.KodeMsn, msn.Ket {$baseSql} ORDER BY a.NOBUKTI ASC
+        SELECT a.NOBUKTI, a.TANGGAL, msn.KodeMsn, msn.Ket, a.IsOtorisasi1, a.OtoUser1, a.TglOto1 {$baseSql} ORDER BY a.NOBUKTI ASC
       ", $filterBindings);
     }
 
@@ -236,6 +236,35 @@ class ProduksiSPKController extends Controller
       return response()->json(['message' => 'SPK tidak ditemukan'], 404);
     }
     return response()->json($row);
+  }
+
+  // Otorisasi SPK -- pola sama dengan menu lain yang tabelnya cuma punya satu level (mis.
+  // MemorialKoreksiController::spOtorisasi()): UPDATE langsung header (DBSPK), level 1,
+  // MaxOL = 1. Dikembalikan jumlah baris terupdate (1 = berhasil); SPK yang sudah diotorisasi
+  // atau tidak ada tidak disentuh (0). Hak akses (IsOtorisasi1 menu) dicek di sisi tombol, sama
+  // seperti menu lain.
+  public function spOtorisasi(Request $req) {
+    $tanggal = date('Y-m-d 00:00:00');
+    return DB::connection('SML')->update(
+      "UPDATE DBSPK SET IsOtorisasi1 = 1, MaxOL = 1, OtoUser1 = :username, TglOto1 = :tanggal
+       WHERE NOBUKTI = :nobukti AND ISNULL(IsOtorisasi1, 0) = 0",
+      ['username' => \Auth::user()->username, 'tanggal' => $tanggal, 'nobukti' => $req->nobukti]
+    );
+  }
+
+  // Batal Otorisasi SPK -- keterangan (pket) wajib dari sisi tombol, dicatat lewat
+  // LoggingData('btloto') seperti menu lain. Ditolak kalau SPK sudah ditutup (IsCLose) -- SPK yang
+  // sudah ditutup tidak boleh dikoreksi lagi.
+  public function spBatalOtorisasi(Request $req) {
+    $res = DB::connection('SML')->update(
+      "UPDATE DBSPK SET IsOtorisasi1 = 0, MaxOL = -1, OtoUser1 = '', TglOto1 = NULL
+       WHERE NOBUKTI = :nobukti AND ISNULL(IsOtorisasi1, 0) = 1 AND ISNULL(IsCLose, 0) = 0",
+      ['nobukti' => $req->nobukti]
+    );
+    if ($res > 0) {
+      app('App\Http\Controllers\GlobalController')->LoggingData('btloto', 'SPK', $req->nobukti, $req->pket, 0, 'DBSPK');
+    }
+    return $res;
   }
 
   // Hapus SELURUH SPK (tombol Hapus di baris Daftar SPK) -- beda dari spSPKJD Choice='D' yang

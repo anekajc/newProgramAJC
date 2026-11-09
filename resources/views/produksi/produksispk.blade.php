@@ -27,6 +27,7 @@
 
   <input type="hidden" name="_token" id="_token" value="{!! csrf_token() !!}" />
   <input type="hidden" id="periode_bulan" value="{!! $periode->bulan !!}" />
+  <input type="hidden" id="akses_isotorisasi1" value="{!! $akses->IsOtorisasi1 !!}" />
   <input type="hidden" id="periode_tahun" value="{!! $periode->tahun !!}" />
 
   <div class="card">
@@ -49,65 +50,6 @@
     </div>
   </div>
 
-</div>
-
-<!-- Modal Detail SPK -- item dbSPKDet satu NoBukti, dipicu buttonDetail() di baris Daftar
-     SPK. Header (No Bukti/Tanggal/Kode Mesin/Mesin) diisi dari baris pertama hasil
-     produksispklistdetail (mesin DI SINI per baris, bisa beda dari mesin rollup di listing
-     utama kalau tiap item SPK pakai proses/mesin berbeda-beda). -->
-<div class="modal fade" id="formDetailSPK" tabindex="-1" role="dialog" aria-labelledby="formDetailSPKLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="formDetailSPKLabel">Detail SPK</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <div class="container-fluid">
-          <div class="row">
-            <div class="col-3"><strong>No. Bukti</strong><div id="spkDetailNoBukti">-</div></div>
-            <div class="col-3"><strong>Tanggal</strong><div id="spkDetailTanggal">-</div></div>
-            <div class="col-3"><strong>Kode Mesin</strong><div id="spkDetailKodeMesin">-</div></div>
-            <div class="col-3"><strong>Mesin</strong><div id="spkDetailMesin">-</div></div>
-          </div>
-        </div>
-        <hr>
-        <div class="container-fluid mt-2">
-          <div class="row">
-            <table class="pb-sub-table" style="width:100%;">
-              <thead>
-                <tr>
-                  <th>Kode Barang</th>
-                  <th>Nama Barang</th>
-                  <th>Kode Proses</th>
-                  <th>Qty</th>
-                  <th>Satuan</th>
-                  <th>Isi</th>
-                  <th>Tipe</th>
-                </tr>
-              </thead>
-              <tbody id="tabel_data_spkdetail">
-                <tr><td colspan="7" class="text-center text-muted">Memuat...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-lg btn-danger" style="
-            height: 30px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            transition: background-color 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" data-dismiss="modal">Tutup</button>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- Modal Tambah SPK -- header (DBSPK) dibuat implisit lewat Simpan Barang Jadi pertama
@@ -169,7 +111,7 @@
         <div class="container-fluid">
           <div class="row align-items-center">
             <div class="col-6"><strong>Barang Jadi</strong></div>
-            <div class="col-6 text-right">
+            <div class="col-6 text-right spk-aksi">
               <button type="button" class="btn btn-sm btn-chip-biru" onclick="spkBJTambah()">Tambah</button>
             </div>
           </div>
@@ -177,7 +119,7 @@
         <div class="container-fluid mt-2">
           <table class="pb-sub-table" style="width:100%;">
             <thead>
-              <tr><th>Kode Barang Jadi</th><th>Nama Barang Jadi</th><th>Qnt</th><th>Sat</th><th>BOM</th><th>Actions</th></tr>
+              <tr><th>Kode Barang Jadi</th><th>Nama Barang Jadi</th><th>Qnt</th><th>Sat</th><th>BOM</th><th class="spk-aksi">Actions</th></tr>
             </thead>
             <tbody id="tabel_data_spkbj"><tr><td colspan="6" class="text-center text-muted">Belum ada Barang Jadi</td></tr></tbody>
           </table>
@@ -226,7 +168,7 @@
         <div class="container-fluid">
           <div class="row align-items-center">
             <div class="col-6"><strong>Bahan Baku</strong></div>
-            <div class="col-6 text-right">
+            <div class="col-6 text-right spk-aksi">
               <button type="button" class="btn btn-sm btn-chip-biru" onclick="spkDetTambah()">Tambah</button>
             </div>
           </div>
@@ -234,7 +176,7 @@
         <div class="container-fluid mt-2">
           <table class="pb-sub-table" style="width:100%;">
             <thead>
-              <tr><th>Kode Barang</th><th>Nama Barang</th><th>Kode Proses</th><th>Qnt</th><th>Sat</th><th>Actions</th></tr>
+              <tr><th>Kode Barang</th><th>Nama Barang</th><th>Kode Proses</th><th>Qnt</th><th>Sat</th><th class="spk-aksi">Actions</th></tr>
             </thead>
             <tbody id="tabel_data_spkdet"><tr><td colspan="6" class="text-center text-muted">Belum ada Bahan Baku</td></tr></tbody>
           </table>
@@ -402,6 +344,15 @@
     border-bottom: 1px solid #e5e7eb;
   }
   .pb-sub-table tbody tr:last-child td { border-bottom: none; }
+
+  /* Mode Detail (modal #formAddSPK dibuka hanya-baca lewat buttonDetail()) -- semua yang
+     bertanda .spk-aksi (tombol Tambah, kolom Actions) dan form input Barang Jadi/Bahan Baku
+     disembunyikan, sisanya sama persis dengan tampilan Koreksi. */
+  #formAddSPK.spk-lihat .spk-aksi,
+  #formAddSPK.spk-lihat #spkBJForm,
+  #formAddSPK.spk-lihat #spkDetForm {
+    display: none !important;
+  }
 </style>
 
 @endsection
@@ -420,6 +371,9 @@ const SPK_KOLOM = [
   ['TANGGAL',  'Tanggal',    1, 'date',    0, 0],
   ['KodeMsn',  'Kode Mesin', 1, 'varchar', 0, 0],
   ['Ket',      'Mesin',      1, 'varchar', 0, 0],
+  ['IsOtorisasi1', 'Oto',     1, 'varchar', 0, 0],
+  ['OtoUser1', 'User Oto',   1, 'varchar', 0, 0],
+  ['TglOto1',  'Tgl Oto',    1, 'date',    0, 0],
 ]
 
 // Kolom DataTables disusun ulang dari kolom yang tampil tiap kali kolom digeser/disembunyikan
@@ -445,68 +399,99 @@ function loadAll () {
       type: "GET",
     },
     columns: MasterList.kolomServer(cols, function (data, type, row) {
-      return `
-        <div class="action-buttons-wrap">
-          <button title="Detail" class="btn-action-sm btn-action-warning" type="button" onclick="buttonDetail('${row.NOBUKTI}')"><i class="bi bi-info"></i></button>
+      // Pola sama dengan menu lain: SPK yang sudah diotorisasi hanya bisa dilihat (Detail) atau
+      // dibatalkan otorisasinya (tombol kunci merah); yang belum, boleh Edit/Hapus dan Otorisasi
+      // (tombol kunci cyan).
+      let sudahOto = Number(row.IsOtorisasi1) === 1
+      let aksi = `<button title="Detail" class="btn-action-sm btn-action-warning" type="button" onclick="buttonDetail('${row.NOBUKTI}')"><i class="bi bi-info"></i></button>`
+      if (sudahOto) {
+        aksi += `<button title="Batal Otorisasi" class="btn-action-sm btn-action-danger" type="button" onclick="buttonBatalOtorisasi('${row.NOBUKTI}')"><i class="bi bi-key"></i></button>`
+      } else {
+        aksi += `
           <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${row.NOBUKTI}')"><i class="bi bi-pen"></i></button>
           <button title="Hapus" class="btn-action-sm btn-action-danger" type="button" onclick="buttonDelete('${row.NOBUKTI}')"><i class="bi bi-trash"></i></button>
-        </div>
-      `;
+          <button title="Otorisasi" class="btn-action-sm btn-action-info" type="button" onclick="buttonOtorisasi('${row.NOBUKTI}')"><i class="bi bi-key"></i></button>`
+      }
+      return `<div class="action-buttons-wrap">${aksi}</div>`;
     }, {
       KodeMsn: { defaultContent: '-' },
       Ket: { defaultContent: '-' },
+      IsOtorisasi1: {
+        render: function (data) {
+          return '<input type="checkbox" disabled' + (Number(data) === 1 ? ' checked' : '') + '>'
+        },
+        className: 'text-center',
+        searchable: false,
+      },
+      OtoUser1: { defaultContent: '' },
     }),
   }));
 
   MasterList.selesai('#tabel')
 }
 
-// Modal Detail -- item dbSPKDet satu NoBukti (ProduksiSPKController::listDetail()).
-function buttonDetail (nobukti) {
-  document.getElementById('spkDetailNoBukti').textContent = nobukti
-  document.getElementById('spkDetailTanggal').textContent = '-'
-  document.getElementById('spkDetailKodeMesin').textContent = '-'
-  document.getElementById('spkDetailMesin').textContent = '-'
-  document.getElementById('tabel_data_spkdetail').innerHTML = '<tr><td colspan="7" class="text-center text-muted">Memuat...</td></tr>'
-  $('#formDetailSPK').modal('show')
+// Otorisasi langsung dari baris tabel (tanpa membuka form, tanpa dialog konfirmasi) -- pola
+// sama dengan buttonOtorisasiRow() di memorialkoreksi. ProduksiSPKController::spOtorisasi().
+function buttonOtorisasi (nobukti) {
+  if (!Number($('#akses_isotorisasi1').val())) {
+    alertify.warning('No access')
+    return
+  }
 
   $.ajax({
-    url: "{!! url('produksispklistdetail') !!}",
-    type: "get",
-    data: { nobukti },
+    url: "{!! url('produksispkspotorisasi') !!}",
+    type: "post",
+    data: { _token: $('#_token').val(), nobukti },
     success: function (res) {
-      if (res.length) {
-        let d = res[0].TANGGAL ? new Date(res[0].TANGGAL) : null
-        document.getElementById('spkDetailTanggal').textContent = d
-          ? String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear()
-          : '-'
-        document.getElementById('spkDetailKodeMesin').textContent = res[0].KodeMsn || '-'
-        document.getElementById('spkDetailMesin').textContent = res[0].Ket || '-'
+      if (res > 0) {
+        alertify.success('Berhasil otorisasi')
+        loadAll()
+      } else {
+        alertify.warning('Gagal otorisasi (SPK sudah diotorisasi atau tidak ditemukan)')
       }
-
-      let rowTable = ''
-      res.forEach((item) => {
-        rowTable += `
-          <tr>
-            <td>${item.KODEBRG ?? ''}</td>
-            <td>${item.NamaBrg ?? ''}</td>
-            <td>${item.KodePrs ? item.KodePrs + (item.NamaPrs ? ' - ' + item.NamaPrs : '') : '-'}</td>
-            <td>${item.QNT ?? ''}</td>
-            <td>${item.SATUAN ?? ''}</td>
-            <td>${item.ISI ?? ''}</td>
-            <td>${item.KetTipe ?? ''}</td>
-          </tr>
-        `
-      });
-      if (!res.length) {
-        rowTable = '<tr><td colspan="7" class="text-center text-muted">Belum ada detail</td></tr>'
-      }
-      document.getElementById('tabel_data_spkdetail').innerHTML = rowTable
     },
     error: function () {
-      alertify.error('Gagal memuat Detail SPK')
+      alertify.warning('Terjadi kesalahan silahkan refresh browser')
     }
-  });
+  })
+}
+
+// Batal otorisasi -- keterangan wajib diisi, dikirim sebagai 'pket' dan dicatat LoggingData di
+// ProduksiSPKController::spBatalOtorisasi() (pola sama dengan menu lain).
+function buttonBatalOtorisasi (nobukti) {
+  if (!Number($('#akses_isotorisasi1').val())) {
+    alertify.warning('No access')
+    return
+  }
+
+  alertify.prompt('Masukkan keterangan batal otorisasi nomor   ' + nobukti, '',
+    function (evt, value) {
+      let pket = (value || '').trim()
+      if (pket == '') {
+        alertify.warning('Keterangan harus diisi.')
+        return false
+      }
+
+      $.ajax({
+        url: "{!! url('produksispkspbatalotorisasi') !!}",
+        type: "post",
+        data: { _token: $('#_token').val(), nobukti, pket },
+        success: function (res) {
+          if (res > 0) {
+            alertify.success('Berhasil batal otorisasi')
+            loadAll()
+          } else {
+            alertify.warning('Gagal batal otorisasi (SPK belum diotorisasi atau sudah ditutup)')
+          }
+        },
+        error: function () {
+          alertify.warning('Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {
+      alertify.error('Action cancelled')
+    })
 }
 
 // Separator ribuan buat Quantity/Qnt -- disalin dari produksibom.blade.php (yang disalin dari
@@ -554,11 +539,15 @@ let spkNoBuktiAktif = null
 // Mode modal Tambah SPK -- dipakai ulang buat Koreksi (buttonEdit()). Di mode edit WIP/BJ,
 // Tanggal dan Kode Mesin dikunci: sp_SPKJD cuma insert header sekali (Choice='I'), tidak ada
 // Choice untuk mengubah header, jadi perubahan ketiganya tidak akan tersimpan.
-function spkSetModeEdit (isEdit) {
-  document.getElementById('formAddSPKLabel').textContent = isEdit ? 'Koreksi SPK' : 'Tambah SPK'
-  document.getElementById('input_spk_tipe').disabled = isEdit
-  document.getElementById('input_spk_tanggal').disabled = isEdit
-  document.getElementById('input_spk_kodemesin').disabled = isEdit
+// lihat (opsional) -- mode Detail: modal yang SAMA dibuka hanya-baca (judul "Detail SPK", semua
+// tombol Tambah/Edit/Hapus dan kolom Actions disembunyikan lewat class .spk-lihat + .spk-aksi).
+function spkSetModeEdit (isEdit, lihat) {
+  lihat = !!lihat
+  document.getElementById('formAddSPKLabel').textContent = lihat ? 'Detail SPK' : (isEdit ? 'Koreksi SPK' : 'Tambah SPK')
+  document.getElementById('input_spk_tipe').disabled = isEdit || lihat
+  document.getElementById('input_spk_tanggal').disabled = isEdit || lihat
+  document.getElementById('input_spk_kodemesin').disabled = isEdit || lihat
+  document.getElementById('formAddSPK').classList.toggle('spk-lihat', lihat)
 }
 
 function buttonAdd () {
@@ -636,12 +625,21 @@ function spkGenerateNoBukti () {
 // tersimpan ke DB seperti di mode Tambah. Edit Barang Jadi (sp_SPKJD Choice='U') TIDAK
 // menghitung ulang Bahan Baku hasil ledak-BOM.
 function buttonEdit (nobukti) {
+  spkBukaModal(nobukti, false)
+}
+
+// Detail SPK -- modal yang sama dengan Koreksi tapi hanya-baca (tanpa Tambah/Edit/Hapus).
+function buttonDetail (nobukti) {
+  spkBukaModal(nobukti, true)
+}
+
+function spkBukaModal (nobukti, lihat) {
   $.ajax({
     url: "{!! url('produksispkheader') !!}",
     type: "get",
     data: { nobukti },
     success: function (res) {
-      spkSetModeEdit(true)
+      spkSetModeEdit(true, lihat)
       spkNoBuktiAktif = res.NOBUKTI
       document.getElementById('input_spk_nobukti').value = res.NOBUKTI
       document.getElementById('input_spk_nourut').value = res.NoUrut || ''
@@ -704,7 +702,7 @@ function spkRefreshBJ () {
             <td>${formatAngka(Number(item.Qnt ?? 0).toFixed(2))}</td>
             <td>${item.Satuan ?? ''}</td>
             <td>${item.KodeBOM ?? ''}</td>
-            <td class="text-center">
+            <td class="text-center spk-aksi">
               <button class="btn-action-sm btn-action-success" type="button" onclick="spkBJEdit(${item.Urut}, '${item.KodeBrg}', ${item.Qnt ?? 0}, '${item.Satuan ?? ''}', '${item.KodeBOM ?? ''}')"><i class="bi bi-pen"></i></button>
               <button class="btn-action-sm btn-action-danger" type="button" onclick="spkBJHapus(${item.Urut}, '${String(item.NamaBrg ?? item.KodeBrg ?? '').replace(/'/g, "\\'").replace(/"/g, '&quot;')}')"><i class="bi bi-trash"></i></button>
             </td>
@@ -937,7 +935,7 @@ function spkRefreshDet () {
             <td>${item.KodePrs ? item.KodePrs + (item.NamaPrs ? ' - ' + item.NamaPrs : '') : '-'}</td>
             <td>${formatAngka(Number(item.QNT ?? 0).toFixed(2))}</td>
             <td>${item.SATUAN ?? ''}</td>
-            <td class="text-center">
+            <td class="text-center spk-aksi">
               <button class="btn-action-sm btn-action-success" type="button" onclick="spkDetEdit(${item.URUT}, '${item.KODEBRG}', ${item.QNT ?? 0}, '${item.SATUAN ?? ''}', '${item.KodePrs ?? ''}')"><i class="bi bi-pen"></i></button>
               <button class="btn-action-sm btn-action-danger" type="button" onclick="spkDetHapus(${item.URUT}, ${item.URUTSPK ?? 0}, '${String(item.NamaBrg ?? item.KODEBRG ?? '').replace(/'/g, "\\'").replace(/"/g, '&quot;')}')"><i class="bi bi-trash"></i></button>
             </td>
