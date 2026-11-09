@@ -520,7 +520,9 @@ optional `App\Otorisasi\LeveledOtorisasiHandler` (`PurchaseOrderOtorisasi`). Dec
   hasApproval()` are, by the handler's `$pJasa`.
 - A level-1 user cannot send a request (they have `IsOtorisasi1`, so they are told to authorise directly). A PO left at
   level 1 only that needs a director has no automatic follow-up request unless one already exists.
-- A PO that was voided by batal (`isbatal = 1`) is refused by `approveWithRules()` ("sudah dibatalkan").
+- A PO that was voided by batal (`isbatal = 1`, both approvals 0) **can be authorised again**, on the desktop and on the phone, exactly as the old `POController`
+  allowed. `approveWithRules()` once refused it ("sudah dibatalkan"); that check was removed on 2026-11-09 because users re-authorise batal'd POs as a normal
+  workflow (e.g. `SML/PO/00001/1026`: batal 1 Oct, re-authorised 27 Oct). Like the old code, re-authorising does **not** clear `IsBatal`/`UserBatal`/`TglBatal`.
 
 ### 10d.1 PO Non Stock (`pononstock`, `KODEMENU` 030202) — same handler, `pJasa = 1`
 

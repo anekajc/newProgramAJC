@@ -148,10 +148,8 @@ class PurchaseOrderOtorisasi implements BatalOtorisasiHandler, BatalPreviewHandl
         if ($o1 === 1 && $o2 === 1) {
             return $refuse('PO '.$nobukti.' sudah diotorisasi.');
         }
-        // PO yang sudah dibatalkan (batal otorisasi dalam plafon) tidak boleh diotorisasi lagi.
-        if ((int) ($po->IsBatal ?? $po->isbatal ?? 0) === 1) {
-            return $refuse('PO '.$nobukti.' sudah dibatalkan.');
-        }
+        // PO yang pernah dibatalkan (batal otorisasi dalam plafon: IsBatal = 1, otorisasi 0) BOLEH diotorisasi lagi - desktop tidak pernah
+        // menolaknya dan user memang memakainya begitu (PO yang dibatal lalu diotorisasi ulang tetap membawa IsBatal = 1). Jangan tolak di sini.
 
         // maxol, jabatan dan plafon dibaca dari tabel menu lama (dbmenu/dbflmenu) - sama dengan POController.
         $menu = $db->select("select * from dbmenu where href = 'purchaseorder'");
