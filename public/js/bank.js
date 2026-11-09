@@ -1753,6 +1753,10 @@ function submitAddAdd () {
             setNewNoBukti()
             alertify.warning('Nobukti telah di refresh, silahkan submit ulang');
           }
+
+          if (res == 3) {
+            alertify.warning('Jumlah melebihi total dokumen DPH/DPP yang dipilih');
+          }
           //
           // if (res == 3 ) {
           //   alertify.warning('Stok gudang tidak mencukupi');

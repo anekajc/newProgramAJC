@@ -54,7 +54,7 @@ a.oto-item:hover { border-color: #bfdbfe; color: inherit; text-decoration: none;
 @section('content')
 <div class="oto-wrap">
   <div class="oto-card oto-device">
-    <i class="bi bi-phone" style="font-size:22px;color:#2563eb"></i>
+    <i class="bi bi-phone" style="font-size:o22px;color:#2563eb"></i>
     <div class="oto-device-text" id="otoDeviceText"><b>Notifikasi perangkat ini</b>Memeriksa…</div>
     <button type="button" class="oto-btn" id="otoDeviceBtn" style="display:none"></button>
   </div>
