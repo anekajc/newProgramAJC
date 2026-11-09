@@ -16,15 +16,6 @@ Route::get('/test', function () {
 });
 
 
-
-
-
-
-
-
-
-
-
 // Login
 Route::get('/', function () {
     if (Auth::check()) {
@@ -44,7 +35,7 @@ Route::post('/ceklockperiodeinput', [GlobalController::class, 'getLockPeriodeInp
 
 // Tes
 Route::get('/newlogin', function () {
-    return view('newmaster');
+    return view('newmasterTest');
 });
 
 Route::get('/newtes', function () {

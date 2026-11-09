@@ -35,7 +35,7 @@
               <div class="form-group mb-0">
                 <div class="form-check d-flex align-items-center p-0 m-0">
                   <label class="form-check-label mb-0 ml-2" for="input_BOM_default">Default  </label>
-                  <input type="checkbox" class="form-check-input position-static m-0" id="input_BOM_default" name="input_BOM_default" value="1">
+                  <input type="checkbox" class="form-check-input position-static m-0" style="margin-left: 10px !important;" id="input_BOM_default" name="input_BOM_default" value="1">
                 </div>
               </div>
             </div>
@@ -184,7 +184,7 @@
                 </div>
               </div>
               <div class="col-sm-3">
-                <input type="text" class="form-control" id="input_BOM_namaBarang">
+                <input type="text" class="form-control" id="input_BOM_namaBarang" disabled>
               </div>
 
             </div>
@@ -585,7 +585,7 @@ function buttonDetailBom () {
 function buttonEditDetailBom (kodebom, kodeprs, urut, kodebrg, numerator, denominator, lossratio, namabrg) {
   $('.showhide').hide();
 
-  document.getElementById('formAddBOMTitle').textContent = 'Edit BOM'
+  document.getElementById('formAddBOMTitle').textContent = 'BOM'
   document.getElementById('input_BOM_kodeBOM').value = kodebom
   document.getElementById('input_BOM_noUrut').value = kodebom.split('-').pop()
 
@@ -747,7 +747,16 @@ function submitAddDetailBom () {
     },
     success: function () {
       alertify.success(choice === 'U' ? 'Detail BOM berhasil diubah' : 'Detail BOM berhasil ditambahkan')
-      // $('.showhide').hide()
+      // Form tetap terbuka tapi DIKOSONGKAN setelah Simpan (Tambah maupun Edit) supaya siap
+      // input barang berikutnya -- kembali ke mode Tambah (Urut kosong), kolom diisi ulang
+      // default. Kode Proses sengaja tidak dikosongkan: nilainya datang dari baris Daftar
+      // Proses yang sedang disorot (readonly), jadi tetap berlaku untuk input berikutnya.
+      document.getElementById('input_BOM_detUrut').value = ''
+      document.getElementById('input_BOM_detKodeBarang').value = ''
+      document.getElementById('input_BOM_namaBarang').value = ''
+      document.getElementById('input_BOM_detNumerator').value = '0.00'
+      document.getElementById('input_BOM_detDenominator').value = '0.00'
+      document.getElementById('input_BOM_detLossRatio').value = '0.00'
       pbRefreshTabelDetailBom(kodeprs)
       pbRefreshDetailJikaAktif()
     },
