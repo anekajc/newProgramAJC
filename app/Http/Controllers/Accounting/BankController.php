@@ -514,7 +514,7 @@ where b.Perkiraan = :lawan
                           Case when D.IsOtorisasi4=1 then 1 else 0 end+
                                             Case when D.IsOtorisasi5=1 then 1 else 0 end=D.MaxOL then 0
                                           else 1
-                                     end As Bit)=0   and E.nobukti is null
+                                     end As Bit)=0   --and E.nobukti is null
                             group by D.Nobukti,A.KODECUSTSUPP,C.NAMACUSTSUPP,E.nobukti
                           ,D.Valas,X.kl" , ["tipe" => $req->tipe , "valas" => $req->valas ]);
     return $listData;
@@ -539,7 +539,7 @@ where b.Perkiraan = :lawan
                           Case when D.IsOtorisasi4=1 then 1 else 0 end+
                                             Case when D.IsOtorisasi5=1 then 1 else 0 end=D.MaxOL then 0
                                           else 1
-                                     end As Bit)=0   and E.nobukti is not null
+                                     end As Bit)=0   --and E.nobukti is not null
                             group by D.Nobukti,A.KODECUSTSUPP,C.NAMACUSTSUPP,E.nobukti
                           ,D.Valas,X.kl" , ["valas" => $req->valas ]);
     return $listData;
@@ -564,7 +564,7 @@ where b.Perkiraan = :lawan
                           Case when D.IsOtorisasi4=1 then 1 else 0 end+
                                             Case when D.IsOtorisasi5=1 then 1 else 0 end=D.MaxOL then 0
                                           else 1
-                                     end As Bit)=0   and E.nobukti is not null
+                                     end As Bit)=0   --and E.nobukti is not null
                             group by D.Nobukti,A.KODECUSTSUPP,C.NAMACUSTSUPP,E.nobukti
                           ,D.Valas,X.kl             " , ["valas" => $req->valas ]);
     return $listData;
@@ -590,7 +590,7 @@ where b.Perkiraan = :lawan
                           Case when D.IsOtorisasi4=1 then 1 else 0 end+
                                             Case when D.IsOtorisasi5=1 then 1 else 0 end=D.MaxOL then 0
                                           else 1
-                                     end As Bit)=0   and E.nobukti is null
+                                     end As Bit)=0   -- and E.nobukti is null
                             group by D.Nobukti,A.KODECUSTSUPP,C.NAMACUSTSUPP,E.nobukti
                           ,D.Valas,X.kl" , ["valas" => $req->valas ]);
     return $listData;
@@ -1130,7 +1130,39 @@ WHERE KODESUPP= :custsupp and IDuser= :username", ["custsupp" => $req->custsupp 
       $plok = DB::connection("SML")->select("Select ISnull(IsLokalOrExim,0) IsLokalOrExim from dbPostHutpiut where perkiraan= :lawan
     " , ["lawan" => $req->lawanx]);
 
-      foreach ($tempData as $d)  {
+      // Jumlah yang diketik user dialokasikan ke baris dokumen sesuai urutan SP_ViewDPH: tiap baris
+      // dibukukan penuh sampai jumlah habis, baris terakhir dipotong sisanya, sisanya dilewati.
+      // Jumlah sama dengan total dokumen (atau kosong) = perilaku lama, semua baris dibukukan penuh.
+      $totalDibayar = 0.0;
+      foreach ($tempData as $d) {
+        $totalDibayar += (float) $d->DIBAYAR;
+      }
+      $totalDibayar = round($totalDibayar, 2);
+      $jumlahInput = $req->jumlah === null ? 0.0 : round((float) $req->jumlah, 2);
+
+      $baris = [];
+      if ($jumlahInput <= 0 || abs($jumlahInput - $totalDibayar) < 0.005) {
+        foreach ($tempData as $d) {
+          $baris[] = [$d, (float) $d->DIBAYAR];
+        }
+      } elseif ($jumlahInput > $totalDibayar) {
+        return 3; // melebihi total dokumen
+      } else {
+        $sisa = $jumlahInput;
+        foreach ($tempData as $d) {
+          $nilai = round(min((float) $d->DIBAYAR, $sisa), 2);
+          if ($nilai <= 0) {
+            continue;
+          }
+          $baris[] = [$d, $nilai];
+          $sisa = round($sisa - $nilai, 2);
+        }
+        if (!count($baris)) {
+          return 3;
+        }
+      }
+
+      foreach ($baris as [$d, $nilaiDibayar])  {
         // return [
         //   'a' => $d->DIBAYAR,
         //   'b' => $req->kurs
@@ -1148,11 +1180,11 @@ WHERE KODESUPP= :custsupp and IDuser= :username", ["custsupp" => $req->custsupp 
           $req->lawanx,
           $req->keterangan ? $req->keterangan : '', // 10
           $req->keterangan2 ? $req->keterangan2 : '',
-          $d->DIBAYAR,
+          $nilaiDibayar,
           $req->kredit,
           $req->valas,
           $req->kurs,
-          (float) $d->DIBAYAR * (float) $req->kurs,
+          $nilaiDibayar * (float) $req->kurs,
           $req->kreditrp,
           $req->transaksi,
           $req->tphc,

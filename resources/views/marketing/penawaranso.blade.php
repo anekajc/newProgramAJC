@@ -149,7 +149,7 @@
     line-height: 0;
     vertical-align: middle;
   }
-  
+
   .toolbar {
     display: flex;
     align-items: center;
@@ -672,7 +672,7 @@
   }
   .po-kpi-label { font-size: 13px; color: #64748b; margin-bottom: 4px; }
   .po-kpi-val { font-size: 22px; font-weight: 700; color: #1e293b; }
-  
+
 /* ---------- Perataan kotak centang untuk semua tabel di halaman ini ----------
    Dikumpulkan di satu tempat supaya tabel utama maupun tabel di dalam modal
    berperilaku sama. Dua hal yang dibereskan:
@@ -1219,7 +1219,7 @@ td input[type="checkbox"] {
 
             <div class="col-md-12">
               <div class="form-group">
-                <input type="text" class="form-control text-left" placeholder="Nama Customer" id="input_add_namasupplier" disabled> 
+                <input type="text" class="form-control text-left" placeholder="Nama Customer" id="input_add_namasupplier" disabled>
               </div>
             </div>
 
@@ -1230,7 +1230,7 @@ td input[type="checkbox"] {
               </div>
             </div>
 
-            
+
             <div class="col-md-12" style="margin-top:-10px;">
               <div class="form-group">
                 <textarea style="width: 100%; resize: none;" rows=2 placeholder="perihal" class="form-control text-left align-items-left" onblur="onChangePerihal()" id="input_add_alamatsupplier"  ></textarea>
@@ -1295,7 +1295,7 @@ td input[type="checkbox"] {
             </div>
 
 
-            
+
 
                 <div class="col-md-6" style="margin-top:-10px;">
               <div class="form-group">
@@ -1303,8 +1303,8 @@ td input[type="checkbox"] {
               </div>
             </div>
 
-            
-       
+
+
 
 
 
@@ -1434,7 +1434,7 @@ td input[type="checkbox"] {
                       </div>
                     </div>
 
-                    
+
 
 
                     <div class="col-md-12">
@@ -1495,7 +1495,7 @@ td input[type="checkbox"] {
                       </div>
                     </div>
 
-                    
+
 
 
                   </div>
@@ -1535,7 +1535,7 @@ td input[type="checkbox"] {
                       </div>
                     </div>
                   </div>
-              </div>  
+              </div>
 
 
               <div class="col-md-3">
@@ -1569,7 +1569,7 @@ td input[type="checkbox"] {
 
 
 
-              
+
               <div class="col-md-3">
                   <div class="row">
                     <div class="col-6">
@@ -1602,7 +1602,7 @@ td input[type="checkbox"] {
                       </div>
                     </div>
                   </div>
-              </div>  
+              </div>
 
 
 
@@ -1619,12 +1619,12 @@ td input[type="checkbox"] {
 
                             <input type="text" class="form-control" id="input_add_lokasipenerima" value='-' readonly>
                              <button onclick="buttonAddListLokasiPenerima()" id="buttonAddListLokasiPenerima" class="btn btn-chip-biru btn-sm"><i class="bi bi-search"></i></button>
-                 
+
 
                           </div>
                         </div>
                   </div>
-              </div>  
+              </div>
 
 
              <div class="col-md-3">
@@ -1639,13 +1639,13 @@ td input[type="checkbox"] {
                           <div class="input-group form-group">
 
                             <input type="text" class="form-control"  onblur="onChangeLokasipenerima()" id="input_add_namalokasipenerima" value='-' readonly>
-                            
+
 
 
                           </div>
                         </div>
                   </div>
-              </div>   
+              </div>
 
 
 
@@ -1654,8 +1654,8 @@ td input[type="checkbox"] {
 
 
 
-              
-              
+
+
 
 
 
@@ -1938,7 +1938,7 @@ td input[type="checkbox"] {
                   <!-- Barang dan Nama Produk -->
                   <div class="col-md-6">
                     <!-- <div class="row">
-                      
+
                       <div class="col-3" style="margin-top:-25px;">
                         <div class="form-group" hidden>
                           <label>No. PNW PO</label>
@@ -1960,7 +1960,7 @@ td input[type="checkbox"] {
                     <div class="row">
                       <!-- Kode Barang - Left Half -->
                       <div class="col-md-6" style="margin-top:-12px;">
-                        
+
                         <div class="row">
                           <div class="col-md-6">
                             <div class="form-group">
@@ -2016,7 +2016,7 @@ td input[type="checkbox"] {
 
 
 
-                  
+
 
                 <div class="col-md-6" style="margin-left:-50px;">
                   <div class="row">
@@ -2077,7 +2077,7 @@ td input[type="checkbox"] {
                     <div class="col-md-3" style="margin-top:-12px;">
                       <div class="form-group">
                         <!-- <input type="number" min="1" max="100" class="form-control text-right" id="input_add_add_discpersen1" value=0 onChange='calculateDiscRp()' tabindex="8"> -->
-                        
+
                       </div>
                     </div>
 
@@ -2098,7 +2098,7 @@ td input[type="checkbox"] {
                   <div class="row">
                     <div class="col-md-3" style="margin-top:-17px;">
                       <div class="form-group">
-                         <label>Disc(%)</label> 
+                         <label>Disc(%)</label>
 
                       </div>
                     </div>
@@ -2138,7 +2138,7 @@ td input[type="checkbox"] {
                   <div class="row">
                     <div class="col-md-3" style="margin-top:-12px;">
                       <div class="form-group">
-                         <label>tipe so</label> 
+                         <label>tipe so</label>
 
                       </div>
                     </div>
@@ -2152,7 +2152,7 @@ td input[type="checkbox"] {
 
                     <div class="col-md-3" style="margin-top:-12px;">
                       <div class="form-group">
-                         <label>merk so</label> 
+                         <label>merk so</label>
 
                       </div>
                     </div>
@@ -2171,10 +2171,10 @@ td input[type="checkbox"] {
 
 
                   <!-- <div class="row">
-                    
+
                   </div> -->
 
-                  
+
 
 
 
@@ -3549,7 +3549,7 @@ td input[type="checkbox"] {
 <div class="modal fade" id="modalPrint" tabindex="-1">
     <div class="modal-dialog modal-sm">
       <div class="modal-content">
-        
+
         <div class="modal-header">
           <h5 class="modal-title">Pilih Design Cetak</h5>
           <button type="button" class="close" data-dismiss="modal">
@@ -3703,10 +3703,10 @@ function choosePrint(type) {
 
   if (type === 'default') {
     submitPrint(selectedNoBukti)
-  } 
+  }
   else if (type === 'design3') {
     submitPrint2(selectedNoBukti)
-  } 
+  }
 }
 
 // function buttonOtorisasi (nobukti) {
@@ -3893,12 +3893,58 @@ function choosePrint(type) {
 //   });
 // }
 
+// User tanpa hak otorisasi: kirim permintaan ke approver (push ke HP mereka). PSO_HREF = kunci di
+// config/otorisasi.php dan DBMENUWEB.href.
+function buttonMintaOtorisasi (nobukti) {
+  var dlgMinta = alertify.confirm('Minta Otorisasi',
+    'Anda tidak berhak otorisasi. Kirim permintaan otorisasi penawaran SO ' + nobukti + ' ke approver?',
+    function () {
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: PSO_HREF, nobukti },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {})
+  dlgMinta.elements.root.classList.add('ajs-app-buttons')
+}
+
+// User tanpa hak Batal: kirim permintaan batal otorisasi (dengan alasan) ke approver ber-hak Batal (push ke HP mereka).
+function buttonMintaBatalOtorisasi (nobukti) {
+  var dlgBatalOtorisasi = aalertify.prompt('Minta Batal Otorisasi',
+    'Anda tidak berhak batal otorisasi. Masukkan alasan untuk meminta batal otorisasi penawaran SO ' + nobukti, '',
+    function (evt, value) {
+      var alasan = (value || '').trim()
+      if (alasan === '') {
+        alertify.warning('Alasan harus diisi.')
+        return false
+      }
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: PSO_HREF, nobukti, tipe: 'B', alasan },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {});
+    dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
+}
+
 function buttonOtorisasi (nobukti) {
   console.log(nobukti)
 
   let akses = $("#akses_isotorisasi1").val();
   if (!Number(akses)) {
-    alertify.warning('No access')
+    buttonMintaOtorisasi(nobukti)
     return
   }
 
@@ -3918,6 +3964,12 @@ function buttonOtorisasi (nobukti) {
 
           },
           success: function(res) {
+            // Server menolak (mis. sudah diotorisasi orang lain / tidak berhak) -> {ok: 0, pesan}
+            if (res && res.pesan) {
+              alertify.warning(res.pesan)
+              loadAll()
+              return
+            }
             alertify.success('Berhasil update otorisasi')
             loadAll()
 
@@ -3938,9 +3990,10 @@ function buttonOtorisasi (nobukti) {
 function buttonBatalOtorisasi (nobukti) {
   console.log(nobukti)
 
-  let akses = $("#akses_isotorisasi1").val();
+  // Hak batal = IsBatal (bukan IsOtorisasi1), sama dengan halaman PR; tanpa hak itu kirim permintaan.
+  let akses = $("#akses_isbatal").val();
   if (!Number(akses)) {
-    alertify.warning('No access')
+    buttonMintaBatalOtorisasi(nobukti)
     return
   }
 
@@ -3966,6 +4019,12 @@ function buttonBatalOtorisasi (nobukti) {
 
           },
           success: function(res) {
+            // Server menolak (mis. belum diotorisasi / tidak berhak) -> {ok: 0, pesan}
+            if (res && res.pesan) {
+              alertify.warning(res.pesan)
+              loadAll()
+              return
+            }
             alertify.success('Berhasil batal otorisasi')
             loadAll()
 
@@ -4403,16 +4462,16 @@ function submitAddAdd (pchoice) {
       jmlrecord = 1
     }
 
-//    kodegdg, kodeexp, 
-// userid, tglinput, nopesanan, tgkirim, masaberlaku , tglbatal , urutmaster , pembayaran , franco , delivery , validitas , namapic  , namapic2 , 
-// freight , ketrevisi   , kodekebunh 
+//    kodegdg, kodeexp,
+// userid, tglinput, nopesanan, tgkirim, masaberlaku , tglbatal , urutmaster , pembayaran , franco , delivery , validitas , namapic  , namapic2 ,
+// freight , ketrevisi   , kodekebunh
 
 // qnt2,isi,idmaster,isVerf,nmsat,tipeso,namamerkso,TglVerf,UserVerf,jmlrecord
-    
+
 
     let _token  = $("#_token").val()
     let choice = pchoice
-    
+
     let nobukti = $("#input_add_nobukti").val()
 
     let tanggal = $("#input_add_tanggal").val()
@@ -4449,7 +4508,7 @@ console.log(choice,nobukti,urut,$purut)
     let disctot = formatAngkaVal($("#input_add_add_discrp").val())
     let noppl = $("#input_add_add_noPPL").val()
     let urutppl = $("#input_add_add_urutPPL").val()
-    
+
 
     let discpdet2 = formatAngkaVal($("#input_add_add_discpersen2").val())
     let discpdet3 = formatAngkaVal($("#input_add_add_discpersen3").val())
@@ -4465,7 +4524,7 @@ console.log(choice,nobukti,urut,$purut)
 
     let pembayaran = $("#input_add_pembayaran").val()
     let franco = $("#input_add_alamatkirim").val()
-    let delivery = $("#input_add_ekspedisi").val()  
+    let delivery = $("#input_add_ekspedisi").val()
     let validitas = $("#input_add_keterangan").val()
 
     let namapic =$("#input_add_up").val()
@@ -4484,7 +4543,7 @@ console.log(choice,nobukti,urut,$purut)
     let namamerkso=$("#input_add_add_merkso").val()
     let kodekebunh=$("#input_add_lokasipenerima").val()
     let satminus=$("#input_add_add_satminus").val()
-    
+
 
 
 
@@ -4511,12 +4570,12 @@ console.log(choice,nobukti,urut,$purut)
     let isi = 0
 
     if (kodebrg== '-')
-    {nosat=1 
+    {nosat=1
      isi= formatAngkaVal($("#input_add_add_isi").val())
 
     }
     else {
-          cekSatuanBarang(kodebrg)    
+          cekSatuanBarang(kodebrg)
           if (nosat == 1) {
             qnt1 = qnt * tempSatuanBarang[0].ISI1
             satuan = tempSatuanBarang[0].SAT1
@@ -4543,7 +4602,7 @@ console.log(choice,nobukti,urut,$purut)
       _token,
         nobukti,
 tanggal ,kodesupp, kodevls, kurs, ppn, tipebayar, hari,keterangan ,catatan, tipedisc,
-  pembayaran , franco , delivery , validitas , namapic , ttd , namapic2 , 
+  pembayaran , franco , delivery , validitas , namapic , ttd , namapic2 ,
 freight , ketrevisi , tglrevisi , tglprcust , kodekebunh , urut
 
 ,kodebrg,namabrg,qnt,nosat,isi,harga,discp1,disctot,idmaster,norpr,urutrpr,ketdet,satuan,tipeso,namamerkso,jmlrecord,satminus,namacustomer
@@ -4561,13 +4620,13 @@ freight , ketrevisi , tglrevisi , tglprcust , kodekebunh , urut
   let xharga=0
   if  ( $("#input_add_tipeppn").val()==2) {
       xppn= harga * 0.1
-  } 
+  }
 
  xharga= harga -  formatAngkaVal($("#input_add_discrp").val()) - xppn
 
 
 
-console.log('==========start ============================================') 
+console.log('==========start ============================================')
 $.ajax({
   url: "{!! url('penawaransospadd') !!}",
   type: "post",
@@ -4576,12 +4635,12 @@ $.ajax({
     _token,
     choice,
     nobukti,
-tanggal ,kodesupp, kodevls, kurs, ppn, tipebayar, hari,keterangan ,catatan, tipedisc, 
- pembayaran , franco , delivery , validitas , namapic , ttd , namapic2 , 
+tanggal ,kodesupp, kodevls, kurs, ppn, tipebayar, hari,keterangan ,catatan, tipedisc,
+ pembayaran , franco , delivery , validitas , namapic , ttd , namapic2 ,
 freight , ketrevisi , tglrevisi , tglprcust , kodekebunh , urut
 
 ,kodebrg,namabrg,qnt,nosat,isi,harga,discp1,disctot,idmaster,norpr,urutrpr,ketdet,satuan,tipeso,namamerkso,jmlrecord,satminus,namacustomer
-    
+
 
 
   },
@@ -4626,8 +4685,8 @@ freight , ketrevisi , tglrevisi , tglprcust , kodekebunh , urut
 
 
 
-              
-      
+
+
 }
 
 
@@ -4839,7 +4898,7 @@ function submitAddEdit () {
   let xharga=0
   if  ( $("#input_add_tipeppn").val()==2) {
       xppn= Harga * 0.1
-  } 
+  }
  xharga= Harga -  formatAngkaVal($("#input_add_discrp").val()) - xppn
   // console.log(kodebarang,tanggal,xharga,nosat,choice)
    console.log(KodeBrg,Noso,xharga,NoSat)
@@ -4857,9 +4916,9 @@ function submitAddEdit () {
     console.log ('=============================>',flagharga)
     if (flagharga !='lanjut'){
          alertify.confirm('' + flagharga + ' ?',
-          function() { 
+          function() {
 
-          
+
 
 
                                                           $.ajax({
@@ -4950,10 +5009,10 @@ function submitAddEdit () {
 
                               }
 
-                              
+
                   ,function(){
                 console.log(' cancel harga minimal')
-        
+
                   return
                 });
 
@@ -6911,7 +6970,7 @@ function buttonAddPickPelanggan (kode, nama , alamat, hari, ppn) {
     <option value=5 >30 Hari Setelah Pekerjaan Selesai</option>
     <option value=6 >BG 30 hari setelah barang diterima</option>
     `
-  
+
 
   if (ppn == 1){
     selectTipePPN = `
@@ -6967,7 +7026,7 @@ function buttonAddPickLokasiPenerima (kode, nama ) {
     onChangeHeader('KODEKEBUNH' , kode)
 
   }
-  
+
   document.getElementById("input_add_lokasipenerima").value = kode
   document.getElementById("input_add_namalokasipenerima").value = nama
 
@@ -7218,7 +7277,7 @@ function unlockFormAdd () {
   // document.getElementById("input_add_draftpo").disabled = false
 
 
-  
+
   // document.getElementById("input_add_up").disabled = false
   // document.getElementById("input_add_up2").disabled = false
   // document.getElementById("input_add_note").disabled = false
@@ -7336,7 +7395,7 @@ function cleanFormAdd () {
   document.getElementById("input_add_ketrevisi").value = ''
   document.getElementById("input_add_namalokasipenerima").value = ''
   document.getElementById("input_add_lokasipenerima").value = ''
-  
+
 
 
   document.getElementById("input_add_tipeppn").disabled = false
@@ -7690,7 +7749,7 @@ function refreshDataTableAdd (NOBUKTI) {
           }
           document.getElementById("tabel_data_add").innerHTML = rowTable
 
-         
+
 
 
           document.getElementById("input_add_nobukti").value = dataHeaderAdd.NoBukti
@@ -7856,7 +7915,7 @@ function refreshDataTableEdit (NOBUKTI) {
 
 
 
-          
+
 
           noBuktiUntukAdd = dataHeaderAdd.NoPPL
 
@@ -8152,7 +8211,7 @@ function submitPrint (nobukti) {
                       <div class="pb-1" style="width: 3%"></div>
                       <div class="pb-1" style="width: 100%">${dataPrint[0].alamatprs ?? ''}</div>
                     </div>
-                    
+
                     <div style="display: flex; width: 100%; font-size: 13px; padding: 2px;">
                       <div class="pb-1" style="width: 10%"></div>
                       <div class="pb-1" style="width: 3%"></div>
@@ -8365,20 +8424,20 @@ tempPrintStr += `</table>`;
     </div>
 
 
-    
+
 
 
   </div>`
 
      tempPrintStr += `
       <div style="width:50%; margin-top:15px; margin-left:-25px; float:left; text-align:center; font-size:15px;">
-       
+
       </div>
 
         <div style="width:50%; float:left; font-size:15px; margin-top:-10px; margin-left:-15px;">
         <table style="width:100%; border-collapse: collapse;">
 
-       
+
     </div>
 
     <div style="clear: both;"></div>
@@ -9019,7 +9078,7 @@ tempPrintStr += `</table>`;
 </div>`
 
 if(i == arrayDataPrint.length - 1){
-      
+
 tempPrintStr += `
 <div style="width: 62%; font-family: sans-serif; font-size: 10px;">
 
@@ -9066,7 +9125,7 @@ tempPrintStr += `
   <div style="width: 5%; text-align:left;"> TOTAL </div>
   <div style="width: 30%; text-align: right">${formatAngka(parseFloat(dataPrint[0].TnnetRp).toFixed(2))}</div>
 </div>`};
-  
+
  tempPrintStr += `
  <table style="width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 6px;">
     <tr>

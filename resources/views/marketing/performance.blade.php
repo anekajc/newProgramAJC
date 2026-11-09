@@ -18,6 +18,7 @@
   <img src="img/sml.png" style="height: 50px; width: 80px" alt="">
 </div>
 <link rel="stylesheet" href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
+<link rel="stylesheet" href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
 <style>
 .custom-tabs {
   display: inline-flex; justify-content: flex-start; align-items: center; gap: 2px;
@@ -639,10 +640,60 @@ $(document).ready(function(){
       perfInitReportTableSekali();
 });
 
+// User tanpa hak Otorisasi: kirim permintaan otorisasi ke approver ber-hak (push ke HP mereka).
+function buttonMintaOtorisasi (nobukti) {
+  var dlgMinta = alertify.confirm('Minta Otorisasi',
+    'Anda tidak berhak otorisasi. Kirim permintaan otorisasi Performa SO ' + nobukti + ' ke approver?',
+    function () {
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: PERF_HREF, nobukti },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {})
+  dlgMinta.elements.root.classList.add('ajs-app-buttons')
+}
+
+// User tanpa hak Batal: kirim permintaan batal otorisasi (dengan alasan) ke approver ber-hak Batal (push ke HP mereka).
+function buttonMintaBatalOtorisasi (nobukti) {
+  var dlgBatalOtorisasi = alertify.prompt('Minta Batal Otorisasi',
+    'Anda tidak berhak batal otorisasi. Masukkan alasan untuk meminta batal otorisasi Performa SO ' + nobukti, '',
+    function (evt, value) {
+      var alasan = (value || '').trim()
+      if (alasan === '') {
+        alertify.warning('Alasan harus diisi.')
+        return false
+      }
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: PERF_HREF, nobukti, tipe: 'B', alasan },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {});
+    dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
+}
+
 function submitAdd (nobukti) {
   console.log('submitAdd')
   // tombol Otorisasi di modal memanggil submitAdd() tanpa argumen
   nobukti = nobukti || tempNoBukti
+
+  if (!Number($("#akses_isotorisasi1").val())) {
+    buttonMintaOtorisasi(nobukti)
+    return
+  }
 
   let _token  = $("#_token").val()
   $.ajax({
@@ -655,6 +706,12 @@ function submitAdd (nobukti) {
     },
     success: function(res) {
       console.log(res)
+      // Server menolak (tidak berhak / sudah diotorisasi / SO belum otorisasi penuh) -> {ok: 0, pesan}
+      if (res && res.pesan) {
+        alertify.warning(res.pesan)
+        loadAll()
+        return
+      }
       if (res ==1 ) {
         loadAll()
         alertify.success('Berhasil Oto Perf')
@@ -676,6 +733,12 @@ function submitBatalOto () {
   console.log('submitBatalOto')
   console.log(tempNoBukti)
 
+  // Hak batal = IsBatal; tanpa hak -> kirim permintaan batal ke approver.
+  if (!Number($("#akses_isbatal").val())) {
+    buttonMintaBatalOtorisasi(tempNoBukti)
+    return
+  }
+
   let _token  = $("#_token").val()
   $.ajax({
     url: "{!! url('performancespbatalotoperf') !!}",
@@ -687,6 +750,12 @@ function submitBatalOto () {
     },
     success: function(res) {
       console.log(res)
+      // Server menolak (tidak berhak / belum diotorisasi) -> {ok: 0, pesan}
+      if (res && res.pesan) {
+        alertify.warning(res.pesan)
+        loadAll()
+        return
+      }
       if (res ==1 ) {
         loadAll()
         $("#form").modal('toggle')
@@ -850,11 +919,11 @@ function submitPrint (nobukti) {
         dataPrint = res
         console.log(res[0])
         console.log(res[0][0])
-        
+
         // console.log(res[0][0].IsOtorisasi1)
       }
     })
-    
+
     let arrayDataPrint = []
     for (let i = 0; i < dataPrint.length; i+=8) {
       let tempArray = dataPrint.slice(i,i+8)
@@ -1300,7 +1369,7 @@ function submitPrint (nobukti) {
                           </div>
                         </div>
                       </div>
-                    </div>             
+                    </div>
 
 
               <div style="width: 40%; margin-left: 90px;">
@@ -1402,7 +1471,7 @@ function submitPrint (nobukti) {
               ? Number(itemSub.harga).toLocaleString('id-ID', {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0
-                }) 
+                })
               : ''}
           </td>
           <td style="width: 15%; text-align: right; border-bottom: none; border-top: none; border-left: none; border-right: none;">
@@ -1410,7 +1479,7 @@ function submitPrint (nobukti) {
               ? Number(itemSub.Jumlah).toLocaleString('id-ID', {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0
-                }) 
+                })
               : ''}
           </td>
          </tr>`;
@@ -1439,7 +1508,7 @@ function submitPrint (nobukti) {
         // total berada di paling bawah
         console.log(i, arrayDataPrint.length)
         if(i == arrayDataPrint.length - 1){
-          
+
         tempPrintStr += `
         <tr>
           <td colspan="5" style="border:1px solid; padding:5px; font-weight:bold; border-bottom: none; border-left: none; border-right: none;">
@@ -1505,7 +1574,7 @@ function submitPrint (nobukti) {
          font-size: 12px ">
          <span style="float: left; display: block; clear: left;">
          </span>
-          
+
 
          <div style="width:100%; display:flex; font-weight:bold; margin-top:5px;">
 
@@ -1541,7 +1610,7 @@ function submitPrint (nobukti) {
 
              <tr>
                <td class="no-border px-2" style="text-align:center;">
-                <p class="m-0" style="display:inline-block; width:120px;">(ISKANDAR)</p>     
+                <p class="m-0" style="display:inline-block; width:120px;">(ISKANDAR)</p>
                </td>
                <td class="no-border px-2">
                </td>

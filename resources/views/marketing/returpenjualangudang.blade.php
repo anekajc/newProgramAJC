@@ -1908,10 +1908,55 @@ function buttonKoreksiDeleteItem (i) {
     });
 }
 
+// User tanpa hak Otorisasi: kirim permintaan otorisasi ke approver ber-hak (push ke HP mereka).
+function buttonMintaOtorisasi (nobukti) {
+  var dlgMinta = alertify.confirm('Minta Otorisasi',
+    'Anda tidak berhak otorisasi. Kirim permintaan otorisasi Retur Gudang ' + nobukti + ' ke approver?',
+    function () {
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: RPG_HREF, nobukti },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {})
+  dlgMinta.elements.root.classList.add('ajs-app-buttons')
+}
+
+// User tanpa hak Batal: kirim permintaan batal otorisasi (dengan alasan) ke approver ber-hak Batal (push ke HP mereka).
+function buttonMintaBatalOtorisasi (nobukti) {
+  var dlgBatalOtorisasi = alertify.prompt('Minta Batal Otorisasi',
+    'Anda tidak berhak batal otorisasi. Masukkan alasan untuk meminta batal otorisasi Retur Gudang ' + nobukti, '',
+    function (evt, value) {
+      var alasan = (value || '').trim()
+      if (alasan === '') {
+        alertify.warning('Alasan harus diisi.')
+        return false
+      }
+      $.ajax({
+        url: "{!! url('otorisasirequest') !!}",
+        type: "post",
+        data: { _token: $("#_token").val(), menu: RPG_HREF, nobukti, tipe: 'B', alasan },
+        success: function (res) { alertify.success(res.message) },
+        error: function (err) {
+          console.log(err)
+          alertify.warning((err.responseJSON && err.responseJSON.message) || 'Terjadi kesalahan silahkan refresh browser')
+        }
+      })
+    },
+    function () {});
+    dlgBatalOtorisasi.elements.root.classList.add('ajs-app-buttons', 'is-danger');
+}
+
 function buttonOtorisasiPenerimaan (nobukti) {
   let akses = $("#akses_isotorisasi1").val();
   if (!Number(akses)) {
-    alertify.warning('No access')
+    buttonMintaOtorisasi(nobukti)
     return
   }
 
@@ -1950,9 +1995,10 @@ function buttonOtorisasiPenerimaan (nobukti) {
 }
 
 function buttonBatalOtorisasiPenerimaan (nobukti) {
-  let akses = $("#akses_isotorisasi1").val();
+  // Hak batal = IsBatal (dulu IsOtorisasi1); tanpa hak -> kirim permintaan batal ke approver.
+  let akses = $("#akses_isbatal").val();
   if (!Number(akses)) {
-    alertify.warning('No access')
+    buttonMintaBatalOtorisasi(nobukti)
     return
   }
 

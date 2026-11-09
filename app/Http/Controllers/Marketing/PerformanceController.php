@@ -10,11 +10,17 @@ use App\Models\DBFLMENU;
 use App\Models\NewPeriode;
 use App\Models\NewUsers;
 use Illuminate\Support\Facades\DB;
+use App\Services\OtorisasiService;
+use App\Traits\PenjagaTransaksi;
 
 
 
 class PerformanceController extends Controller
 {
+  use PenjagaTransaksi;
+
+  // Kunci menu di config/otorisasi.php dan DBMENUWEB.href.
+  private const HREF = 'performance';
 
   // Query bersama index()/loadAll() -- tab "SO Sudah Otorisasi" (OtoPerf=0, DP>0) dan
   // "Perintah Uang Muka" (OtoPerf=1) digabung jadi satu daftar dengan filter status
@@ -231,24 +237,57 @@ order by A.NoBukti
   }
 
 
-  public function spOtoPerf (Request $req) {
-    // $tanggal = date('Y-m-d H:i:s');
-    $res = DB::connection('SML')->update("Update DBSO set OtoPerf=1,TglOtoPerf=GetDate(),UserOtoPerf= :username where nobukti= :nobukti", ["username" => \Auth::user()->username , "nobukti" => $req->NOBUKTI ]);
-    return 1;
-  }
-
-  public function spBatalOtoPerf (Request $req) {
-    // $tanggal = date('Y-m-d H:i:s');
-    $sudahUM = DB::connection('SML')->select("select top 1 NoBukti from dbumjual where noso= :nobukti", [ "nobukti" => $req->NOBUKTI ]);
-    if (count($sudahUM)) {
-      return response('Tidak bisa batal otorisasi, uang muka jual ' . $sudahUM[0]->NoBukti . ' sudah dibuat untuk SO ini', 422);
+  // Hak: IsOtorisasi1 menu Performa. User tanpa hak mengirim permintaan lewat tombol yang sama (otorisasirequest).
+  // UPDATE ada di PerformanceOtorisasi - satu sumber dengan otorisasi lewat HP. Balasan sukses tetap 1.
+  public function spOtoPerf (Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
+    if (!$oto->canApprove($username, self::HREF)) {
+      return $this->tolak('Anda tidak berhak otorisasi Performa');
     }
-    $res = DB::connection('SML')->update("Update DBSO set OtoPerf='',TglOtoPerf=NULL,UserOtoPerf='' where nobukti= :nobukti", [ "nobukti" => $req->NOBUKTI ]);
+    $so = $this->headerDokumen('DBSO', $req->NOBUKTI);
+    if (!$so) {
+      return $this->tolak('SO ' . $req->NOBUKTI . ' tidak ditemukan, mungkin sudah dihapus.');
+    }
+    try {
+      $res = $oto->handler(self::HREF)->approve($req->NOBUKTI, $username);
+    } catch (\DomainException $e) {
+      return $this->tolak($e->getMessage());
+    }
+    if (!$res) {
+      return $this->tolak('Performa SO ' . $req->NOBUKTI . ' sudah diotorisasi oleh ' . $so->userotoperf . '.');
+    }
+    // Tutup permintaan push yang masih pending + kabari peminta.
+    $oto->closePending(self::HREF, $req->NOBUKTI, $username);
+
     return 1;
   }
 
+  // Hak: IsBatal menu Performa. Ditolak (422, teks yang dibaca JS) kalau uang muka jual sudah dibuat untuk SO ini.
+  public function spBatalOtoPerf (Request $req, OtorisasiService $oto) {
+    $username = \Auth::user()->username;
+    if (!$oto->canCancel($username, self::HREF)) {
+      return $this->tolak('Anda tidak berhak batal otorisasi Performa');
+    }
+    $so = $this->headerDokumen('DBSO', $req->NOBUKTI);
+    if (!$so) {
+      return $this->tolak('SO ' . $req->NOBUKTI . ' tidak ditemukan, mungkin sudah dihapus.');
+    }
+    if (!(int) $so->otoperf) {
+      return $this->tolak('Performa SO ' . $req->NOBUKTI . ' belum diotorisasi.');
+    }
+    $handler = $oto->handler(self::HREF);
+    if ($alasan = $handler->cancelBlocker($req->NOBUKTI)) {
+      return response($alasan, 422);
+    }
+    $res = $handler->cancelApproval($req->NOBUKTI, $username, '');
+    if (!$res) {
+      return $this->tolak('Performa SO ' . $req->NOBUKTI . ' sudah dibatalkan otorisasinya.');
+    }
+    // Tutup permintaan batal yang masih pending + kabari peminta.
+    $oto->closePending(self::HREF, $req->NOBUKTI, $username, OtorisasiService::BATAL);
 
-// Update DBSO set OtoPerf=1,TglOtoPerf=GetDate(),UserOtoPerf= :username where nobukti= :nobukti
+    return 1;
+  }
 
 
 

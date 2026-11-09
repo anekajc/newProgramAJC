@@ -11,11 +11,18 @@ use App\Models\NewPeriode;
 use App\Models\NewUsers;
 use Illuminate\Support\Facades\DB;
 use App\Models\VwPPL;
+use App\Otorisasi\SOOtorisasi;
+use App\Services\OtorisasiService;
+use App\Traits\PenjagaTransaksi;
 
 // use App\Http\Controllers\NewMenuController;
 
 class SOController extends Controller
 {
+  use PenjagaTransaksi;
+
+  // Kunci menu di config/otorisasi.php dan DBMENUWEB.href.
+  private const HREF = 'so';
 
   public function index(Request $req) {
 
@@ -1350,132 +1357,38 @@ return $noBukti[0]->Nobukti;
 
     public function cekHargaOto (Request $req) {
 
-      // return 1;
-      // $listData = $req->tempData ? $req->tempData : [] ;
-      // $tempArray = [];
-      //
-      // foreach ($listData as $d)  {
-        // $xso = '';
-        // if ($d['NOSO'] != '-') {
-        //   $xso = $d['NOSO'];
-        // }
-        // return ["noso" => $d['NOSO'], "kodebrg" => $d['KodeBrg'] ,"nopo" => $d['NoBukti']];
-      $x = DB::connection('SML')->select("declare @noSO varchaR(30)--,@KODEBRG VARCHAR(30)
-select @noSO= :noso
-
-
-
-
-SELECT XTABLE.kodebrg ,
-
-XTABLE.XBeli + (XTABLE.XBeli * 0.1 )  hrgminso,
-XTABLE.XBeli + (XTABLE.XBeli * 1.00 ) hrgmaxso,
-XTABLE.xhrgpo
-, case when XTABLE.xhrgpo < XTABLE.XBeli + (XTABLE.XBeli * 0.1 ) then 'Margin Kurang dari Harga Minimal'
-  when XTABLE.xhrgpo >= XTABLE.XBeli + (XTABLE.XBeli * 1.00 ) then 'Margin Lebih dari 100%'
-else
-'lanjut' End Ket
- FROM (
-
-
- select AA.kodebrg,AA.Harga - AA.DiscRp1 Hrg,B.tanggal,AA.nosat,
- AA.harga * AA.Kurs harga,
- (AA.harga * AA.Kurs ) - (AA.DiscTot * AA.kurs) -
-(case when AA.PPN=2 then  (AA.harga * AA.Kurs ) * 0.1 else 0 end )XHrgPO,
-
- (select top 1
-
- case when aa.NOSAT=1 then
-      case when A.NOSAT=1 then A.HRGNETTO - (case when a.PPN=2 then A.HRGNETTO * 0.10 else 0 end)
-            when A.NOSAT=2 then (A.HRGNETTO /C.ISI2)- ((case when a.PPN=2 then (A.HRGNETTO/C.ISI2) * 0.10 else 0 end))
-            when A.NOSAT=3 THEN (A.HRGNETTO /C.ISI3) - ((case when a.PPN=2 then (A.HRGNETTO/C.ISI3) * 0.10 else 0 end)) END * A.KURS
-
-     when aa.NOSAt=2 then
-       CASE WHEN A.NOSAT=2 THEN A.HRGNETTO - (case when a.PPN=2 then A.HRGNETTO * 0.10 else 0 end)
-            WHEN A.NOSAT=1 THEN (A.HRGNETTO * C.ISI2)- ((case when a.PPN=2 then (A.HRGNETTO * C.ISI2) * 0.10 else 0 end))
-            WHEN A.NOSAT=3 THEN (((A.HRGNETTO / C.ISI3)*C.ISI2)- ((case when a.PPN=2 then ((A.HRGNETTO / C.ISI3)*C.ISI2) * 0.10 else 0 end))) END * A.KURS
-
-     when aa.NOSAt=3 then
-       CASE WHEN A.NOSAT=3 THEN A.HRGNETTO - ((case when a.PPN=2 then A.HRGNETTO * 0.10 else 0 end))
-            WHEN A.NOSAT=1 THEN (A.HRGNETTO * C.ISI3)- ((case when a.PPN=2 then (A.HRGNETTO * C.ISI3) * 0.10 else 0 end))
-            WHEN A.NOSAT=2 THEN (((A.HRGNETTO/ C.ISI2)*c.ISI3) - ((case when a.PPN=2 then ((A.HRGNETTO / C.ISI2)*c.ISI3) * 0.10 else 0 end))) eND * A.KURS
-End
-from DBBELIDET A
-Left OUter join DBBELI b on A.nobukti=B.NOBUKTI
-Left Outer join DBBARANG C on A.KODEBRG=C.KODEBRG
-Where B.TANGGAL <=B.TANGGAL and A.KODEBRG=AA.KODEBRG  and A.kodegdg<>'G06'
-order by B.TANGGAL Desc
-   ) XBeli
-
-
- from DbSODET AA
-left outer join dbSo B on AA.NOBUKTI=B.nobukti
-where AA.nobukti = @noSO and AA.iscetakkitir=0
-  ) XTABLE
-
-      ", ["noso" => $req->nobukti ]);
-      // if ($x) {
-      //
-      //   array_push($tempArray, $x);
-      // }
-      //
-      // }
-      return $x;
+      // Query cek harga dipindah ke SOOtorisasi::cekHarga (satu sumber dengan halaman approve HP).
+      return SOOtorisasi::cekHarga($req->nobukti);
 
 
     }
 
 
 
-  public function updateOtorisasi (Request $req) {
+  // Hak: IsOtorisasi1 menu SO. User tanpa hak mengirim permintaan lewat tombol yang sama (otorisasirequest).
+  // UPDATE, aturan blacklist/plafon dan jejak audit ada di SOOtorisasi - satu sumber dengan otorisasi lewat HP.
+  // Balasan sukses tetap 1; penolakan sekarang {ok:0, pesan} (dulu kode 9 = blacklist, 2 = plafon, 0 = tanpa akses).
+  public function updateOtorisasi (Request $req, OtorisasiService $oto) {
     $username = \Auth::user()->username;
-     $maxOL = DB::connection('SML')->select("select * from dbmenu where href ='so'");
-    $cekOto = DB::connection('SML')->select("
-select b.*,c.KodeJab,isnull(d.PlafonOtoSO , 0) PlafonOtoPO,
-       case when B.IsOtorisasi1=1 then 1
-   when B.IsOtorisasi2=1 then 2
-   when B.IsOtorisasi3=1 then 3
-   when B.IsOtorisasi4=1 then 4
-   when B.IsOtorisasi5=1 then 5 end leveloto,e.nnet,e.pblacklist
-       from dbmenu a
-    join dbflmenu b on a.kodemenu = b.l1
-    join DBFLPASS c on b.USERID=c.USERID
-    join DBJABATAN d on c.KodeJab=d.KODEJAB
-    left outer join (select a.nobukti,SUM(a.nnet) nnet,isnull(c.pblacklist,0) pblacklist
-           from DBSODET A
-           left outer join dbSo b on a.noBukti=b.noBukti
-           left outer join DBCustSUpp c on b.kodecust=c.kodecustsupp
-           where a.NOBUKTI= :nobukti
-           group by a.nobukti,pblacklist
-           ) E on 1=1
-    where a.href ='so' and b.USERID= :username ", ["nobukti" => $req->nobukti , "username" => $username]);
-    $tanggal = date('Y-m-d H:i:s');
-  // return ["cekoto" => $cekOto ,
-// "blacklist" => $cekOto[0]->pblacklist, "nnet" => (int)$cekOto[0]->nnet , "plafon" => (int)$cekOto[0]->PlafonOtoPO ];
-     if($cekOto[0]->pblacklist == 1) {
-
-        return 9;
-     }
-
-
-    if ( (int)$cekOto[0]->nnet > (int)$cekOto[0]->PlafonOtoPO ) {
-      if($cekOto[0]->leveloto == 1) {
-
-        return 2;
-      } else {
-        $res = DB::connection('SML')->update("update dbso set isOtorisasi1 = 1, maxol = :maxol, OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username ,"maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
-         $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto','SO',$req->nobukti,'',0,'DBSO');
-      }
-
-    } else {
-      $res = DB::connection('SML')->update("update dbso set isOtorisasi1 = 1, maxol = :maxol , OtoUser1= :username , TglOto1 = :tanggal where nobukti = :nobukti", ["username" => \Auth::user()->username , "maxol" => $maxOL[0]->OL , "tanggal" => $tanggal , "nobukti" => $req->nobukti]);
-       $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto','SO',$req->nobukti,'',0,'DBSO');
+    if (!$oto->canApprove($username, self::HREF)) {
+      return $this->tolak('Anda tidak berhak otorisasi SO');
     }
+    $so = $this->headerDokumen('DBSO', $req->nobukti);
+    if (!$so) {
+      return $this->tolak('SO ' . $req->nobukti . ' tidak ditemukan, mungkin sudah dihapus.');
+    }
+    try {
+      $res = $oto->handler(self::HREF)->approve($req->nobukti, $username);
+    } catch (\DomainException $e) {
+      return $this->tolak($e->getMessage());
+    }
+    if (!$res) {
+      return $this->tolak('SO ' . $req->nobukti . ' sudah diotorisasi oleh ' . $so->otouser1 . '.');
+    }
+    // Tutup permintaan push yang masih pending + kabari peminta.
+    $oto->closePending(self::HREF, $req->nobukti, $username);
 
-
-
-return 1;
-
+    return 1;
   }
 
   public function updateCBD (Request $req) {
@@ -1487,54 +1400,34 @@ return 1;
     return 1;
   }
 
-  public function updateBatalOtorisasi (Request $req) {
+  // Hak: IsBatal menu SO (dulu IsOtorisasi1 di JS); keterangan wajib, dicatat ke LoggingData('btloto'). Aturan plafon ada di SOOtorisasi.
+  // User tanpa hak mengirim permintaan batal lewat tombol yang sama (otorisasirequest, tipe B).
+  public function updateBatalOtorisasi (Request $req, OtorisasiService $oto) {
     $username = \Auth::user()->username;
-    // Dulu disalin dari Purchase Order (menu 'purchaseorder' + nilai DBPODET), sehingga nilai SO
-    // tidak pernah terbaca (nnet selalu kosong) dan user tanpa akses menu PO akan error.
-    // Sekarang memakai menu 'so' + nilai DBSODET, aturan plafonnya sama dengan updateOtorisasi().
-    $cekOto = DB::connection('SML')->select("
-    select b.*,c.KodeJab,isnull(d.PlafonOtoSO , 0) PlafonOtoPO,
-           case when B.IsOtorisasi1=1 then 1
-    	 when B.IsOtorisasi2=1 then 2
-    	 when B.IsOtorisasi3=1 then 3
-    	 when B.IsOtorisasi4=1 then 4
-    	 when B.IsOtorisasi5=1 then 5 end leveloto,e.nnet
-           from dbmenu a
-        join dbflmenu b on a.kodemenu = b.l1
-        join DBFLPASS c on b.USERID=c.USERID
-        join DBJABATAN d on c.KodeJab=d.KODEJAB
-        left outer join (select nobukti,SUM(nnet) nnet from DBSODET
-    					 where NOBUKTI= :nobukti
-    					 group by nobukti
-    					 ) E on 1=1
-        where a.href ='so' and b.USERID= :username", ["nobukti" => $req->nobukti , "username" => $username]);
-    if (empty($cekOto)) {
-      return 0;
+    if (!$oto->canCancel($username, self::HREF)) {
+      return $this->tolak('Anda tidak berhak batal otorisasi SO');
     }
-    // Keterangan dari prompt "batal otorisasi" ikut dicatat di log.
-    $keterangan = $req->pket ?: '';
-    if ( (int)$cekOto[0]->nnet > (int)$cekOto[0]->PlafonOtoPO ) {
-      if($cekOto[0]->leveloto == 1) {
-
-        return 0;
-      } else {
-        $res = DB::connection('SML')->update("update dbso set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL  where nobukti = :nobukti", ["nobukti" => $req->nobukti]);
-
-         $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'btloto','SO',$req->nobukti,$keterangan,0,'DBSO');
-
-      }
-
-    } else {
-      $res = DB::connection('SML')->update("update dbso set isOtorisasi1 = 0, maxol = -1 , OtoUser1= '' , TglOto1 = NULL  where nobukti = :nobukti", [ "nobukti" => $req->nobukti]);
-
-       $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'btloto','SO',$req->nobukti,$keterangan,0,'DBSO');
-
-
+    if (trim((string) $req->pket) === '') {
+      return $this->tolak('Keterangan batal otorisasi harus diisi.');
     }
+    $so = $this->headerDokumen('DBSO', $req->nobukti);
+    if (!$so) {
+      return $this->tolak('SO ' . $req->nobukti . ' tidak ditemukan, mungkin sudah dihapus.');
+    }
+    if ((int) $so->isotorisasi1 !== 1) {
+      return $this->tolak('SO ' . $req->nobukti . ' belum diotorisasi.');
+    }
+    try {
+      $res = $oto->handler(self::HREF)->cancelApproval($req->nobukti, $username, trim((string) $req->pket));
+    } catch (\DomainException $e) {
+      return $this->tolak($e->getMessage());
+    }
+    if (!$res) {
+      return $this->tolak('SO ' . $req->nobukti . ' sudah dibatalkan otorisasinya.');
+    }
+    // Tutup permintaan batal yang masih pending + kabari peminta.
+    $oto->closePending(self::HREF, $req->nobukti, $username, OtorisasiService::BATAL);
 
-
-
-  // $tempX2 =  app('App\Http\Controllers\GlobalController')->LoggingData( 'oto2','PO',$req->nobukti,'',0,'DBPO');
     return 1;
   }
 
