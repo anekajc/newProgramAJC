@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Produksi\ProduksiBomController;
 use App\Http\Controllers\Produksi\ProduksiSPKController;
+use App\Http\Controllers\Produksi\ProduksiHasilProduksiController;
 
 // BOM ==========================================================
 Route::get('/produksibom', [ProduksiBomController::class, 'index'])->middleware('auth');
@@ -32,6 +33,20 @@ Route::post('/produksispkhapus', [ProduksiSPKController::class, 'hapusSPK'])->mi
 Route::get('/produksispklistproses', [ProduksiSPKController::class, 'listProsesSPK'])->middleware('auth');
 Route::post('/produksispkspspkjd', [ProduksiSPKController::class, 'spSPKJD'])->middleware('auth');
 Route::post('/produksispkspspk', [ProduksiSPKController::class, 'spSPK'])->middleware('auth');
+
+// HASIL PRODUKSI ======================================================
+Route::get('/produksihasilproduksi', [ProduksiHasilProduksiController::class, 'index'])->middleware('auth');
+Route::get('/produksihasilproduksiloadall', [ProduksiHasilProduksiController::class, 'loadAll'])->middleware('auth');
+Route::get('/produksihasilproduksinextnobukti', [ProduksiHasilProduksiController::class, 'nextNoBukti'])->middleware('auth');
+Route::get('/produksihasilproduksidetail', [ProduksiHasilProduksiController::class, 'detail'])->middleware('auth');
+Route::get('/produksihasilproduksilistspk', [ProduksiHasilProduksiController::class, 'listSPK'])->middleware('auth');
+Route::get('/produksihasilproduksilistbarangavalan', [ProduksiHasilProduksiController::class, 'listBarangAvalan'])->middleware('auth');
+Route::get('/produksihasilproduksilistbarangspk', [ProduksiHasilProduksiController::class, 'listBarangSPK'])->middleware('auth');
+Route::get('/produksihasilproduksilistgudang', [ProduksiHasilProduksiController::class, 'listGudang'])->middleware('auth');
+Route::post('/produksihasilproduksispitem', [ProduksiHasilProduksiController::class, 'spItem'])->middleware('auth');
+Route::post('/produksihasilproduksihapusitem', [ProduksiHasilProduksiController::class, 'spHapusItem'])->middleware('auth');
+Route::post('/produksihasilproduksiotorisasi', [ProduksiHasilProduksiController::class, 'updateOtorisasi'])->middleware('auth');
+Route::post('/produksihasilproduksibatalotorisasi', [ProduksiHasilProduksiController::class, 'updateBatalOtorisasi'])->middleware('auth');
 
 
 //========================================================================================================================================

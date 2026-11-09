@@ -2,6 +2,7 @@
 
 use App\Otorisasi\BankOtorisasi;
 use App\Otorisasi\DebetNoteOtorisasi;
+use App\Otorisasi\HasilProduksiOtorisasi;
 use App\Otorisasi\InvoiceReturBeliOtorisasi;
 use App\Otorisasi\KasOtorisasi;
 use App\Otorisasi\PembelianAccOtorisasi;
@@ -81,6 +82,11 @@ return [
     'pembelianpermintaandebetnote' => [
         'label' => 'Debet Note',
         'handler' => DebetNoteOtorisasi::class,
+    ],
+
+    'produksihasilproduksi' => [
+        'label' => 'Hasil Produksi',
+        'handler' => HasilProduksiOtorisasi::class,
     ],
 
 ];
