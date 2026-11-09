@@ -912,6 +912,56 @@ class HeaderTableController extends Controller
 
       $desimal = $this->desimalHeaderTable($headertable , $isnumberheadertable);
     }
+    // Hasil Produksi
+    else if ($req->href == 'produksihasilproduksi') {
+      $statusset = 1;
+      $isparsed = 0;
+      $headertable = DB::connection("SML")->select("select *  from dbheadertable where  href= :href and username = :username "  , ["username" => \Auth::user()->username , "href" => $req->href ]);
+
+      if (count($headertable) > 0) {
+        $isnumberheadertable = json_decode($headertable[0]->isnumber);
+        $headertablevalue = json_decode($headertable[0]->value);
+        $headertableheader = json_decode($headertable[0]->header);
+        $headerisshown = json_decode($headertable[0]->isshown);
+        $isparsed = 0;
+      } else {
+        $isparsed = 1;
+        // Sama seperti cabang 'pembelianpermintaandebetnote' - kolom default ditulis eksplisit.
+        // Nama field HARUS sama persis dengan alias kolom di
+        // ProduksiHasilProduksiController@loadAll. IsOtorisasi1/OtoUser1/TglOto1 sengaja tidak
+        // dimasukkan - kolom Otorisasi/User Oto/Tgl Oto selalu ditambahkan lewat JS.
+        // field => tipe (0 varchar, 1 float, 2 date)
+        $default = [
+          'No Bukti' => 0,
+          'Tanggal'  => 2,
+          'Shift'    => 0,
+        ];
+        foreach ($default as $key => $tipe) {
+          array_push($headertablevalue, $key);
+          array_push($headertableheader, $key);
+          array_push($headerisshown, 1);
+          $isnumberheadertable[] = $tipe;
+        }
+      }
+
+      $aliasOrdered = [];
+      if ($headertablealias) {
+        foreach ($headertablevalue as $header) {
+          foreach ($headertablealias as $item) {
+            if ($item->value === $header) {
+              array_push( $aliasOrdered , $item);
+              break;
+            }
+          }
+        }
+      } else {
+        foreach ($headertablevalue as $header) {
+          array_push( $aliasOrdered , ["value" => $header , "alias" => $header]);
+        }
+      }
+
+      $desimal = $this->desimalHeaderTable($headertable , $isnumberheadertable);
+    }
     // Invoice Retur Beli
     else if ($req->href == 'invoicereturbeli') {
       $statusset = 1;

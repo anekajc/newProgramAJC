@@ -2,6 +2,7 @@
 
 use App\Otorisasi\BankOtorisasi;
 use App\Otorisasi\DebetNoteOtorisasi;
+use App\Otorisasi\HasilProduksiOtorisasi;
 use App\Otorisasi\InvoiceReturBeliOtorisasi;
 use App\Otorisasi\KasOtorisasi;
 use App\Otorisasi\KreditNoteOtorisasi;
@@ -95,6 +96,9 @@ return [
         'handler' => DebetNoteOtorisasi::class,
     ],
 
+    'produksihasilproduksi' => [
+        'label' => 'Hasil Produksi',
+        'handler' => HasilProduksiOtorisasi::class,
     'penawaranso' => [
         'label' => 'Penawaran SO',
         'handler' => PenawaranSOOtorisasi::class,
