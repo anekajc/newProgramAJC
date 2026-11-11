@@ -1,0 +1,16 @@
+/* Tombol Batal / Simpan / Tambah / Tutup halaman Produksi (BOM, SPK, Pemakaian Bahan) dibuat
+   oval seperti tombol di menu SO (so.blade.php: height 30px, padding 4px 12px, radius 20px,
+   font .75rem, bold). Tombol cari di samping input (.btn-select), tombol aksi tabel
+   (.btn-action-sm) dan tombol toolbar tidak ikut. */
+.btn.btn-sm.btn-danger,
+.btn.btn-lg.btn-danger,
+.btn.btn-chip-biru:not(.btn-select),
+.btn.btn-batal-add {
+  height: 30px;
+  padding: 4px 12px !important;
+  border-radius: 20px !important;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.5;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}

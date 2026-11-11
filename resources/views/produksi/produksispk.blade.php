@@ -19,6 +19,8 @@
     href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
 <link rel="stylesheet"
     href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
+<link rel="stylesheet"
+    href="{!! URL::asset('css/produksi-oval.css') !!}?v={{ @filemtime(base_path('public/css/produksi-oval.css')) ?: '1' }}">
 @endsection
 
 @section('content')
@@ -33,7 +35,19 @@
   <div class="card">
     <div class="card-body" style="padding:0;">
 
-      @include('master.partials.toolbarMaster')
+      {{-- Tombol Filter hijau di toolbar (modal #modalFilterMaster, MasterList.filter): status otorisasi.
+           Nilainya dibaca loadAll() lewat #filterOtorisasi dan dikirim ke produksispkloadall. --}}
+      @include('master.partials.toolbarMaster', [
+        'filterJudul' => 'Filter SPK',
+        'filterIsi' => '
+          <label for="filterOtorisasi">Status Otorisasi</label>
+          <select id="filterOtorisasi" class="form-control">
+            <option value="">Semua</option>
+            <option value="0">Belum Otorisasi</option>
+            <option value="1">Sudah Otorisasi</option>
+          </select>
+        ',
+      ])
 
       {{-- Header interaktif (geser & sembunyikan kolom, disimpan per user) -- pola sama dengan
            halaman Master (masterbarang): <thead> diisi MasterList.headHtml() dari loadAll(),
@@ -85,10 +99,8 @@
               <label>No. Bukti</label>
               <input type="text" class="form-control" id="input_spk_nobukti" disabled>
             </div>
-            <div class="col-md-auto" style="width:100px;">
-              <label>No. Urut</label>
-              <input type="text" class="form-control" id="input_spk_nourut" disabled>
-            </div>
+            {{-- No. Urut tidak ditampilkan, tapi tetap dibawa ke sp_SPKJD (spkBJSimpan()). --}}
+            <input type="hidden" id="input_spk_nourut">
             <div class="col-md">
               <label>Tanggal</label>
               <input type="date" class="form-control" id="input_spk_tanggal">
@@ -119,7 +131,7 @@
         <div class="container-fluid mt-2">
           <table class="pb-sub-table" style="width:100%;">
             <thead>
-              <tr><th>Kode Barang Jadi</th><th>Nama Barang Jadi</th><th>Qnt</th><th>Sat</th><th>BOM</th><th class="spk-aksi">Actions</th></tr>
+              <tr><th>Kode Barang Jadi</th><th>Nama Barang Jadi</th><th>QTY</th><th>Sat</th><th>BOM</th><th class="spk-aksi">Actions</th></tr>
             </thead>
             <tbody id="tabel_data_spkbj"><tr><td colspan="6" class="text-center text-muted">Belum ada Barang Jadi</td></tr></tbody>
           </table>
@@ -149,7 +161,7 @@
               </div>
             </div>
             <div class="col-md-2">
-              <label>Quantity</label>
+              <label>QTY</label>
               <input type="text" inputmode="decimal" class="form-control" id="input_spkbj_qnt" value="0.00" oninput="formatAngkaKetik(this)" onblur="formatAngkaInput(this)">
             </div>
             <div class="col-md-2">
@@ -176,7 +188,7 @@
         <div class="container-fluid mt-2">
           <table class="pb-sub-table" style="width:100%;">
             <thead>
-              <tr><th>Kode Barang</th><th>Nama Barang</th><th>Kode Proses</th><th>Qnt</th><th>Sat</th><th class="spk-aksi">Actions</th></tr>
+              <tr><th>Kode Barang</th><th>Nama Barang</th><th>Kode Proses</th><th>QTY</th><th>Sat</th><th class="spk-aksi">Actions</th></tr>
             </thead>
             <tbody id="tabel_data_spkdet"><tr><td colspan="6" class="text-center text-muted">Belum ada Bahan Baku</td></tr></tbody>
           </table>
@@ -194,12 +206,16 @@
             </div>
             <div class="col-md-3">
               <label>Kode Proses</label>
-              {{-- Hanya proses yang terikat ke Kode BOM Barang Jadi di SPK ini -- diisi
-                   spkIsiProses() dari produksispklistproses. --}}
-              <select class="form-control" id="input_spkdet_kodeprs"></select>
+              {{-- Dipilih lewat picker (spkPilihProses()) seperti Kode Proses di BOM -- hanya
+                   proses yang terikat ke Kode BOM Barang Jadi di SPK ini
+                   (produksispklistproses). --}}
+              <div class="input-group">
+                <input type="text" class="form-control" id="input_spkdet_kodeprs" readonly>
+                <div class="input-group-append"><button type="button" class="btn btn-chip-biru btn-select" onclick="spkPilihProses()" title="Cari Kode Proses"><i class="bi bi-search"></i></button></div>
+              </div>
             </div>
             <div class="col-md-2">
-              <label>Qnt</label>
+              <label>QTY</label>
               <input type="text" inputmode="decimal" class="form-control" id="input_spkdet_qnt" value="0.00" oninput="formatAngkaKetik(this)" onblur="formatAngkaInput(this)">
             </div>
             <div class="col-md-2">
@@ -214,8 +230,41 @@
         </div>
 
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Picker Kode Proses (Bahan Baku) -- isi dari produksispklistproses, pola sama dengan picker
+     Kode Proses di modalProduksiBOM.blade.php. -->
+<div class="modal fade" id="formPilihProsesSPK" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Kode Proses</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid mt-4">
+          <div class="row">
+            <div class="col-12" style="overflow:auto; margin-top:-30px;">
+              <table id="tabel_pilihproses" class="data-table">
+                <thead><tr><th style="padding: 4px 12px;" scope="col">Kode</th><th style="padding: 4px 12px;" scope="col">Nama</th></tr></thead>
+                <tbody id="tabel_data_pilihproses" class="text-left"><tr><td>-</td><td>-</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-lg btn-danger" data-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-lg btn-batal-add" style="
+            height: 30px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" data-dismiss="modal">Batal</button>
       </div>
     </div>
   </div>
@@ -397,6 +446,7 @@ function loadAll () {
     ajax: {
       url: "{!! url('produksispkloadall') !!}",
       type: "GET",
+      data: function (d) { d.otorisasi = $('#filterOtorisasi').val() },
     },
     columns: MasterList.kolomServer(cols, function (data, type, row) {
       // Pola sama dengan menu lain: SPK yang sudah diotorisasi hanya bisa dilihat (Detail) atau
@@ -418,7 +468,9 @@ function loadAll () {
       Ket: { defaultContent: '-' },
       IsOtorisasi1: {
         render: function (data) {
-          return '<input type="checkbox" disabled' + (Number(data) === 1 ? ' checked' : '') + '>'
+          return Number(data) === 1
+            ? '<i class="bi bi-check2 text-success" title="Sudah Otorisasi" style="-webkit-text-stroke-width: 2px;"></i>'
+            : '<i class="bi bi-x-lg text-danger" title="Belum Otorisasi" style="-webkit-text-stroke-width: 1px;"></i>'
         },
         className: 'text-center',
         searchable: false,
@@ -958,30 +1010,42 @@ function spkRefreshDet () {
 // dipilih setelah daftar termuat (dipakai spkDetEdit(); kalau proses baris itu sudah tidak ada di
 // daftar, tetap ditambahkan supaya tidak hilang saat disimpan ulang).
 function spkIsiProses (terpilih) {
+  document.getElementById('input_spkdet_kodeprs').value = terpilih || ''
+}
+
+// Picker Kode Proses -- daftar proses dari BOM Barang Jadi di SPK ini.
+function spkPilihProses () {
   $.ajax({
     url: "{!! url('produksispklistproses') !!}",
     type: "get",
     data: { nobukti: spkNoBuktiAktif },
     success: function (res) {
-      let opts = '<option value="">-</option>'
-      let ada = false
+      let rowTable = ''
       res.forEach((item) => {
-        if (item.KodePrs === terpilih) { ada = true }
-        opts += `<option value="${item.KodePrs}">${item.KodePrs} - ${item.Keterangan ?? ''}</option>`
+        rowTable += `
+          <tr class="pick-row" onclick="spkPilihProsesSet('${item.KodePrs}')">
+            <td>${item.KodePrs}</td>
+            <td>${item.Keterangan ?? ''}</td>
+          </tr>
+        `
       });
-      if (terpilih && !ada) {
-        opts += `<option value="${terpilih}">${terpilih}</option>`
-      }
-      document.getElementById('input_spkdet_kodeprs').innerHTML = opts
-      document.getElementById('input_spkdet_kodeprs').value = terpilih || ''
-      if (!res.length && !terpilih) {
+      if (!res.length) {
         alertify.warning('Tambah Barang Jadi (dengan Kode BOM) terlebih dahulu, proses diambil dari BOM-nya')
+        rowTable = '<tr><td colspan="2" class="text-center text-muted">Tidak ada data</td></tr>'
       }
+      document.getElementById('tabel_data_pilihproses').innerHTML = rowTable
+      if (typeof pickerKasInit === 'function') { pickerKasInit('tabel_pilihproses') }
+      $('#formPilihProsesSPK').modal('show')
     },
     error: function () {
       alertify.error('Gagal memuat Kode Proses')
     }
   });
+}
+
+function spkPilihProsesSet (kodeprs) {
+  document.getElementById('input_spkdet_kodeprs').value = kodeprs
+  $('#formPilihProsesSPK').modal('hide')
 }
 
 function spkDetTambah () {
@@ -1144,8 +1208,8 @@ $('#formAddSPK').on('hidden.bs.modal', function () {
 // Modal pemilih (Kode BOM/Barang Jadi/Bahan Baku) disamakan persis dengan modal pemilih
 // menu Kas/SO/PO -- pola sama dengan DOMContentLoaded di produksibom.blade.php.
 document.addEventListener('DOMContentLoaded', function () {
-  jQuery('#formPilihBarangJadi, #formPilihBOM, #formPilihBahanBaku').addClass('picker-kas')
-  jQuery('#formPilihBarangJadi .modal-footer .btn, #formPilihBOM .modal-footer .btn, #formPilihBahanBaku .modal-footer .btn').filter(function () {
+  jQuery('#formPilihBarangJadi, #formPilihBOM, #formPilihBahanBaku, #formPilihProsesSPK').addClass('picker-kas')
+  jQuery('#formPilihBarangJadi .modal-footer .btn, #formPilihBOM .modal-footer .btn, #formPilihBahanBaku .modal-footer .btn, #formPilihProsesSPK .modal-footer .btn').filter(function () {
     return jQuery.trim(jQuery(this).text()) === 'Batal'
   }).addClass('picker-kas-batal')
 })

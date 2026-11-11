@@ -5,6 +5,7 @@ use App\Http\Controllers\Produksi\ProduksiBomController;
 use App\Http\Controllers\Produksi\ProduksiSPKController;
 use App\Http\Controllers\Produksi\ProduksiHasilProduksiController;
 use App\Http\Controllers\Produksi\ProduksiPemakaianBahanController;
+use App\Http\Controllers\Produksi\ProduksiPemakaianTambahanController;
 
 // BOM ==========================================================
 Route::get('/produksibom', [ProduksiBomController::class, 'index'])->middleware('auth');
@@ -64,5 +65,17 @@ Route::get('/produksipemakaianbahanloaddetailbp', [ProduksiPemakaianBahanControl
 Route::post('/produksipemakaianbahanupdatebp', [ProduksiPemakaianBahanController::class, 'updateBP'])->middleware('auth');
 Route::post('/produksipemakaianbahanspotorisasi', [ProduksiPemakaianBahanController::class, 'spOtorisasi'])->middleware('auth');
 Route::post('/produksipemakaianbahanspbatalotorisasi', [ProduksiPemakaianBahanController::class, 'spBatalOtorisasi'])->middleware('auth');
+
+// PEMAKAIAN TAMBAHAN
+Route::get('/produksipemakaiantambahan', [ProduksiPemakaianTambahanController::class, 'index'])->middleware('auth');
+Route::get('/produksipemakaiantambahanloadbp', [ProduksiPemakaianTambahanController::class, 'loadBP'])->middleware('auth');
+Route::get('/produksipemakaiantambahanlistgudang', [ProduksiPemakaianTambahanController::class, 'listGudang'])->middleware('auth');
+Route::get('/produksipemakaiantambahanlistbarang', [ProduksiPemakaianTambahanController::class, 'listBarang'])->middleware('auth');
+Route::get('/produksipemakaiantambahanloaddetailbp', [ProduksiPemakaianTambahanController::class, 'loadDetailBP'])->middleware('auth');
+Route::post('/produksipemakaiantambahantambahitem', [ProduksiPemakaianTambahanController::class, 'tambahItem'])->middleware('auth');
+Route::post('/produksipemakaiantambahanhapusitem', [ProduksiPemakaianTambahanController::class, 'hapusItem'])->middleware('auth');
+Route::post('/produksipemakaiantambahanupdatebp', [ProduksiPemakaianTambahanController::class, 'updateBP'])->middleware('auth');
+Route::post('/produksipemakaiantambahanspotorisasi', [ProduksiPemakaianTambahanController::class, 'spOtorisasi'])->middleware('auth');
+Route::post('/produksipemakaiantambahanspbatalotorisasi', [ProduksiPemakaianTambahanController::class, 'spBatalOtorisasi'])->middleware('auth');
 
 //========================================================================================================================================

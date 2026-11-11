@@ -59,6 +59,8 @@
                 <button type="button" class="btn btn-chip-biru btn-select" onclick="buttonKodeProses()" title="Cari Kode Proses"><i class="bi bi-search"></i></button>
               </div>
             </div>
+            <label for="input_BOM_namaProses">Nama Proses</label>
+            <input type="text" class="form-control" id="input_BOM_namaProses" disabled>
           </div>
           <div class="text-right mt-3">
             <button type="button" class="btn btn-sm btn-danger" onclick="closeShowHideSubGroup()">Batal</button>
@@ -112,13 +114,12 @@
             <table id="tabel_proses_modal" class="pb-sub-table"  >
               <thead class="text-center">
                 <tr id='theadCustom'>
-                  <th scope="col">Urut</th>
                   <th scope="col">Kode Proses</th>
+                  <th scope="col">Nama Proses</th>
                   <th scope="col">Actions</th>
 
                 </tr>
               </thead>
-
 
               <tbody id="tabel_data_proses_modal" class="text-left" >
 
@@ -126,7 +127,6 @@
 
                   <td></td>
                   <td></td>
-
 
                     <td class="text-center">
                       <button class="btn-action-sm btn-action-danger" type="button"><i class="bi bi-trash"></i></button>
@@ -409,6 +409,7 @@ function buttonKodeProses () {
 
 function buttonPilihKodeProses (kodeprs, keterangan) {
   document.getElementById('input_BOM_kodeProses').value = kodeprs
+  document.getElementById('input_BOM_namaProses').value = keterangan || ''
   $('#formKodeProses').modal('hide')
 }
 
@@ -443,6 +444,7 @@ function submitAddProses () {
       alertify.success('Proses berhasil ditambahkan')
       $('.showhide').hide()
       document.getElementById('input_BOM_kodeProses').value = ''
+      document.getElementById('input_BOM_namaProses').value = ''
       pbRefreshTabelProses()
     },
     error: function () {
@@ -529,8 +531,8 @@ function pbRefreshTabelProses (autoPilihKodePrs) {
       res.forEach((item) => {
         rowTable += `
           <tr class="pb-modal-pilih-proses" data-kodeprs="${item.KodePrs}" onclick="pbModalPilihProses('${item.KodePrs}', this)">
-            <td>${item.Urut}</td>
             <td>${item.KodePrs}</td>
+            <td>${item.Keterangan}</td>
             <td class="text-center">
               <button class="btn-action-sm btn-action-danger" type="button" onclick="event.stopPropagation(); buttonHapusProses('${kodebom}', ${item.Urut}, '${item.KodePrs}')"><i class="bi bi-trash"></i></button>
             </td>
