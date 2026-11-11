@@ -2896,6 +2896,7 @@
 @endsection
 
 @section('js')
+@include('partials.tabel-memuat')
 {{-- window.ReportTable: header tabel interaktif (drag kolom, roda gigi, bar kolom
      tersembunyi, tombol "Reset kolom"). File-nya berupa IIFE ber-guard, aman meski
      dimuat lebih dari sekali. --}}

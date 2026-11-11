@@ -3224,6 +3224,7 @@
 @endsection
 
 @section('js')
+@include('partials.tabel-memuat')
 <script>window.RT_LABEL_PAJAK = true</script>
 <script src="{{ asset('js/report-table.js') }}"></script>
 <script type="text/javascript">

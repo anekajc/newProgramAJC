@@ -3987,6 +3987,7 @@ td input[type="checkbox"] {
 @endsection
 
 @section('js')
+@include('partials.tabel-memuat')
 {{-- window.ReportTable: header tabel interaktif (drag kolom, menu roda gigi, bar kolom
      tersembunyi, tombol "Reset kolom"). Dimuat di halaman ini saja, bukan di layout
      purchasing/newmasterx, supaya halaman purchasing yang lain tidak ikut terpengaruh.
