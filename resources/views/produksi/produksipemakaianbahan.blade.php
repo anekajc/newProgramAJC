@@ -389,7 +389,8 @@ function renderTabelBP () {
     } else {
       aksi += `
         <button title="Edit" class="btn-action-sm btn-action-success" type="button" onclick="buttonEdit('${item.NoBukti}')"><i class="bi bi-pen"></i></button>
-        <button title="Otorisasi" class="btn-action-sm btn-action-info" type="button" onclick="buttonOtorisasi('${item.NoBukti}')"><i class="bi bi-key"></i></button>`
+        <button title="Otorisasi" class="btn-action-sm btn-action-info" type="button" onclick="buttonOtorisasi('${item.NoBukti}')"><i class="bi bi-key"></i></button>
+        <button title="Hapus" class="btn-action-sm btn-action-danger" type="button" onclick="buttonHapusBP('${item.NoBukti}')"><i class="bi bi-trash"></i></button>`
     }
     aksi = `<div class="action-buttons-wrap">${aksi}</div>`
     rowTable += MasterList.baris(item, cols, aksi, BP_KHUSUS)
@@ -534,6 +535,30 @@ function bpMuatBP (nobukti, mode) {
       alertify.error('Gagal memuat BP')
     }
   })
+}
+
+// Hapus BP dari baris tab BP (hanya yang belum diotorisasi) -- ProduksiPemakaianBahanController::hapusBP().
+// Setelah berhasil kedua daftar dimuat ulang (Qnt Pakai di OutStanding SPK ikut berubah).
+function buttonHapusBP (nobukti) {
+  alertify.confirm('Hapus BP', 'Apakah yakin ingin menghapus BP "' + nobukti + '" beserta seluruh barangnya?',
+    function () {
+      $.ajax({
+        url: "{!! url('produksipemakaianbahanhapusbp') !!}",
+        type: "post",
+        dataType: "json",
+        data: { _token: $('#_token').val(), nobukti },
+        success: function () {
+          alertify.success('BP berhasil dihapus')
+          loadBP()
+          if (typeof loadOutstanding === 'function') { loadOutstanding() }
+        },
+        error: function (xhr) {
+          alertify.error(xhr.responseJSON?.message || 'Gagal menghapus BP')
+        }
+      })
+    },
+    function () {}
+  )
 }
 
 // Otorisasi langsung dari baris tabel (tanpa membuka form, tanpa dialog konfirmasi) -- pola sama dengan

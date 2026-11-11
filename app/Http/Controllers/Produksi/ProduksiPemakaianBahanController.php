@@ -261,6 +261,42 @@ class ProduksiPemakaianBahanController extends Controller
     return response()->json(['success' => true, 'nobukti' => $nobukti]);
   }
 
+  // Hapus BP (satu BP utuh dari tab BP) -- sp_PenyerahanBhn Choice 'D' per baris (Nobukti + Urut +
+  // NoSPK + UrutSPK); SP ikut menghapus header BP saat baris terakhir terhapus. Ditolak kalau BP tidak
+  // ada atau sudah diotorisasi (level mana pun). Semua dalam satu transaksi; kalau header masih tersisa
+  // tanpa baris, dihapus langsung.
+  public function hapusBP(Request $req) {
+    $db = DB::connection('SML');
+    $nobukti = trim((string) $req->nobukti);
+
+    $bp = $db->selectOne(
+      'SELECT IsOtorisasi1, IsOtorisasi2, IsOtorisasi3, IsOtorisasi4, IsOtorisasi5 FROM DBPenyerahanBhn WHERE Nobukti = ?',
+      [$nobukti]
+    );
+    if (!$bp) {
+      return response()->json(['message' => 'BP tidak ditemukan'], 404);
+    }
+    if ($bp->IsOtorisasi1 || $bp->IsOtorisasi2 || $bp->IsOtorisasi3 || $bp->IsOtorisasi4 || $bp->IsOtorisasi5) {
+      return response()->json(['message' => 'BP sudah diotorisasi, tidak bisa dihapus'], 422);
+    }
+
+    try {
+      $db->transaction(function () use ($db, $nobukti) {
+        $rows = $db->select('SELECT Urut, NoSPK, UrutSPK FROM DBPenyerahanBhnDET WHERE Nobukti = ? ORDER BY Urut DESC', [$nobukti]);
+        foreach ($rows as $r) {
+          $db->statement('exec sp_PenyerahanBhn ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?', [
+            'D', $nobukti, '', '1970-01-01', '', (int) $r->Urut, '', 0, 0, '', 0, (string) $r->NoSPK, 0, (int) $r->UrutSPK, 0, 0, '',
+          ]);
+        }
+        $db->delete('DELETE FROM DBPenyerahanBhn WHERE Nobukti = ?', [$nobukti]);
+      });
+    } catch (\Throwable $e) {
+      return response()->json(['message' => 'Gagal menghapus BP: ' . $e->getMessage()], 422);
+    }
+
+    return response()->json(['success' => true]);
+  }
+
   // Otorisasi BP -- pola sama dengan Otorisasi SPK/menu satu-level lain (mis. MemorialKoreksiController):
   // UPDATE langsung header (DBPenyerahanBhn), level 1, MaxOL = 1. Dikembalikan jumlah baris terupdate
   // (1 = berhasil); BP yang sudah diotorisasi atau tidak ada tidak disentuh (0). Hak akses

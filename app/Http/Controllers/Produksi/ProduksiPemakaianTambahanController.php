@@ -155,7 +155,16 @@ class ProduksiPemakaianTambahanController extends Controller
         '',                         // @KodePrs
       ]);
     } catch (\Throwable $e) {
-      return response()->json(['message' => 'Gagal menambah barang: ' . $e->getMessage()], 422);
+      \Log::error('tambahItem BP ' . $nobukti . ' / ' . $kodebrg . ': ' . $e->getMessage());
+      // Koneksi ke server SQL kadang putus SETELAH SP selesai -- cek dulu apakah barang sudah masuk.
+      try {
+        $sudahMasuk = $db->selectOne('SELECT 1 AS x FROM DBPenyerahanBhnDET WHERE Nobukti = ? AND KodeBrg = ?', [$nobukti, $kodebrg]);
+      } catch (\Throwable $e2) {
+        $sudahMasuk = null;
+      }
+      if (!$sudahMasuk) {
+        return response()->json(['message' => 'Gagal menambah barang: ' . $e->getMessage()], 422);
+      }
     }
 
     $sesudah = (int) $db->selectOne('SELECT COUNT(*) AS n FROM DBPenyerahanBhnDET WHERE Nobukti = ?', [$nobukti])->n;
