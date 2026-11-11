@@ -1264,14 +1264,22 @@
     'marketing':       'shopping-cart',
     'gudang':          'warehouse',
     'pos':             'trending-up',
+    'produksi':        'settings',     // roda gigi -- proses produksi
+    'dokumen bc':      'scroll-text',  // dokumen resmi (Bea Cukai)
     'laporan-laporan': 'file-text',
-    'utilitas':        'tool',
+    'utilitas':        'tool',         // kunci pas
     'jendela':         'monitor',
   };
 
+  // Di DBMENUWEB, Produksi/Dokumen BC/Utilitas masih berisi icon 'shopping-cart' (bawaan salin) yang
+  // dalam getModuleIcon() menang atas peta di atas -- untuk ketiganya peta di atas dipakai LEBIH DULU.
+  // Modul lain (mis. POS yang icon DB-nya memang diisi) tetap mengikuti urutan lama: icon DB dulu.
+  const moduleIconTimpaDB = ['produksi', 'dokumen bc', 'utilitas'];
+
   function getModuleIcon(label, dbIcon) {
-    if (dbIcon && icons[dbIcon]) return dbIcon;
     const k = (label || '').toLowerCase().trim();
+    if (moduleIconTimpaDB.includes(k) && moduleIcons[k]) return moduleIcons[k];
+    if (dbIcon && icons[dbIcon]) return dbIcon;
     if (moduleIcons[k]) return moduleIcons[k];
     for (const [pattern, iconName] of Object.entries(moduleIcons)) {
       if (k.includes(pattern)) return iconName;

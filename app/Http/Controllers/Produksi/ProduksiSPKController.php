@@ -41,12 +41,21 @@ class ProduksiSPKController extends Controller
     $start = (int) $req->input('start', 0);
     $length = (int) $req->input('length', 10);
 
-    $where = '';
+    // Filter status otorisasi (tombol Filter hijau di toolbar): '' = semua, '0' = belum
+    // diotorisasi, '1' = sudah diotorisasi (DBSPK.IsOtorisasi1; NULL dianggap belum). Digabung dengan
+    // kotak cari -- pencarian dibungkus kurung supaya OR-nya tidak lolos dari filter.
+    $kondisi = [];
     $filterBindings = [];
     if (!empty($search)) {
-      $where = 'WHERE a.NOBUKTI LIKE :f1 OR msn.KodeMsn LIKE :f2 OR msn.Ket LIKE :f3';
+      $kondisi[] = '(a.NOBUKTI LIKE :f1 OR msn.KodeMsn LIKE :f2 OR msn.Ket LIKE :f3)';
       $filterBindings = ['f1' => "%{$search}%", 'f2' => "%{$search}%", 'f3' => "%{$search}%"];
     }
+    if ($req->input('otorisasi') === '0') {
+      $kondisi[] = 'ISNULL(a.IsOtorisasi1, 0) = 0';
+    } elseif ($req->input('otorisasi') === '1') {
+      $kondisi[] = 'ISNULL(a.IsOtorisasi1, 0) = 1';
+    }
+    $where = $kondisi ? 'WHERE ' . implode(' AND ', $kondisi) : '';
 
     // Mesin sekarang disimpan di header (DBSPK.KodeMSN, diisi sp_SPKJD), jadi di-join langsung
     // dari header -- bukan lagi lewat KodePrs baris dbSPKDet (baris Bahan Baku yang dibuat
@@ -89,7 +98,7 @@ class ProduksiSPKController extends Controller
   // BEDA dari loadAll() yang cuma ambil satu representatif per SPK buat listing).
   public function listDetail(Request $req) {
     return DB::connection('SML')->select(
-      "SELECT B.NOBUKTI, a.TANGGAL, B.URUT, B.URUTSPK, B.KODEBRG, H.NamaBrg, B.QNT, B.SATUAN, B.ISI,
+      "SELECT B.NOBUKTI, a.TANGGAL, B.URUT, B.URUTSPK, B.KODEBRG, H.NamaBrg, B.QNT, COALESCE(NULLIF(B.SATUAN, ''), H.SAT1) as SATUAN, B.ISI,
               B.KodePrs, pr.Keterangan as NamaPrs,
               msn.KodeMsn, msn.Ket, 1 as Tipe, 'Bahan Baku' as KetTipe
        FROM dbSPKDet B

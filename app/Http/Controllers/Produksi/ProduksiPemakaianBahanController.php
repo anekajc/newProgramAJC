@@ -135,11 +135,18 @@ class ProduksiPemakaianBahanController extends Controller
       }
     }
 
+    // Shift: '-' (atau kosong) = 0, selain itu 1-4 (kolom DBPenyerahanBhn.Shif bertipe tinyint).
+    $shiftIn = trim((string) $req->shift);
+    $shift = ($shiftIn === '' || $shiftIn === '-') ? 0 : (int) $shiftIn;
+    if ($shift < 0 || $shift > 4) {
+      return response()->json(['message' => 'Shift tidak valid'], 422);
+    }
+
     $tipe = substr($nospk, -3) === '/BJ' ? 'BJ' : 'WIP';
-    $no = $this->hitungNoBuktiBP($tipe, $req->bulan, $req->tahun);
+    $no =$this->hitungNoBuktiBP($tipe, $req->bulan, $req->tahun);
 
     try {
-      $db->transaction(function () use ($db, $no, $nospk, $req, $kodegdg, $qnt) {
+      $db->transaction(function () use ($db, $no, $nospk, $req, $kodegdg, $qnt, $shift) {
         $db->statement('exec SP_INSPEMAKAI ?,?,?,?,?,?,?,?,?', [
           $no['nobukti'],
           $no['nourut'],
@@ -147,7 +154,7 @@ class ProduksiPemakaianBahanController extends Controller
           $req->tanggal ?: date('Y-m-d'),
           $kodegdg,
           0,
-          0,
+          $shift,
           0,
           0,
         ]);

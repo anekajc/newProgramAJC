@@ -18,6 +18,8 @@
     href="{!! URL::asset('css/report-table.css') !!}?v={{ @filemtime(base_path('public/css/report-table.css')) ?: '1' }}">
 <link rel="stylesheet"
     href="{!! URL::asset('css/master-list.css') !!}?v={{ @filemtime(base_path('public/css/master-list.css')) ?: '1' }}">
+<link rel="stylesheet"
+    href="{!! URL::asset('css/produksi-oval.css') !!}?v={{ @filemtime(base_path('public/css/produksi-oval.css')) ?: '1' }}">
 <style>
 
   /* Grid barang form Tambah BP (#page2) -- gaya ringkas sama dengan .pb-sub-table di halaman BOM/SPK. */
@@ -155,7 +157,7 @@
                       </select>
                     </div>
                     <div class="po-toolbar-act">
-                      <button id="AddVisibility" class="btn btn-chip-biru" type="button" onclick="buttonAddBP()">Tambah</button>
+                      <button id="AddVisibility" class="btn btn-dpp-utama" type="button" onclick="buttonAddBP()">Tambah</button>
                     </div>
                   </div>
                   <div id="rtBarBP"></div>
@@ -220,12 +222,7 @@
           </select>
         </div>
       </div>
-      <div class="col-md-2">
-        <div class="form-group">
-          <label>Nomor Urut</label>
-          <input type="text" class="form-control" id="input_bp_nourut" disabled>
-        </div>
-      </div>
+      <input type="hidden" id="input_bp_nourut">
       <div class="col-md-3">
         <div class="form-group">
           <label>Nomor Bukti</label>
@@ -256,8 +253,12 @@
       <div class="col-md-2">
         <div class="form-group">
           <label>Shift</label>
-          <select class="form-control" id="input_bp_shift" disabled>
-            <option value="">-</option>
+          <select class="form-control" id="input_bp_shift">
+            <option value="0">-</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
           </select>
         </div>
       </div>
@@ -331,10 +332,12 @@ const BP_KOLOM = [
 let dataOS = []
 let dataBP = []
 
-// Sel khusus tab BP: kolom Otorisasi sebagai kotak centang (hanya-baca).
+// Sel khusus tab BP: kolom Otorisasi sebagai centang hijau / silang merah (sama dengan SO).
 const BP_KHUSUS = {
   IsOtorisasi1: function (item) {
-    return '<td class="text-center"><input type="checkbox" disabled' + (Number(item.IsOtorisasi1) ? ' checked' : '') + '></td>'
+    return '<td class="text-center">' + (Number(item.IsOtorisasi1)
+      ? '<i class="bi bi-check2 text-success" title="Sudah Otorisasi" style="-webkit-text-stroke-width: 2px;"></i>'
+      : '<i class="bi bi-x-lg text-danger" title="Belum Otorisasi" style="-webkit-text-stroke-width: 1px;"></i>') + '</td>'
   },
 }
 
@@ -446,6 +449,7 @@ function bpBukaForm (nospk) {
   document.getElementById('input_bp_nourut').value = ''
   document.getElementById('input_bp_tanggal').valueAsDate = new Date()
   document.getElementById('input_bp_nospk').value = nospk
+  document.getElementById('input_bp_shift').value = '0'
   bpKosongkanGrid()
 
   bpGenerateNoBukti()
@@ -467,6 +471,7 @@ function bpSetMode (mode) {
   document.getElementById('bpFormJudul').textContent = mode === 'edit' ? 'Koreksi BP' : (mode === 'lihat' ? 'Detail BP' : 'Tambah BP')
   document.getElementById('input_bp_tanggal').disabled = kunci
   document.getElementById('input_bp_gudang').disabled = kunci
+  document.getElementById('input_bp_shift').disabled = kunci
   if (kunci) { document.getElementById('input_bp_tipe').disabled = true }
   $('#bpFormAksi').toggle(mode !== 'lihat')
 }
@@ -499,6 +504,7 @@ function bpMuatBP (nobukti, mode) {
       document.getElementById('input_bp_nobukti').value = h.NoBukti
       document.getElementById('input_bp_tanggal').value = h.Tanggal ? String(h.Tanggal).substring(0, 10) : ''
       document.getElementById('input_bp_nospk').value = h.NoBPPB ?? ''
+      document.getElementById('input_bp_shift').value = String(h.Shif ?? 0)
       bpIsiGudang(h.KodeGdg)
 
       // Baris tanpa Urut = BP tanpa detail (LEFT JOIN) -- grid dikosongkan.
@@ -835,6 +841,7 @@ function bpSimpan () {
     data: {
       _token: $('#_token').val(),
       nobukti: $('#input_bp_nobukti').val(),
+      shift: $('#input_bp_shift').val(),
       nospk: $('#input_bp_nospk').val(),
       tanggal: $('#input_bp_tanggal').val(),
       kodegdg: $('#input_bp_gudang').val(),

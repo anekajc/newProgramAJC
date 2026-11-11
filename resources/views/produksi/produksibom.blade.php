@@ -16,6 +16,8 @@
     href="{!! URL::asset('css/po-table-header.css') !!}?v={{ @filemtime(base_path('public/css/po-table-header.css')) ?: '1' }}">
 <link rel="stylesheet"
     href="{!! URL::asset('css/picker-kas.css') !!}?v={{ @filemtime(base_path('public/css/picker-kas.css')) ?: '1' }}">
+<link rel="stylesheet"
+    href="{!! URL::asset('css/produksi-oval.css') !!}?v={{ @filemtime(base_path('public/css/produksi-oval.css')) ?: '1' }}">
 <style>
 
   /* Halaman ini harus muat 1 layar (tidak discroll) -- #content adalah wrapper layout
