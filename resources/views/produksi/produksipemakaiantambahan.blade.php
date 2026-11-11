@@ -247,6 +247,11 @@
       </div>
     </div>
 
+    {{-- Tombol Tambah di bawah tabel (hanya mode Koreksi) -- tampil/sembunyikan panel input barang. --}}
+    <div class="mt-2" id="bpTambahBtnWrap" style="display:none;">
+      <button type="button" class="btn btn-sm btn-chip-biru" onclick="bpTogglePanelTambah()">Tambah</button>
+    </div>
+
     {{-- Panel Tambah Barang (hanya mode Koreksi) -- barang di luar SPK. Satuan ikut Sat1 barang. --}}
     <div id="bpTambahPanel" class="mt-3" style="display:none; border:1px solid #e5e7eb; border-radius:8px; padding:12px;">
       <div class="row">
@@ -271,7 +276,7 @@
         </div>
       </div>
       <div class="text-right mt-2">
-        <button type="button" class="btn btn-sm btn-danger" onclick="bpTambahBatal()">Batal</button>
+        <button type="button" class="btn btn-sm btn-danger" onclick="bpTambahBatal(); $('#bpTambahPanel').hide()">Batal</button>
         <button type="button" class="btn btn-sm btn-chip-biru" onclick="bpTambahSimpan()">Simpan Barang</button>
       </div>
     </div>
@@ -469,7 +474,13 @@ function bpSetMode (mode) {
   document.getElementById('bpFormJudul').textContent = mode === 'edit' ? 'Koreksi BP' : 'Detail BP'
   $('#bpFormAksi').toggle(mode !== 'lihat')
   $('#bpTambahPanel').hide()
-  if (mode === 'edit') { bpTambahBatal(); $('#bpTambahPanel').show() }
+  $('#bpTambahBtnWrap').toggle(mode === 'edit')
+  if (mode === 'edit') { bpTambahBatal() }
+}
+
+// Tombol Tambah di bawah tabel -- tampil/sembunyikan panel input barang.
+function bpTogglePanelTambah () {
+  $('#bpTambahPanel').toggle()
 }
 
 function buttonDetail (nobukti) {

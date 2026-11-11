@@ -63,6 +63,7 @@ Route::get('/produksipemakaianbahanambilspk', [ProduksiPemakaianBahanController:
 Route::post('/produksipemakaianbahansimpanbp', [ProduksiPemakaianBahanController::class, 'simpanBP'])->middleware('auth');
 Route::get('/produksipemakaianbahanloaddetailbp', [ProduksiPemakaianBahanController::class, 'loadDetailBP'])->middleware('auth');
 Route::post('/produksipemakaianbahanupdatebp', [ProduksiPemakaianBahanController::class, 'updateBP'])->middleware('auth');
+Route::post('/produksipemakaianbahanhapusbp', [ProduksiPemakaianBahanController::class, 'hapusBP'])->middleware('auth');
 Route::post('/produksipemakaianbahanspotorisasi', [ProduksiPemakaianBahanController::class, 'spOtorisasi'])->middleware('auth');
 Route::post('/produksipemakaianbahanspbatalotorisasi', [ProduksiPemakaianBahanController::class, 'spBatalOtorisasi'])->middleware('auth');
 
