@@ -82,7 +82,7 @@ return [
     ],
 
     'perintahreturbeli' => [
-        'label' => 'Perintah Retur Beli',
+        'label' => 'Perinretah Retur Beli',
         'handler' => PerintahReturBeliOtorisasi::class,
     ],
 
