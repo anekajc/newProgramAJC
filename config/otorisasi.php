@@ -99,6 +99,8 @@ return [
     'produksihasilproduksi' => [
         'label' => 'Hasil Produksi',
         'handler' => HasilProduksiOtorisasi::class,
+    ],
+
     'penawaranso' => [
         'label' => 'Penawaran SO',
         'handler' => PenawaranSOOtorisasi::class,
