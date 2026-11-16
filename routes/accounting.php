@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Accounting\AmortisasiController;
 use App\Http\Controllers\Accounting\BankController;
 use App\Http\Controllers\Accounting\BonSementaraController;
 use App\Http\Controllers\Accounting\CetakPengajuanDphController;
@@ -351,6 +352,20 @@ Route::post('/bonsementaraspdetail' , [BonSementaraController::class, 'getDetail
 Route::post('/bonsementaraspadd' , [BonSementaraController::class, 'spAdd']);
 Route::post('/bonsementararesetheader' , [BonSementaraController::class, 'resetHeader']);
 Route::post('/bonsementaradetailCetak' , [BonSementaraController::class, 'getDetailCetak']);
+
+
+// AMORTISASI
+Route::controller(AmortisasiController::class)->group(function () {
+    Route::get('/amortisasi', 'index');
+    Route::get('/amortisasiloadall', 'loadAll');
+    Route::get('/amortisasiloaddetail', 'loadDetail');
+    Route::post('/amortisasispdetail', 'spDetail');
+    Route::post('/amortisasispadd', 'spAdd');
+    Route::post('/amortisasispedit', 'spEdit');
+    Route::post('/amortisasispdelete', 'spDelete');
+    Route::post('/amortisasispeksekusi', 'spEksekusi');
+    Route::post('/amortisasispbatal', 'spBatal');
+});
 
 
 });
