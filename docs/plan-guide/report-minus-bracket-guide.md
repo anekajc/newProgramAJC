@@ -209,8 +209,8 @@ public function fmtReportNumber($n, $dec = 2)
 
 | Phase | Work | Files | Done |
 |---|---|---|---|
-| 1 | Central formatters | `report/newmaster2x.blade.php`, `report/newmaster2.blade.php` (§4.1); `public/js/report-table.js` (§4.2); `public/js/report-export.js` (§4.3) | ☐ |
-| 2 | Leftover pages | `reportaccountingkasharian`, `reportaccountingbankharian`, `reportaccountingbukubesar` (§4.4); the 11 `fmtShort` pages (§4.4) | ☐ |
+| 1 | Central formatters | `report/newmaster2x.blade.php`, `report/newmaster2.blade.php` (§4.1); `public/js/report-table.js` (§4.2); `public/js/report-export.js` (§4.3) | ☑ |
+| 2 | Leftover pages | `reportaccountingkasharian`, `reportaccountingbankharian`, `reportaccountingbukubesar` (§4.4); the 11 `fmtShort` pages (§4.4) | ☑ |
 | 3 | Verify (§6) and tick Appendix A | — | ☐ |
 | 4 | Server-side print/PDF | only after open decision D2 is answered (§4.6) | ⏸ |
 

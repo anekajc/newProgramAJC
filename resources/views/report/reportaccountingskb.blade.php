@@ -31,7 +31,7 @@
       <!-- Periode (rentang tanggal) -->
       <div class="filter-wrap">
         <label>Periode</label>
-        <input type="date" class="filter-inp" id="inputDate1" value="{!! date('Y-m-d') !!}">
+        <input type="date" class="filter-inp" id="inputDate1" value="{!! date('Y-m-01') !!}">
         <span class="filter-sep">s/d</span>
         <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
       </div>
@@ -109,7 +109,9 @@
     kasUrl    : "{{ url('laporanaccountingskb_doKasharian') }}",
     invoiceUrl: "{{ url('laporanaccountingskb_doInvoice') }}",
     lpbUrl    : "{{ url('laporanaccountingskb_doLpb') }}",
-    bpUrl     : "{{ url('laporanaccountingskb_doBp') }}"
+    bpUrl     : "{{ url('laporanaccountingskb_doBp') }}",
+    opnUrl    : "{{ url('laporanaccountingskb_doOpn') }}",
+    jenisTitle: { OPN: 'KOREKSI STOCK' }
   };
 
   // Susunan kolom (mode "Nomor Bukti"). Kolom No Bukti dapat diklik (voucher).

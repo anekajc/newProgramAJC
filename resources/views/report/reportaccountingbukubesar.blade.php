@@ -49,7 +49,7 @@
                 <!-- Periode (date range) -->
                 <div class="filter-wrap">
                     <label>Periode</label>
-                    <input type="date" class="filter-inp" id="inputDate1" value="{!! date('Y-m-d') !!}">
+                    <input type="date" class="filter-inp" id="inputDate1" value="{!! date('Y-m-01') !!}">
                     <span class="filter-sep">s/d</span>
                     <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
                 </div>
@@ -190,10 +190,13 @@
         window.ReportTableConfig = {
             kasUrl: "{{ url('laporanaccountingbukubesar_doKasharian') }}",
             invoiceUrl: "{{ url('laporanaccountingbukubesar_doInvoice') }}",
+            lpbUrl: "{{ url('laporanaccountingbukubesar_doLpb') }}",
+            opnUrl: "{{ url('laporanaccountingbukubesar_doOpn') }}",   // Jenis OPN -> koreksi stock (CetakOpnameBahan)
             // Voucher titles per Jenis. BBK/BBM/BKK/BKM/BMM/BJK/INVC are already covered by
-            // report-table.js. Unmapped jenis (TDP/BPL/UMJ/R/L/OPN/RPB/BP/KRS/…) fall back to
+            // report-table.js. Unmapped jenis (TDP/BPL/UMJ/R/L/RPB/BP/KRS/…) fall back to
             // "Bukti Kas". Add overrides here later, e.g.  TDP: 'BUKTI TITIPAN',
             jenisTitle: {
+                OPN: 'KOREKSI STOCK'
                 // KODE: 'JUDUL VOUCHER',
             }
         };
@@ -415,12 +418,12 @@
             const dec = col ? Number(col[5]) : 2;
             return rpBracket(v, dec);
         }
-        // Negatif -> (Rp 1.234,00): kurung membungkus seluruh teks termasuk "Rp", tanpa tanda minus.
+        // Negatif -> (1.234,00): kurung membungkus seluruh angka, tanpa tanda minus dan tanpa awalan "Rp".
         // Nilai yang membulat ke nol tidak diberi kurung.
         function rpBracket(v, dec) {
             const s = Math.abs(v).toLocaleString('id-ID', { minimumFractionDigits: dec, maximumFractionDigits: dec });
             const isZero = !/[1-9]/.test(s);
-            return (v < 0 && !isZero) ? '(Rp ' + s + ')' : 'Rp ' + s;
+            return (v < 0 && !isZero) ? '(' + s + ')' : s;
         }
 
         // HTML-escape teks bebas (Keterangan/Lawan/No. Bukti/nama akun bisa diisi user).
@@ -588,7 +591,7 @@
 
                     const map = {
                         tanggal:    { text: tgl, style: 'white-space:nowrap' },
-                        nobukti:    { text: esc(nb), cls: 'code' },
+                        nobukti:    { text: esc(nb), cls: 'code', style: 'color:#0d6efd;text-decoration:underline' },
                         keterangan: { text: esc(r.keterangan), cls: 'name' },
                         lawan:      { text: esc(r.lawan), cls: 'code' },
                         debet:      { text: money(num(r.debet), colByKey['debet']) },
@@ -734,16 +737,12 @@
 
             document.getElementById("tabel_dataSelect").innerHTML = rowTable;
             $("#formSelect").addClass('rt-picker-v2');
-            $("#tabelSelect").DataTable({
-                "lengthChange": false,
-                "paging": true,
-                // Sebelum konversi, kolom Actions (isinya tombol identik di tiap baris) ada di
-                // index 0, jadi sort default DataTables ("order": [[0,'asc']]) adalah no-op
-                // stabil -> baris tampil sesuai urutan API. Setelah Actions dihapus, Perkiraan
-                // jadi kolom 0 dan sort default itu betulan mengurutkan -- matikan biar urutan
-                // sama seperti sebelumnya (klik header masih tetap bisa sort manual).
-                "order": [],
-            });
+            // Sebelum konversi, kolom Actions (isinya tombol identik di tiap baris) ada di
+            // index 0, jadi sort default DataTables ("order": [[0,'asc']]) adalah no-op
+            // stabil -> baris tampil sesuai urutan API. Setelah Actions dihapus, Perkiraan
+            // jadi kolom 0 dan sort default itu betulan mengurutkan -- matikan biar urutan
+            // sama seperti sebelumnya (klik header masih tetap bisa sort manual).
+            rtPickerInit('tabelSelect', { order: [] });
 
             $("#formSelect").modal('toggle'); // <-- tampilkan modalnya
         }

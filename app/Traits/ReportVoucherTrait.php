@@ -68,6 +68,9 @@ trait ReportVoucherTrait {
   /**
    * Sales-invoice voucher detail, used when the clicked row's Jenis is INVC
    * (different proc + layout from the B* vouchers).
+   * BP
+   * BPL
+   * KRS
    */
   public function doInvoice(Request $req) {
     $res = DB::connection('SML')->select("SET NOCOUNT ON; EXEC dbo.CetakInvoicePenjualan :nobukti",
@@ -81,6 +84,24 @@ trait ReportVoucherTrait {
    */
   public function doLpb(Request $req) {
     $res = DB::connection('SML')->select("SET NOCOUNT ON; EXEC dbo.CetakPenerimaanACC :nobukti",
+      ['nobukti' => trim($req->nobukti)]);
+    return $res;
+  }
+
+  /**
+   * Bukti Pemakaian Internal ACC voucher detail, used when the clicked row's
+   * Jenis is BP (public/js/report-table.js openBp). Same proc the Pembebanan
+   * Pemakaian print uses.
+   */
+  public function doBp(Request $req) {
+    $res = DB::connection('SML')->select("SET NOCOUNT ON; EXEC dbo.CetakPemakaianBahanACC :nobukti",
+      ['nobukti' => trim($req->nobukti)]);
+    return $res;
+  }
+
+//   untuk koreksi opname dengan jenis OPN
+  public function doOpn(Request $req) {
+    $res = DB::connection('SML')->select("SET NOCOUNT ON; exec dbo.CetakOpnameBahan :nobukti",
       ['nobukti' => trim($req->nobukti)]);
     return $res;
   }

@@ -143,10 +143,12 @@
 
 #form .am-form {
   display: grid;
-  grid-template-columns: 96px minmax(0, 1fr);
+  grid-template-columns: 96px minmax(0, 1fr) 56px minmax(0, 1fr);
   gap: 14px 12px;
   align-items: center;
 }
+/* Input yang membentang dari kolom input pertama sampai tepi kanan. */
+#form .am-form .am-full { grid-column: 2 / -1; }
 #form .am-form label {
   margin-bottom: 0;
   font-size: 11.5px;
@@ -189,6 +191,7 @@
 @media (max-width: 575.98px) {
   #form .am-form { grid-template-columns: 1fr; gap: 4px 0; }
   #form .am-form label { margin-top: 8px; }
+  #form .am-form .am-full { grid-column: 1 / -1; }
 }
 </style>
 @endsection
@@ -250,6 +253,8 @@
                 <th style="padding: 4px 12px;">Tanggal</th>
                 <th style="padding: 4px 12px;">Nilai</th>
                 <th style="padding: 4px 12px;">Tipe</th>
+                <th style="padding: 4px 12px;">Metode</th>
+                <th style="padding: 4px 12px;">Persen</th>
                 <th style="padding: 4px 12px;">Lama</th>
                 <th style="padding: 4px 12px;">Progres</th>
               </tr>
@@ -278,6 +283,7 @@
                 <th style="padding: 4px 12px;">Keterangan</th>
                 <th style="padding: 4px 12px;">Tanggal</th>
                 <th style="padding: 4px 12px;">Nilai</th>
+                <th style="padding: 4px 12px;">Sisa</th>
                 <th style="padding: 4px 12px;">Status</th>
               </tr>
             </thead>
@@ -307,10 +313,19 @@
       <div class="modal-body">
         <div class="am-form">
           <label for="input_kode" class="am-baris-kode">Kode</label>
-          <input type="text" class="form-control am-baris-kode" id="input_kode" disabled>
+          <input type="text" class="form-control am-full am-baris-kode" id="input_kode" disabled>
 
           <label for="input_keterangan">Keterangan</label>
-          <input type="text" class="form-control" id="input_keterangan" maxlength="50">
+          <input type="text" class="form-control am-full" id="input_keterangan" maxlength="50">
+
+          <label for="input_metode">Metode</label>
+          <select class="form-control" id="input_metode">
+            <option value="0">Garis Lurus</option>
+            <option value="1">Saldo Menurun</option>
+          </select>
+
+          <label for="input_persen">Persen</label>
+          <input type="text" inputmode="decimal" class="form-control text-right" id="input_persen" placeholder="% / tahun" autocomplete="off" disabled>
 
           <label for="input_nilai">Nilai</label>
           <input type="text" inputmode="decimal" class="form-control text-right" id="input_nilai">
@@ -333,7 +348,7 @@
           <div class="am-preview-judul">Jadwal yang akan dibuat <span id="amPreviewInfo"></span></div>
           <div id="amPreviewScroll">
             <table id="amPreview">
-              <thead><tr><th>#</th><th>Tanggal</th><th class="text-right">Nilai</th></tr></thead>
+              <thead><tr><th>#</th><th>Tanggal</th><th class="text-right">Nilai</th><th class="text-right">Sisa</th></tr></thead>
               <tbody id="amPreviewData"></tbody>
             </table>
           </div>
@@ -380,6 +395,7 @@
 <script type="text/javascript">
 
 const AM_TIPE   = { 0: 'Bulan', 1: 'Tahun' }
+const AM_METODE = { 0: 'Garis Lurus', 1: 'Saldo Menurun' }
 const AM_STATUS = { 0: 'Belum', 1: 'Tereksekusi', 2: 'Batal' }
 
 const hak = {
@@ -396,7 +412,10 @@ let batalTarget = null  // { kode, tanggal }
 $(document).ready(function () {
   amPasangSeparatorInput('input_nilai')
 
-  $('#input_keterangan, #input_nilai, #input_tipe, #input_tanggal, #input_lama').on('input change', renderPreview)
+  amPasangPersenInput('input_persen')
+
+  $('#input_metode').on('change', amAturPersen)
+  $('#input_keterangan, #input_metode, #input_persen, #input_nilai, #input_tipe, #input_tanggal, #input_lama').on('input change', renderPreview)
 
   amIkatPeriode('amTglAwal', 'amTglAkhir', loadAll)
   amIkatPeriode('jdTglAwal', 'jdTglAkhir', loadDetail)
@@ -463,6 +482,28 @@ function amPasangSeparatorInput (id) {
   })
 }
 
+// Persen: angka dengan titik desimal, maksimal 2 desimal (tanpa separator ribuan).
+function amPasangPersenInput (id) {
+  let el = document.getElementById(id)
+  if (!el) { return }
+  el.addEventListener('input', function () {
+    let parts = el.value.replace(/[^0-9.]/g, '').split('.')
+    el.value = parts.length > 1 ? parts[0] + '.' + parts.slice(1).join('').slice(0, 2) : parts[0]
+  })
+}
+
+// Persen hanya aktif untuk Saldo Menurun; untuk Garis Lurus dikosongkan dan dinonaktifkan.
+function amAturPersen () {
+  let menurun = $('#input_metode').val() === '1'
+  $('#input_persen').prop('disabled', !menurun)
+  if (!menurun) { $('#input_persen').val('') }
+}
+
+// Persen valid: 0 < persen <= 100.
+function amPersenValid (persen) {
+  return persen > 0 && persen <= 100
+}
+
 function amIkatPeriode (idAwal, idAkhir, muat) {
   let awal = document.getElementById(idAwal)
   let akhir = document.getElementById(idAkhir)
@@ -513,7 +554,12 @@ function amError (err) {
    Jadwal (preview) - HARUS sama dengan AmortisasiController::buatJadwal().
    - Tanggal ke-i = tanggal awal + i bulan/tahun dari tanggal awal; kalau harinya
      tidak ada di bulan tujuan, dipakai hari terakhir bulan itu (31 Jan -> 28 Feb).
-   - Nilai dalam sen: tiap baris floor(total / lama), sisa masuk baris terakhir.
+   - Nilai dalam sen. Garis Lurus (metode 0): tiap baris floor(total / lama), sisa
+     masuk baris terakhir.
+   - Saldo Menurun (metode 1): tiap baris kecuali terakhir = sisa x persen / 1200
+     (Bulan) atau / 100 (Tahun), dibulatkan half-up dan dibatasi paling besar sisa;
+     baris terakhir = seluruh sisa. Hitungan bilangan bulat (persen dalam basis point,
+     BigInt) supaya identik dengan nilaiSaldoMenurun() di controller.
    ========================================================================== */
 function amTambahTanggal (ymd, tipe, i) {
   let [y, m, d] = ymd.split('-').map(Number)
@@ -529,13 +575,30 @@ function amTambahTanggal (ymd, tipe, i) {
   return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
 }
 
-function amBuatJadwal (nilai, tipe, tanggal, lama) {
+function amBuatJadwal (nilai, tipe, tanggal, lama, metode, persen) {
   let totalSen = Math.round(nilai * 100)
   let perBaris = Math.floor(totalSen / lama)
+  let sisaSen = totalSen
   let hasil = []
   for (let i = 0; i < lama; i++) {
-    let sen = (i === lama - 1) ? totalSen - perBaris * (lama - 1) : perBaris
-    hasil.push({ tanggal: amTambahTanggal(tanggal, tipe, i), nilai: sen / 100 })
+    let sen
+    if (Number(metode) === 1) {
+      if (i === lama - 1) {
+        sen = sisaSen
+      } else {
+        // BigInt supaya tepat (angka JS hanya eksak sampai 2^53); pembulatan half-up.
+        const p = BigInt(Math.round(persen * 100))
+        const den = BigInt(Number(tipe) === 1 ? 10000 : 120000)
+        const num = BigInt(sisaSen) * p
+        let q = num / den
+        if ((num % den) * 2n >= den) { q += 1n }
+        sen = Math.min(Number(q), sisaSen)
+      }
+    } else {
+      sen = (i === lama - 1) ? totalSen - perBaris * (lama - 1) : perBaris
+    }
+    sisaSen -= sen
+    hasil.push({ tanggal: amTambahTanggal(tanggal, tipe, i), nilai: sen / 100, sisa: sisaSen / 100 })
   }
   return hasil
 }
@@ -545,19 +608,27 @@ function renderPreview () {
   let tipe = $('#input_tipe').val()
   let tanggal = $('#input_tanggal').val()
   let lama = parseInt($('#input_lama').val(), 10)
+  let metode = $('#input_metode').val()
+  let persen = Math.round(amAngkaMentah($('#input_persen').val()) * 100) / 100
 
   if (!tanggal || !(nilai > 0) || !(lama >= 1) || lama > 600) {
-    $('#amPreviewData').html('<tr><td colspan="3" class="text-muted text-center">Isi Nilai, Tanggal dan Lama</td></tr>')
+    $('#amPreviewData').html('<tr><td colspan="4" class="text-muted text-center">Isi Nilai, Tanggal dan Lama</td></tr>')
+    $('#amPreviewInfo').text('')
+    return
+  }
+  if (metode === '1' && !amPersenValid(persen)) {
+    $('#amPreviewData').html('<tr><td colspan="4" class="text-muted text-center">Isi Persen (lebih dari 0, maksimal 100)</td></tr>')
     $('#amPreviewInfo').text('')
     return
   }
 
   let html = ''
-  amBuatJadwal(nilai, tipe, tanggal, lama).forEach((b, i) => {
-    html += `<tr><td>${i + 1}</td><td>${amFormatTanggal(b.tanggal)}</td><td class="text-right">${amFormatAngka(b.nilai)}</td></tr>`
+  amBuatJadwal(nilai, tipe, tanggal, lama, metode, persen).forEach((b, i) => {
+    html += `<tr><td>${i + 1}</td><td>${amFormatTanggal(b.tanggal)}</td><td class="text-right">${amFormatAngka(b.nilai)}</td><td class="text-right">${amFormatAngka(b.sisa)}</td></tr>`
   })
   $('#amPreviewData').html(html)
-  $('#amPreviewInfo').text(`(${lama} baris, per ${AM_TIPE[tipe].toLowerCase()})`)
+  let namaMetode = AM_METODE[metode] + (metode === '1' ? ` ${amFormatAngka(persen)}%` : '')
+  $('#amPreviewInfo').text(`(${lama} baris, per ${AM_TIPE[tipe].toLowerCase()}, ${namaMetode})`)
 }
 
 /* ==========================================================================
@@ -614,6 +685,8 @@ function renderDaftar (rows) {
       <td data-order="${amEsc(r.Tanggal)}">${amFormatTanggal(r.Tanggal)}</td>
       <td class="text-right" data-order="${Number(r.Nilai)}">${amFormatAngka(r.Nilai)}</td>
       <td>${AM_TIPE[Number(r.Tipe)] || ''}</td>
+      <td>${Number(r.Metode) === 1 ? AM_METODE[1] : AM_METODE[0]}</td>
+      <td class="text-right">${Number(r.Metode) === 1 ? amFormatAngka(r.Persen) + '%' : ''}</td>
       <td class="text-right">${Number(r.Lama)}</td>
       <td>${progres}</td>
     </tr>`
@@ -648,6 +721,7 @@ function renderJadwal (rows) {
       <td>${amEsc(r.Keterangan)}</td>
       <td data-order="${tgl}">${amFormatTanggal(r.Tanggal)}</td>
       <td class="text-right" data-order="${Number(r.Nilai)}">${amFormatAngka(r.Nilai)}</td>
+      <td class="text-right" data-order="${Number(r.Sisa)}">${amFormatAngka(r.Sisa)}</td>
       <td><span class="am-badge am-badge-${status}">${AM_STATUS[status] || status}</span></td>
     </tr>`
   })
@@ -672,6 +746,9 @@ function bukaForm (mode, data) {
   $('#input_tipe').val(data ? String(Number(data.Tipe)) : '0')
   $('#input_tanggal').val(data ? data.Tanggal : amHariIni())
   $('#input_lama').val(data ? Number(data.Lama) : '')
+  $('#input_metode').val(data ? String(Number(data.Metode) === 1 ? 1 : 0) : '0')
+  $('#input_persen').val(data && Number(data.Metode) === 1 && data.Persen !== null ? String(Number(Number(data.Persen).toFixed(2))) : '')
+  amAturPersen()
 
   renderPreview()
   $('#form').modal('show')
@@ -708,6 +785,8 @@ function submitForm () {
     tipe: $('#input_tipe').val(),
     tanggal: $('#input_tanggal').val(),
     lama: $('#input_lama').val(),
+    metode: $('#input_metode').val(),
+    persen: $('#input_metode').val() === '1' ? amAngkaMentah($('#input_persen').val()) : '',
   }
   let lama = parseInt(data.lama, 10)
 
@@ -717,7 +796,13 @@ function submitForm () {
   if (!(lama >= 1) || lama > 600 || String(lama) !== String(data.lama).trim()) {
     alertify.warning('Lama harus bilangan bulat 1 - 600'); return
   }
-  if (Math.round(data.nilai * 100) < lama) {
+  if (data.metode === '1' && data.nilai > 999999999999.99) {
+    alertify.warning('Nilai maksimal 999,999,999,999.99 untuk Saldo Menurun'); return
+  }
+  if (data.metode === '1' && !amPersenValid(data.persen)) {
+    alertify.warning('Persen harus lebih dari 0 dan maksimal 100'); return
+  }
+  if (data.metode === '0' && Math.round(data.nilai * 100) < lama) {
     alertify.warning('Nilai terlalu kecil untuk dibagi ' + lama + ' baris'); return
   }
 
@@ -764,7 +849,7 @@ function buttonHapus (kode) {
    Eksekusi / Batal jadwal
    ========================================================================== */
 function buttonEksekusi (kode, tanggal, nilaiTeks) {
-  alertify.confirm('Eksekusi Jadwal',
+  var dlgEksekusi = alertify.confirm('Eksekusi Jadwal',
     `Eksekusi jadwal ${kode} tanggal ${amFormatTanggal(tanggal)} senilai ${nilaiTeks}?`,
     function () {
       $.ajax({
@@ -782,6 +867,7 @@ function buttonEksekusi (kode, tanggal, nilaiTeks) {
     },
     function () {}
   ).set('labels', { ok: 'Eksekusi', cancel: 'Batal' })
+  dlgEksekusi.elements.root.classList.add('ajs-app-buttons')
 }
 
 function buttonBatal (kode, tanggal) {

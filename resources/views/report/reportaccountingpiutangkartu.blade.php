@@ -25,7 +25,7 @@
                 <!-- Periode (date range) -->
                 <div class="filter-wrap">
                     <label>Periode</label>
-                    <input type="date" class="filter-inp" id="inputDate1" value="{!! date('Y-m-d') !!}">
+                    <input type="date" class="filter-inp" id="inputDate1" value="{!! date('Y-m-01') !!}">
                     <span class="filter-sep">s/d</span>
                     <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
                 </div>
@@ -977,10 +977,7 @@
       </tr>`;
             });
             document.getElementById("tabel_dataSelectSuppAwal").innerHTML = rowTable;
-            $("#tabelSelectSuppAwal").DataTable({
-                "lengthChange": false,
-                "paging": true
-            });
+            rtPickerInit('tabelSelectSuppAwal');
         }
 
         /* ── MODAL PELANGGAN AKHIR ── */
@@ -1026,10 +1023,7 @@
       </tr>`;
             });
             document.getElementById("tabel_dataSelectSuppAkhir").innerHTML = rowTable;
-            $("#tabelSelectSuppAkhir").DataTable({
-                "lengthChange": false,
-                "paging": true
-            });
+            rtPickerInit('tabelSelectSuppAkhir');
         }
 
         /* ── MODAL VALAS ── */
@@ -1067,10 +1061,7 @@
       </tr>`;
             });
             document.getElementById("tabel_dataSelectValas").innerHTML = rowTable;
-            $("#tabelSelectValas").DataTable({
-                "lengthChange": false,
-                "paging": true
-            });
+            rtPickerInit('tabelSelectValas');
         }
     </script>
 @endsection

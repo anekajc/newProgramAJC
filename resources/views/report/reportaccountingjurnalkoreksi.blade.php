@@ -32,7 +32,7 @@
       <!-- Periode (rentang tanggal) -->
       <div class="filter-wrap">
         <label>Periode</label>
-        <input type="date" class="filter-inp" id="inputDate1" value="{!! date('Y-m-d') !!}">
+        <input type="date" class="filter-inp" id="inputDate1" value="{!! date('Y-m-01') !!}">
         <span class="filter-sep">s/d</span>
         <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
       </div>
@@ -120,7 +120,9 @@
     kasUrl    : "{{ url('laporanaccountingjurnalkoreksi_doKasharian') }}",
     invoiceUrl: "{{ url('laporanaccountingjurnalkoreksi_doInvoice') }}",
     lpbUrl    : "{{ url('laporanaccountingjurnalkoreksi_doLpb') }}",
-    bpUrl     : "{{ url('laporanaccountingjurnalkoreksi_doBp') }}"
+    bpUrl     : "{{ url('laporanaccountingjurnalkoreksi_doBp') }}",
+    opnUrl    : "{{ url('laporanaccountingjurnalkoreksi_doOpn') }}",
+    jenisTitle: { OPN: 'KOREKSI STOCK' }
   };
 
   $(document).ready(function () {
