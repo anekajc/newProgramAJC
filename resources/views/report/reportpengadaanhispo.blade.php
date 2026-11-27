@@ -44,7 +44,7 @@
       <!-- Periode (date range) -->
       <div class="filter-wrap">
         <label>Periode</label>
-        <input type="date" class="filter-inp" id="inputDate1" value="{!! date('Y-m-d') !!}">
+        <input type="date" class="filter-inp" id="inputDate1" value="{!! date('Y-m-01') !!}">
         <span class="filter-sep">s/d</span>
         <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
       </div>
@@ -476,7 +476,7 @@
         `<td>${item.KodeCustSupp}</td><td>${item.NamaCustSupp}</td><td>${item.NamaKota}</td>`);
     });
     document.getElementById("tabel_dataSelect").innerHTML = rowTable;
-    $("#tabelSelect").DataTable({ "lengthChange": false, "paging": true });
+    rtPickerInit('tabelSelect');
   }
 
   function loadSelectLokasi() {
@@ -498,7 +498,7 @@
         `<td>${item.KodeKebun}</td><td>${item.namaKebun}</td>`);
     });
     document.getElementById("tabel_dataSelect").innerHTML = rowTable;
-    $("#tabelSelect").DataTable({ "lengthChange": false, "paging": true });
+    rtPickerInit('tabelSelect');
   }
 
   /* ══════════════════ FILTER MODAL (PICK_FIELDS: Supplier + Lokasi) ══════════════════

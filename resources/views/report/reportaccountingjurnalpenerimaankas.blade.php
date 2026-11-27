@@ -45,7 +45,7 @@
       <!-- Periode (rentang tanggal) -->
       <div class="filter-wrap">
         <label>Periode</label>
-        <input type="date" class="filter-inp" id="inputDate1" value="{!! date('Y-m-d') !!}">
+        <input type="date" class="filter-inp" id="inputDate1" value="{!! date('Y-m-01') !!}">
         <span class="filter-sep">s/d</span>
         <input type="date" class="filter-inp" id="inputDate2" value="{!! date('Y-m-d') !!}">
       </div>
@@ -433,9 +433,11 @@
       kasUrl    : BASE + '/' + j.slug + '_doKasharian',
       invoiceUrl: BASE + '/' + j.slug + '_doInvoice',
       lpbUrl    : BASE + '/' + j.slug + '_doLpb',
-      bpUrl     : BASE + '/' + j.slug + '_doBp'
+      bpUrl     : BASE + '/' + j.slug + '_doBp',
+      opnUrl    : BASE + '/' + j.slug + '_doOpn'
     };
-    if (j.jenisTitle) window.ReportTableConfig.jenisTitle = j.jenisTitle;
+    // Jenis OPN → koreksi stock (semua jurnal). Merge supaya override per-jurnal (mis. BJP penutup) tetap terjaga.
+    window.ReportTableConfig.jenisTitle = Object.assign({ OPN: 'KOREKSI STOCK' }, j.jenisTitle || {});
 
     $('#inputJurnal').val(key);
     $('#jurnalTitle').text(j.title);

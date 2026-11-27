@@ -10,10 +10,12 @@ use Illuminate\Support\Facades\DB;
 /**
  * Amortisasi.
  *
- * Header DBAMORTISASI (Kode, keterangan, Nilai, Tipe, Tanggal, lama) dipecah menjadi
- * `lama` baris jadwal di DBAMORTISASIDET (kode, Tanggal, Nilai, Status).
+ * Header DBAMORTISASI (Kode, keterangan, Nilai, Tipe, Tanggal, lama, Metode, Persen) dipecah
+ * menjadi `lama` baris jadwal di DBAMORTISASIDET (kode, Tanggal, Nilai, Status).
  *
  * - Tipe   : 0 = Bulan (jadwal tiap bulan), 1 = Tahun (jadwal tiap tahun).
+ * - Metode : 0 / NULL = Garis Lurus, 1 = Saldo Menurun.
+ * - Persen : tarif per tahun (%), hanya diisi untuk Saldo Menurun (NULL untuk Garis Lurus).
  * - Status : 0 = Belum, 1 = Tereksekusi, 2 = Batal.
  *
  * DBAMORTISASIDET tidak punya primary key maupun kolom urut. Satu baris jadwal
@@ -85,14 +87,17 @@ class AmortisasiController extends Controller
      * awal (bukan dari baris sebelumnya), supaya 31 Jan -> 28 Feb -> 31 Mar tidak
      * bergeser menjadi 28 Mar.
      *
-     * Nilai dihitung dalam sen: tiap baris = floor(total / lama), sisa pembulatan masuk
-     * ke baris terakhir, sehingga jumlah semua baris persis sama dengan Nilai header.
+     * Nilai dihitung dalam sen sehingga jumlah semua baris persis sama dengan Nilai header:
+     * - Garis Lurus (metode 0): tiap baris = floor(total / lama), sisa pembulatan masuk
+     *   ke baris terakhir.
+     * - Saldo Menurun (metode 1): lihat nilaiSaldoMenurun().
      * Aturan yang sama dipakai preview di amortisasi.blade.php (amBuatJadwal).
      */
-    private function buatJadwal($nilai, $tipe, Carbon $tanggal, $lama)
+    private function buatJadwal($nilai, $tipe, Carbon $tanggal, $lama, $metode = 0, $persen = null)
     {
         $totalSen = (int) round($nilai * 100);
         $perBaris = intdiv($totalSen, $lama);
+        $nilaiMenurun = (int) $metode === 1 ? $this->nilaiSaldoMenurun($nilai, $tipe, $lama, $persen) : null;
         $jadwal = [];
 
         for ($i = 0; $i < $lama; $i++) {
@@ -100,12 +105,53 @@ class AmortisasiController extends Controller
                 ? $tanggal->copy()->addYearsNoOverflow($i)
                 : $tanggal->copy()->addMonthsNoOverflow($i);
 
-            $sen = ($i === $lama - 1) ? $totalSen - $perBaris * ($lama - 1) : $perBaris;
+            if ($nilaiMenurun !== null) {
+                $nilaiBaris = $nilaiMenurun[$i];
+            } else {
+                $sen = ($i === $lama - 1) ? $totalSen - $perBaris * ($lama - 1) : $perBaris;
+                $nilaiBaris = $sen / 100;
+            }
 
-            $jadwal[] = ['tanggal' => $tgl, 'nilai' => $sen / 100];
+            $jadwal[] = ['tanggal' => $tgl, 'nilai' => $nilaiBaris];
         }
 
         return $jadwal;
+    }
+
+    /**
+     * Nilai tiap baris metode Saldo Menurun (dalam sen, hasil dibagi 100).
+     *
+     * Persen = tarif per tahun. Tiap baris kecuali yang terakhir = sisa x persen / 1200
+     * (Tipe Bulan) atau sisa x persen / 100 (Tipe Tahun), dibulatkan ke sen (half-up)
+     * dan dibatasi paling besar sisa. Baris terakhir mengambil seluruh sisa, sehingga
+     * jumlahnya persis sama dengan Nilai header.
+     * Hitungannya bilangan bulat murni (persen dalam basis point, pembagian + sisa bagi)
+     * supaya hasilnya identik dengan amBuatJadwal() di amortisasi.blade.php (BigInt).
+     */
+    private function nilaiSaldoMenurun($nilai, $tipe, $lama, $persen)
+    {
+        $p = (int) round((float) $persen * 100);
+        $den = (int) $tipe === 1 ? 10000 : 120000;
+        $sisa = (int) round($nilai * 100);
+        $hasil = [];
+
+        for ($i = 0; $i < $lama; $i++) {
+            if ($i === $lama - 1) {
+                $sen = $sisa;
+            } else {
+                $num = $sisa * $p;
+                $sen = intdiv($num, $den);
+                if (($num - $sen * $den) * 2 >= $den) {
+                    $sen++;
+                }
+                $sen = min($sen, $sisa);
+            }
+
+            $sisa -= $sen;
+            $hasil[] = $sen / 100;
+        }
+
+        return $hasil;
     }
 
     // Validasi isian form Tambah / Koreksi. Hasil: [data, pesan error].
@@ -116,6 +162,8 @@ class AmortisasiController extends Controller
         $tipe = (string) $req->input('tipe');
         $tanggal = $this->tanggalDariInput($req->input('tanggal'));
         $lama = filter_var($req->input('lama'), FILTER_VALIDATE_INT);
+        $metode = (string) $req->input('metode');
+        $persen = null;
 
         if ($keterangan === '') {
             return [null, 'Keterangan harus diisi'];
@@ -135,7 +183,24 @@ class AmortisasiController extends Controller
         if ($lama === false || $lama < 1 || $lama > self::MAX_LAMA) {
             return [null, 'Lama harus antara 1 dan '.self::MAX_LAMA];
         }
-        if ((int) round($nilai * 100) < $lama) {
+        if ($metode !== '0' && $metode !== '1') {
+            return [null, 'Metode tidak valid'];
+        }
+        if ($metode === '1') {
+            // Hitungan sen x basis point memakai int 64-bit; di atas batas ini bisa meluap.
+            if ($nilai > 999999999999.99) {
+                return [null, 'Nilai maksimal 999,999,999,999.99 untuk Saldo Menurun'];
+            }
+            $persenInput = $req->input('persen');
+            if (! is_numeric($persenInput) || (float) $persenInput <= 0 || (float) $persenInput > 100) {
+                return [null, 'Persen harus lebih dari 0 dan maksimal 100'];
+            }
+            $persen = round((float) $persenInput, 2);
+            if ($persen <= 0) {
+                return [null, 'Persen harus lebih dari 0 dan maksimal 100'];
+            }
+        } elseif ((int) round($nilai * 100) < $lama) {
+            // Hanya Garis Lurus yang membagi rata; Saldo Menurun boleh menghasilkan baris 0.
             return [null, 'Nilai terlalu kecil untuk dibagi '.$lama.' baris'];
         }
 
@@ -145,12 +210,18 @@ class AmortisasiController extends Controller
             'tipe' => (int) $tipe,
             'tanggal' => $tanggal,
             'lama' => $lama,
+            'metode' => (int) $metode,
+            'persen' => $persen,
         ], null];
     }
 
     private function simpanJadwal($kode, array $data)
     {
-        foreach ($this->buatJadwal($data['nilai'], $data['tipe'], $data['tanggal'], $data['lama']) as $baris) {
+        $jadwal = $this->buatJadwal(
+            $data['nilai'], $data['tipe'], $data['tanggal'], $data['lama'], $data['metode'], $data['persen']
+        );
+
+        foreach ($jadwal as $baris) {
             DB::connection('SML')->insert(
                 'insert into DBAMORTISASIDET (kode, Tanggal, Nilai, Status) values (:kode, :tanggal, :nilai, 0)',
                 ['kode' => $kode, 'tanggal' => $baris['tanggal']->format('Ymd'), 'nilai' => $baris['nilai']]
@@ -217,6 +288,7 @@ class AmortisasiController extends Controller
         return DB::connection('SML')->select('
             select A.Kode, A.keterangan as Keterangan, A.Nilai, isnull(A.Tipe, 0) as Tipe,
                    convert(varchar(10), A.Tanggal, 23) as Tanggal, A.lama as Lama,
+                   isnull(A.Metode, 0) as Metode, A.Persen,
                    isnull(D.JmlJadwal, 0) as JmlJadwal,
                    isnull(D.JmlEksekusi, 0) as JmlEksekusi,
                    isnull(D.JmlBatal, 0) as JmlBatal
@@ -236,6 +308,9 @@ class AmortisasiController extends Controller
     }
 
     // Tab "Jadwal Amortisasi": baris jadwal (semua status) pada rentang DBAMORTISASIDET.Tanggal.
+    // Sisa = nilai buku rencana setelah baris ini (Nilai header - jumlah baris s/d tanggal ini).
+    // Dihitung dari seluruh jadwal kode itu dan mengabaikan Status (Batal tetap dihitung).
+    // Subquery berkorelasi karena SQL Server 2008 R2 tidak punya SUM() OVER (ORDER BY).
     public function loadDetail(Request $req)
     {
         [$awal, $akhir] = $this->rentangTanggal($req);
@@ -243,6 +318,8 @@ class AmortisasiController extends Controller
         return DB::connection('SML')->select('
             select D.kode as Kode, A.keterangan as Keterangan,
                    convert(varchar(10), D.Tanggal, 23) as Tanggal, D.Nilai,
+                   A.Nilai - (select sum(X.Nilai) from DBAMORTISASIDET X
+                              where X.kode = D.kode and X.Tanggal <= D.Tanggal) as Sisa,
                    isnull(D.Status, 0) as Status
             from DBAMORTISASIDET D
             left join DBAMORTISASI A on A.Kode = D.kode
@@ -258,7 +335,8 @@ class AmortisasiController extends Controller
     {
         $header = DB::connection('SML')->select('
             select Kode, keterangan as Keterangan, Nilai, isnull(Tipe, 0) as Tipe,
-                   convert(varchar(10), Tanggal, 23) as Tanggal, lama as Lama
+                   convert(varchar(10), Tanggal, 23) as Tanggal, lama as Lama,
+                   isnull(Metode, 0) as Metode, Persen
             from DBAMORTISASI where Kode = :kode', ['kode' => $req->input('kode')]);
 
         if (! $header) {
@@ -288,14 +366,16 @@ class AmortisasiController extends Controller
                 $kode = $this->kodeBaru($data['tanggal']);
 
                 DB::connection('SML')->insert(
-                    'insert into DBAMORTISASI (Kode, keterangan, Nilai, Tipe, Tanggal, lama)
-                     values (:kode, :keterangan, :nilai, :tipe, :tanggal, :lama)', [
+                    'insert into DBAMORTISASI (Kode, keterangan, Nilai, Tipe, Tanggal, lama, Metode, Persen)
+                     values (:kode, :keterangan, :nilai, :tipe, :tanggal, :lama, :metode, :persen)', [
                         'kode' => $kode,
                         'keterangan' => $data['keterangan'],
                         'nilai' => $data['nilai'],
                         'tipe' => $data['tipe'],
                         'tanggal' => $data['tanggal']->format('Ymd'),
                         'lama' => $data['lama'],
+                        'metode' => $data['metode'],
+                        'persen' => $data['persen'],
                     ]);
 
                 $this->simpanJadwal($kode, $data);
@@ -337,12 +417,15 @@ class AmortisasiController extends Controller
 
             DB::connection('SML')->update(
                 'update DBAMORTISASI set keterangan = :keterangan, Nilai = :nilai, Tipe = :tipe,
-                 Tanggal = :tanggal, lama = :lama where Kode = :kode', [
+                 Tanggal = :tanggal, lama = :lama, Metode = :metode, Persen = :persen
+                 where Kode = :kode', [
                     'keterangan' => $data['keterangan'],
                     'nilai' => $data['nilai'],
                     'tipe' => $data['tipe'],
                     'tanggal' => $data['tanggal']->format('Ymd'),
                     'lama' => $data['lama'],
+                    'metode' => $data['metode'],
+                    'persen' => $data['persen'],
                     'kode' => $kode,
                 ]);
 

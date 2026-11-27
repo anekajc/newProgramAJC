@@ -745,7 +745,7 @@
       </tr>`;
     });
     document.getElementById("tabel_dataSelectCustomer").innerHTML = rowTable;
-    $("#tabelSelectCustomer").DataTable({ "lengthChange": false, "paging": true, "order": [[1, "asc"]] });
+    rtPickerInit('tabelSelectCustomer', { order: [[1, 'asc']] });
   }
 
   /* ── MODAL LOKASI ── */
@@ -771,7 +771,7 @@
       </tr>`;
     });
     document.getElementById("tabel_dataSelectLokasi").innerHTML = rowTable;
-    $("#tabelSelectLokasi").DataTable({ "lengthChange": false, "paging": true });
+    rtPickerInit('tabelSelectLokasi');
   }
 
   /* ── MODAL SUPPLIER AWAL ── */
@@ -801,7 +801,7 @@
       </tr>`;
     });
     document.getElementById("tabel_dataSelectSuppAwal").innerHTML = rowTable;
-    $("#tabelSelectSuppAwal").DataTable({ "lengthChange": false, "paging": true });
+    rtPickerInit('tabelSelectSuppAwal');
   }
 
   /* ── MODAL SUPPLIER AKHIR ── */
@@ -829,7 +829,7 @@
       </tr>`;
     });
     document.getElementById("tabel_dataSelectSuppAkhir").innerHTML = rowTable;
-    $("#tabelSelectSuppAkhir").DataTable({ "lengthChange": false, "paging": true });
+    rtPickerInit('tabelSelectSuppAkhir');
   }
 </script>
 @endsection
